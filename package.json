@@ -1,0 +1,25 @@
+{
+  "name": "blair",
+  "version": "1.0.0",
+  "description": "Utility bot for Wholesome Beans made by CommandLineFox",
+  "main": "dist/index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CommandLineFox/Blair.git"
+  },
+  "author": "CommandLineFox",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CommandLineFox/Blair/issues"
+  },
+  "homepage": "https://github.com/CommandLineFox/Blair#readme",
+  "dependencies": {
+    "@sapphire/framework": "^5.2.1",
+    "discord.js": "^14.15.3",
+    "mongoose": "^8.5.0"
+  }
+}
