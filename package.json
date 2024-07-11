@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "Utility bot for Wholesome Beans made by CommandLineFox",
   "main": "dist/index.js",
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "shx rm -rf ./dist/ && tsc --project tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -20,6 +19,7 @@
   "dependencies": {
     "@sapphire/framework": "^5.2.1",
     "discord.js": "^14.15.3",
-    "mongoose": "^8.5.0"
+    "mongoose": "^8.5.0",
+    "shx": "^0.3.4"
   }
 }
