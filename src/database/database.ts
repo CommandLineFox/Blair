@@ -1,19 +1,38 @@
+import { DatabaseConfig } from "../types/config";
+import { DatabaseGuild } from "./models/guild";
 import mongoose, { Schema, Model } from "mongoose";
-import type { DatabaseConfig, DatabaseGuild } from "types/types";
 
 const guildSchema = new Schema<DatabaseGuild>({
     id: { type: String, required: true, unique: true },
 });
 
-export class Database {
+export default class Database {
+    private static instance: Database | null = null;
+
     private config: DatabaseConfig;
     private GuildModel: Model<DatabaseGuild>
 
-    public constructor(config: DatabaseConfig) {
+    private constructor(config: DatabaseConfig) {
         this.config = config;
         this.GuildModel = mongoose.model("Guild", guildSchema);
 
         mongoose.set("strictQuery", false);
+    }
+
+    /**
+     * Create or return an instance of the database
+     * @param config The configuration params for creating a new Database object
+     * @returns New or existing Database object
+     */
+    public static getInstance(config?: DatabaseConfig): Database {
+        if (!this.instance) {
+            if (!config) {
+                throw new Error("You must provide the config in order to create a new instance")
+            }
+            this.instance = new Database(config);
+        }
+
+        return this.instance;
     }
 
     /**
@@ -44,6 +63,9 @@ export class Database {
         return guild;
     }
 
+    /**
+     * Disconnect from the database
+     */
     public async disconnect(): Promise<void> {
         await mongoose.disconnect();
         console.log("Disconnected from database");

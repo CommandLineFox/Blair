@@ -1,17 +1,13 @@
-import BotClient from "client";
-import { Database } from "database/database";
-import { getConfig } from "utils/utils";
+import { SapphireClient } from "@sapphire/framework";
+import {Config} from "./types/config";
+import Database from "./database/database";
 
 async function main(): Promise<void> {
-    const configFile = getConfig("config.json");
-    if (!configFile) {
-        return;
-    }
+    const config = Config.getInstance("config.json");
+    Database.getInstance(config.getDatabaseConfig());
 
-    const database = new Database(configFile.database);
-    const client = new BotClient(configFile.config, database, configFile.options);
-
-    client.login(configFile.config.token);
+    const client = new SapphireClient(config.getClientOptions());
+    client.login(config.getClientConfig().token);
 }
 
 main();

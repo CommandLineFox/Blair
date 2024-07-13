@@ -29,8 +29,7 @@
         "strictPropertyInitialization": true,
         "esModuleInterop": true,
         "target": "es2021",
-        "baseUrl": "./src",
-        "paths": {}
+        "baseUrl": "./src"
     },
     "include": [
         "src/**/*"
