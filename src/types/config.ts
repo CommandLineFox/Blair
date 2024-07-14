@@ -58,7 +58,6 @@ export class Config {
             const databaseConfig: DatabaseConfig = parsedConfig.database;
 
             this.instance = new Config(clientConfig, clientOptions, databaseConfig);
-            console.log(this.instance);
         }
 
         return this.instance;

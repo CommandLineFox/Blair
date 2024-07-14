@@ -1,3 +1,4 @@
+import { container } from "@sapphire/framework";
 import { DatabaseConfig } from "../types/config";
 import { DatabaseGuild } from "./models/guild";
 import mongoose, { Schema, Model } from "mongoose";
@@ -41,9 +42,9 @@ export default class Database {
     public async connect(): Promise<void> {
         try {
             await mongoose.connect(this.config.url, { dbName: this.config.name });
-            console.log("Connected to database");
+            container.logger.info("Connected to database");
         } catch (error) {
-            console.error("Failed to connect to the database", error);
+            container.logger.error("Failed to connect to the database", error);
             throw error;
         }
     }
