@@ -1,4 +1,5 @@
 import { Command } from '@sapphire/framework';
+import { Message } from 'discord.js';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -19,6 +20,10 @@ export class PingCommand extends Command {
     }
 
     public override chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-        interaction.reply({ content: "Pong", ephemeral: true });
+        interaction.reply({ content: "Pong" });
+    }
+
+    public override messageRun(message: Message) {
+        message.reply({ content: "Pong" });
     }
 }

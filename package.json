@@ -4,7 +4,8 @@
   "description": "Utility bot for Wholesome Beans made by CommandLineFox",
   "main": "dist/index.js",
   "scripts": {
-    "build": "shx rm -rf ./dist/ && tsc --project tsconfig.json"
+    "build": "shx rm -rf ./dist/ && tsc --project tsconfig.json",
+    "start": "ts-node -r tsconfig-paths/register dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,12 @@
   "homepage": "https://github.com/CommandLineFox/Blair#readme",
   "dependencies": {
     "@sapphire/framework": "^5.2.1",
+    "@sapphire/plugin-subcommands": "^6.0.3",
+    "@sapphire/utilities": "^3.16.2",
     "discord.js": "^14.15.3",
     "mongoose": "^8.5.0",
-    "shx": "^0.3.4"
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0"
   }
 }

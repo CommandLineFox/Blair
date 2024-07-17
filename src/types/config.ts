@@ -10,11 +10,12 @@ export type ClientOptions = {
     disableMentions: "all" | "everyone" | "none";
     partials: Partials[];
     intents: GatewayIntentBits[];
+    loadMessageCommandListeners: boolean;
 };
 
 export type DatabaseConfig = {
     name: string;
-    url: string
+    url: string;
 }
 
 type FileConfig = {

@@ -29,7 +29,17 @@
         "strictPropertyInitialization": true,
         "esModuleInterop": true,
         "target": "es2021",
-        "baseUrl": "./src"
+        "paths": {
+            "database/*": [
+                "./src/database/*"
+            ],
+            "types/*": [
+                "./src/types/*"
+            ],
+            "models/*": [
+                "./src/database/models/*"
+            ]
+        }
     },
     "include": [
         "src/**/*"
