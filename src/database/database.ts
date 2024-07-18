@@ -114,7 +114,7 @@ export default class Database {
             return { success: false, message: "There was an error fetching the guild" };
         }
 
-        const currentValue = guild.get("config.verification.guildChannel");
+        const currentValue = guild.get("config.verification.guideChannel");
         if (currentValue === channelId) {
             return { success: false, message: "The guide channel is already set to that" };
         }
@@ -139,7 +139,7 @@ export default class Database {
             return { success: false, message: "There was an error fetching the guild" };
         }
 
-        const currentValue = guild.get("config.verification.guildChannel");
+        const currentValue = guild.get("config.verification.guideChannel");
         if (!currentValue) {
             return { success: false, message: "The guide channel is already set to that" };
         }
@@ -165,12 +165,12 @@ export default class Database {
             return { success: false, message: "There was an error fetching the guild" };
         }
 
-        const currentValue = guild.get("config.verification.guildMessage");
+        const currentValue = guild.get("config.verification.guideMessage");
         if (currentValue === message) {
             return { success: false, message: "The guide message is already set to that" };
         }
 
-        guild.set("config.verification.guildMessage", message);
+        guild.set("config.verification.guideMessage", message);
         try {
             await guild.save();
             return { success: true, message: `Successfully set the guide message to:\n${message}` };
@@ -190,12 +190,12 @@ export default class Database {
             return { success: false, message: "There was an error fetching the guild" };
         }
 
-        const currentValue = guild.get("config.verification.guildMessage");
+        const currentValue = guild.get("config.verification.guideMessage");
         if (!currentValue) {
             return { success: false, message: "The guide channel is already set to that" };
         }
 
-        guild.set("config.verification.guildMessage", undefined);
+        guild.set("config.verification.guideMessage", undefined);
         try {
             await guild.save();
             return { success: true, message: `Successfully removed the guide message` };
