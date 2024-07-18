@@ -1,7 +1,8 @@
 import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import Database from 'database/database';
-import { ChannelType, Message, PermissionFlagsBits } from 'discord.js';
+import { ChannelType, Message, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { getGuideComponent } from 'types/component';
 
 export class GuideCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -28,7 +29,7 @@ export class GuideCommand extends Subcommand {
                     ]
                 }
             ],
-            runIn: CommandOptionsRunTypeEnum.GuildAny,
+            runIn: CommandOptionsRunTypeEnum.GuildText,
             requiredUserPermissions: [PermissionFlagsBits.Administrator]
         });
     }
@@ -129,7 +130,7 @@ export class GuideCommand extends Subcommand {
     }
 
     /**
-     * Gulde channel remove message command logic
+     * Gulde message set slash command logic
      * @param message Message containing the command 
      * @param args Desired message text
      */
@@ -139,11 +140,80 @@ export class GuideCommand extends Subcommand {
     }
 
     public async chatInputGuideMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        interaction.reply("WIP");
+        await interaction.reply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
+
+        const channel = interaction.channel;
+        if (!channel) {
+            await interaction.editReply({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setGuideMessage(interaction.guildId!, guideMessage.cleanContent);
+                await interaction.editReply({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await interaction.editReply({ content: "No message was provided after 2 minutes" });
+            });
+
     }
 
-    public async messageGuideMessageSet(message: Message, args: Args): Promise<void> {
-        console.log(message, args);
+    /**
+     * Gulde message set message command logic
+     * @param message Message containing the command 
+     * @param args Desired message text
+     */
+    public async messageGuideMessageSet(message: Message): Promise<void> {
+        const reply = await message.reply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
+
+        const channel = message.channel;
+        if (!channel) {
+            await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setGuideMessage(message.guildId!, guideMessage.cleanContent);
+                await reply.edit({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await reply.edit({ content: "No message was provided after 2 minutes" });
+            });
+
     }
 
     /**
@@ -151,7 +221,7 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const response = await Database.getInstance().removeGuildMessage(interaction.guildId!);
+        const response = await Database.getInstance().removeGuideMessage(interaction.guildId!);
         await interaction.reply({ content: response.message, ephemeral: !response.success });
 
     }
@@ -161,23 +231,93 @@ export class GuideCommand extends Subcommand {
      * @param message Message containing the command
      */
     public async messageGuideMessageRemove(message: Message): Promise<void> {
-        const response = await Database.getInstance().removeGuildMessage(message.guildId!);
+        const response = await Database.getInstance().removeGuideMessage(message.guildId!);
         await message.reply({ content: response.message });
     }
 
+    /**
+     * Guide message post slash command logic
+     * @param interaction Interaction of the command
+     */
     public async chatInputGuideMessagePost(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
         const guild = await Database.getInstance().getGuild(interaction.guildId!);
-        if (!guild?.config.verification?.guideChannel) {
+        const guideChannel = guild?.config.verification?.guideChannel;
+        const guideMessage = guild?.config.verification?.guideMessage;
+
+        if (!guideChannel) {
             await interaction.reply({ content: "The guide channel isn't set", ephemeral: true });
             return;
         }
 
-        if (!guild.config.verification.guideMessage) {
+        if (!guideMessage) {
             await interaction.reply({ content: "The guide message isn't set", ephemeral: true });
+            return;
         }
+
+        const channel = await interaction.guild?.channels.fetch(guideChannel);
+        if (!channel) {
+            await interaction.reply({ content: "Couldn't find the guide channel", ephemeral: true });
+            return;
+        }
+
+        if (channel?.type !== ChannelType.GuildText) {
+            await interaction.reply({ content: "The guide channel has to be a text channel", ephemeral: true });
+            return;
+        }
+
+        const permissions = channel.permissionsFor(interaction.client.user);
+        if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
+            await interaction.reply({ content: "The bot doesn't have the send messages permission in that channel", ephemeral: true });
+            return;
+        }
+
+        channel as TextChannel;
+
+        const row = getGuideComponent();
+        const postedMessage = await channel.send({ content: guideMessage, components: [row] });
+        await interaction.reply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
     }
 
-    public async messageGuideMessagePost(message: Message, args: Args): Promise<void> {
-        console.log(message, args);
+    /**
+     * Guide message post message command logic
+     * @param interaction Interaction of the command
+     */
+    public async messageGuideMessagePost(message: Message): Promise<void> {
+        const guild = await Database.getInstance().getGuild(message.guildId!);
+        const guideChannel = guild?.config.verification?.guideChannel;
+        const guideMessage = guild?.config.verification?.guideMessage;
+
+        if (!guideChannel) {
+            await message.reply({ content: "The guide channel isn't set" });
+            return;
+        }
+
+        if (!guideMessage) {
+            await message.reply({ content: "The guide message isn't set" });
+            return;
+        }
+
+        const channel = await message.guild?.channels.fetch(guideChannel);
+        if (!channel) {
+            await message.reply({ content: "Couldn't find the guide channel" });
+            return;
+        }
+
+        if (channel?.type !== ChannelType.GuildText) {
+            await message.reply({ content: "The guide channel has to be a text channel" });
+            return;
+        }
+
+        const permissions = channel.permissionsFor(message.client.user);
+        if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
+            await message.reply({ content: "The bot doesn't have the send messages permission in that channel" });
+            return;
+        }
+
+        channel as TextChannel;
+
+        const row = getGuideComponent();
+        const postedMessage = await channel.send({ content: guideMessage, components: [row] });
+        await message.reply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
     }
 }

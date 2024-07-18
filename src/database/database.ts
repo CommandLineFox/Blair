@@ -159,7 +159,7 @@ export default class Database {
      * @param message Message that will be sent
      * @returns Success or error message
      */
-    public async setGuildMessage(guildId: string, message: string): Promise<Response> {
+    public async setGuideMessage(guildId: string, message: string): Promise<Response> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild" };
@@ -184,7 +184,7 @@ export default class Database {
      * @param guildId ID of the guild
      * @returns Success or error message
      */
-    public async removeGuildMessage(guildId: string): Promise<Response> {
+    public async removeGuideMessage(guildId: string): Promise<Response> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild" };
