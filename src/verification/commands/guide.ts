@@ -88,12 +88,7 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const channel = interaction.options.getChannel("channel");
-        if (!channel) {
-            await interaction.reply({ content: "You need to provide a channel", ephemeral: true });
-            return;
-        }
-
+        const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
             await interaction.reply({ content: "The channel has to be a text channel", ephemeral: true });
             return;
@@ -132,7 +127,6 @@ export class GuideCommand extends Subcommand {
     /**
      * Gulde message set slash command logic
      * @param message Message containing the command 
-     * @param args Desired message text
      */
     public async messageGuideChannelRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeGuideChannel(message.guildId!);
@@ -178,7 +172,7 @@ export class GuideCommand extends Subcommand {
     /**
      * Gulde message set message command logic
      * @param message Message containing the command 
-     * @param args Desired message text
+     * @param args Text containing desired message
      */
     public async messageGuideMessageSet(message: Message): Promise<void> {
         const reply = await message.reply("Please enter the message you would like to use as the guide message below within the next 2 minutes");

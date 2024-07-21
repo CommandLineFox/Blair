@@ -45,7 +45,7 @@ export class Config {
     public static getInstance(file?: string): Config {
         if (!this.instance) {
             if (!file) {
-                throw new Error("You must provide the file path for ");
+                throw new Error("You must provide the file path for the config.json");
             }
 
             if (!existsSync(file)) {
