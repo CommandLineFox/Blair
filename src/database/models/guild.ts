@@ -1,12 +1,7 @@
-interface Question {
-    index?: number;
-    text?: string;
-}
-
 interface Verification {
     guideChannel?: string;
     guideMessage?: string;
-    verificationQuestions?: Question[];
+    verificationQuestions?: string[];
     verificationLog?: string;
     questioningCategory?: string;
     questioningChannels?: string[];
@@ -20,6 +15,7 @@ interface Verification {
 interface Roles {
     memberRole?: string;
     unverifiedRole?: string;
+    staffRoles?: string[]
 }
 
 interface Config {

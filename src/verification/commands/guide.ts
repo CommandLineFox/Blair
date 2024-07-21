@@ -125,7 +125,7 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const response = await Database.getInstance().removeGuildChannel(interaction.guildId!);
+        const response = await Database.getInstance().removeGuideChannel(interaction.guildId!);
         await interaction.reply({ content: response.message, ephemeral: !response.success });
     }
 
@@ -135,7 +135,7 @@ export class GuideCommand extends Subcommand {
      * @param args Desired message text
      */
     public async messageGuideChannelRemove(message: Message): Promise<void> {
-        const response = await Database.getInstance().removeGuildChannel(message.guildId!);
+        const response = await Database.getInstance().removeGuideChannel(message.guildId!);
         await message.reply({ content: response.message });
     }
 
