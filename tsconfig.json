@@ -38,6 +38,9 @@
             ],
             "models/*": [
                 "./src/database/models/*"
+            ],
+            "utils/*": [
+                "./src/utils/*"
             ]
         }
     },

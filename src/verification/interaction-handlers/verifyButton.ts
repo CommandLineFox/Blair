@@ -1,0 +1,120 @@
+import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import Database from 'database/database';
+import { PendingApplication } from 'database/models/guild';
+import type { ButtonInteraction, DMChannel, Message } from 'discord.js';
+import { Buttons, getDmVerificationComponent } from 'types/component';
+
+export class ButtonHandler extends InteractionHandler {
+    public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
+        super(ctx, {
+            ...options,
+            interactionHandlerType: InteractionHandlerTypes.Button
+        });
+    }
+
+    public override parse(interaction: ButtonInteraction) {
+        if (interaction.customId !== Buttons.VERIFY_BUTTON) {
+            return this.none();
+        }
+
+        return this.some();
+    }
+
+    /**
+     * Handle what happens when the Verify button gets pressed in the guide channel
+     * Initiating verification through DMs
+     * @param interaction 
+     */
+    public async run(interaction: ButtonInteraction): Promise<void> {
+        if (!interaction.guild) {
+            await interaction.reply({ content: "This button can only work in a guild", ephemeral: true });
+            return;
+        }
+
+        const user = interaction.user;
+        const database = Database.getInstance();
+
+        const verificationMessageText = await database.getVerificationMessage(interaction.guild);
+        if (!verificationMessageText) {
+            await interaction.reply({ content: "Couldn't find the verification message.", ephemeral: true });
+            return;
+        }
+
+        let verificationMessage: Message | null = null;
+        try {
+            verificationMessage = await user.send(verificationMessageText);
+        } catch (error) {
+            await interaction.reply({ content: "Couldn't message you, please make sure your DMs are open.", ephemeral: true });
+            return;
+        }
+
+        if (!verificationMessage) {
+            await interaction.reply({ content: "Couldn't find the message after sending it.", ephemeral: true });
+            return;
+        }
+
+        const pendingApplication: PendingApplication = { userId: user.id, requiredApprovers: [] };
+        const pendingApplications = await database.getPendingApplications(interaction.guild);
+        if (pendingApplications?.includes(pendingApplication)) {
+            await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
+            return;
+        }
+
+        await database.addPendingApplication(interaction.guild.id, pendingApplication);
+
+        await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
+
+        const verificationQuestions = await database.getVerificationQuestions(interaction.guild);
+        if (!verificationQuestions || verificationQuestions.length === 0) {
+            await interaction.editReply({ content: "Couldn't find the questions." });
+            return;
+        }
+
+        const verificationAnswers: string[] = [];
+        const dmChannel = verificationMessage.channel as DMChannel;
+        for (const verificationQuestion of verificationQuestions) {
+            let questionMessage: Message | null = null;
+            try {
+                questionMessage = await dmChannel.send(verificationQuestion)
+            } catch (error) {
+                await interaction.editReply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
+                await database.removePendingApplication(interaction.guild.id, pendingApplication);
+                return;
+            }
+
+            if (!questionMessage) {
+                await interaction.editReply({ content: "Couldn't find the question after sending it please try again." });
+                await database.removePendingApplication(interaction.guild.id, pendingApplication);
+                return;
+            }
+
+            let answerMessage: Message | undefined;
+
+            await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+                .then(async (messages) => {
+                    if (!messages.first()) {
+                        await questionMessage.edit({ content: "There was an error when fetching the answer you sent. Please verify again." });
+                        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                        return;
+                    }
+
+                    answerMessage = messages.first();
+                    if (!answerMessage) {
+                        await questionMessage.edit({ content: "There was an error when fetching the answer message. Please verify again." });
+                        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                        return;
+                    }
+
+                    verificationAnswers.push(answerMessage.cleanContent);
+                })
+                .catch(async () => {
+                    await questionMessage.edit({ content: "No message was provided after 2 minutes. Please verify again." });
+                    await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                    return;
+                });
+        }
+
+        const row = getDmVerificationComponent();
+        await dmChannel.send({ content: "If you're satisfied with your answers, press confirm to send the verification to staff. Otherwise retry.", components: [row] });
+    }
+}

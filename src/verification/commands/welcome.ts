@@ -74,12 +74,6 @@ export class WelcomeCommand extends Subcommand {
                             command
                                 .setName("set")
                                 .setDescription("Set the welcome message")
-                                .addStringOption((option) =>
-                                    option
-                                        .setName("message")
-                                        .setDescription("The welcome message to set")
-                                        .setRequired(true)
-                                )
                         )
                         .addSubcommand((command) =>
                             command
@@ -160,9 +154,38 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const messageContent = interaction.options.getString("message", true);
-        const response = await Database.getInstance().setWelcomeMessage(interaction.guildId!, messageContent);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes");
+
+        const channel = interaction.channel;
+        if (!channel) {
+            await interaction.editReply({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setWelcomeMessage(interaction.guildId!, guideMessage.content.trim());
+                await interaction.editReply({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await interaction.editReply({ content: "No message was provided after 2 minutes" });
+            });
     }
 
     /**
@@ -170,10 +193,39 @@ export class WelcomeCommand extends Subcommand {
      * @param message Message containing the command
      * @param args Text message content
      */
-    public async messageMessageSet(message: Message, args: Args): Promise<void> {
-        const messageContent = await args.pick("string");
-        const response = await Database.getInstance().setWelcomeMessage(message.guildId!, messageContent);
-        await message.reply({ content: response.message });
+    public async messageMessageSet(message: Message): Promise<void> {
+        const reply = await message.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes");
+
+        const channel = message.channel;
+        if (!channel) {
+            await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setWelcomeMessage(message.guildId!, guideMessage.content.trim());
+                await reply.edit({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await reply.edit({ content: "No message was provided after 2 minutes" });
+            });
     }
 
     /**

@@ -156,7 +156,7 @@ export class GuideCommand extends Subcommand {
                     return;
                 }
 
-                const response = await Database.getInstance().setGuideMessage(interaction.guildId!, guideMessage.cleanContent);
+                const response = await Database.getInstance().setGuideMessage(interaction.guildId!, guideMessage.content.trim());
                 await interaction.editReply({ content: response.message });
 
                 if (guideMessage.deletable) {
@@ -197,7 +197,7 @@ export class GuideCommand extends Subcommand {
                     return;
                 }
 
-                const response = await Database.getInstance().setGuideMessage(message.guildId!, guideMessage.cleanContent);
+                const response = await Database.getInstance().setGuideMessage(message.guildId!, guideMessage.content.trim());
                 await reply.edit({ content: response.message });
 
                 if (guideMessage.deletable) {
@@ -207,7 +207,6 @@ export class GuideCommand extends Subcommand {
             .catch(async () => {
                 await reply.edit({ content: "No message was provided after 2 minutes" });
             });
-
     }
 
     /**
@@ -234,9 +233,9 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessagePost(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        const guild = await Database.getInstance().getGuild(interaction.guildId!);
-        const guideChannel = guild?.config.verification?.guideChannel;
-        const guideMessage = guild?.config.verification?.guideMessage;
+        const database = Database.getInstance();
+        const guideChannel = await database.getGuideChannel(interaction.guild!);
+        const guideMessage = await database.getGuideMessage(interaction.guild!);
 
         if (!guideChannel) {
             await interaction.reply({ content: "The guide channel isn't set", ephemeral: true });
@@ -248,7 +247,7 @@ export class GuideCommand extends Subcommand {
             return;
         }
 
-        const channel = await interaction.guild?.channels.fetch(guideChannel);
+        const channel = await interaction.guild?.channels.fetch(guideChannel.id);
         if (!channel) {
             await interaction.reply({ content: "Couldn't find the guide channel", ephemeral: true });
             return;
@@ -277,9 +276,9 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async messageGuideMessagePost(message: Message): Promise<void> {
-        const guild = await Database.getInstance().getGuild(message.guildId!);
-        const guideChannel = guild?.config.verification?.guideChannel;
-        const guideMessage = guild?.config.verification?.guideMessage;
+        const database = Database.getInstance();
+        const guideChannel = await database.getGuideChannel(message.guild!);
+        const guideMessage = await database.getGuideMessage(message.guild!);
 
         if (!guideChannel) {
             await message.reply({ content: "The guide channel isn't set" });
@@ -291,7 +290,7 @@ export class GuideCommand extends Subcommand {
             return;
         }
 
-        const channel = await message.guild?.channels.fetch(guideChannel);
+        const channel = await message.guild?.channels.fetch(guideChannel.id);
         if (!channel) {
             await message.reply({ content: "Couldn't find the guide channel" });
             return;

@@ -1,29 +1,50 @@
 import { container } from "@sapphire/framework";
 import { DatabaseConfig } from "../types/config";
-import { DatabaseGuild } from "models/guild";
+import { DatabaseGuild, PendingApplication } from "models/guild";
 import mongoose, { Schema, Model, Document } from "mongoose";
+import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel } from "discord.js";
+import { trimString } from "utils/utils";
+
+const pendingApplicationSchema = new Schema({
+    userId: { type: String },
+    requiredApprovers: { type: [String] },
+}, { _id: false });
 
 const verificationSchema = new Schema({
-    guideChannel: { type: String },
-    guideMessage: { type: String },
-    verificationQuestions: { type: [String] },
-    verificationLog: { type: String },
-    questioningCategory: { type: String },
-    questioningChannels: { type: [String] },
-    questioningLog: { type: String },
-    welcomeChannel: { type: String },
-    welcomeMessage: { type: String },
-    welcomeToggle: { type: Boolean },
-    pendingApplications: { type: [String] },
+    questions: { type: [String] },
+    log: { type: String },
+    pendingApplications: { type: [pendingApplicationSchema] },
+    approvers: { type: [String] },
+}, { _id: false });
+
+const questioningSchema = new Schema({
+    ongoingCategory: { type: String },
+    ongoingChannels: { type: [String] },
+    log: { type: String },
+}, { _id: false });
+
+const guideSchema = new Schema({
+    channel: { type: String },
+    message: { type: String },
+}, { _id: false });
+
+const welcomeSchema = new Schema({
+    channel: { type: String },
+    message: { type: String },
+    toggle: { type: Boolean },
 }, { _id: false });
 
 const rolesSchema = new Schema({
     memberRole: { type: String },
     unverifiedRole: { type: String },
+    staffRoles: { type: [String] },
 }, { _id: false });
 
 const configSchema = new Schema({
     verification: { type: verificationSchema },
+    questioning: { type: questioningSchema },
+    guide: { type: guideSchema },
+    welcome: { type: welcomeSchema },
     roles: { type: rolesSchema },
 }, { _id: false });
 
@@ -80,6 +101,14 @@ export default class Database {
     }
 
     /**
+     * Disconnect from the database
+     */
+    public async disconnect(): Promise<void> {
+        await mongoose.disconnect();
+        container.logger.info("Disconnected from database");
+    }
+
+    /**
      * Return data for a specific guild if it's in the database, if it isn't, create one
      * @param id ID of the guild
      * @returns New or existing guild object
@@ -90,13 +119,6 @@ export default class Database {
         return guild;
     }
 
-    /**
-     * Disconnect from the database
-     */
-    public async disconnect(): Promise<void> {
-        await mongoose.disconnect();
-        console.log("Disconnected from database");
-    }
 
     /**
      * Set a value in the database
@@ -270,7 +292,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setGuideChannel(guildId: string, channelId: string) {
-        return this.setValue(guildId, "config.verification.guideChannel", channelId,
+        return this.setValue(guildId, "config.guide.channel", channelId,
             `The guide channel is already set to <#${channelId}.`,
             `Successfully set the guide channel to <#${channelId}>.`,
             "Failed to set the guide channel.");
@@ -282,7 +304,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeGuideChannel(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.guideChannel",
+        return this.unsetValue(guildId, "config.guide.channel",
             "The guide channel is not set.",
             "Successfully removed the guide channel.",
             "Failed to remove the guide channel.");
@@ -295,9 +317,9 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setGuideMessage(guildId: string, message: string) {
-        return this.setValue(guildId, "config.verification.guideMessage", message,
+        return this.setValue(guildId, "config.guide.message", message,
             "The guide message is already set to that.",
-            `Successfully set the guide message to:\n\n${message}`,
+            trimString(`Successfully set the guide message to:\n\n${message}`, 4000),
             "Failed to set the guide message.");
     }
 
@@ -307,10 +329,35 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeGuideMessage(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.guideMessage",
+        return this.unsetValue(guildId, "config.guide.message",
             "The guide message is not set.",
             "Successfully removed the guide message.",
             "Failed to remove the guide message.");
+    }
+
+    /**
+     * Set the verification message
+     * @param guildId ID of the guild
+     * @param messageId ID of the guide message
+     * @returns Response indicating success or failure
+     */
+    public setVerificationMessage(guildId: string, message: string) {
+        return this.setValue(guildId, "config.verification.message", message,
+            "The verification message is already set to that.",
+            trimString(`Successfully set the verification message to:\n\n${message}`, 4000),
+            "Failed to set the verification message.");
+    }
+
+    /**
+     * Remove the verification message
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public removeVerificationMessage(guildId: string) {
+        return this.unsetValue(guildId, "config.verification.message",
+            "The verification message is not set.",
+            "Successfully removed the verification message.",
+            "Failed to remove the verification message.");
     }
 
     /**
@@ -320,7 +367,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public addVerificationQuestion(guildId: string, question: string) {
-        return this.addToArray(guildId, "config.verification.verificationQuestions", question,
+        return this.addToArray(guildId, "config.verification.questions", question,
             "That verification question already exists.",
             `Successfully added "${question}" to the verification questions list.`,
             "Failed to add the verification question.");
@@ -333,7 +380,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeVerificationQuestion(guildId: string, questionIndex: number) {
-        return this.removeFromArray(guildId, "config.verification.verificationQuestions", questionIndex, true,
+        return this.removeFromArray(guildId, "config.verification.questions", questionIndex, true,
             "That verification question does not exist.",
             "Successfully removed the question from the verification questions list.",
             "Failed to remove the verification question.");
@@ -347,7 +394,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public repositionVerificationQuestion(guildId: string, oldIndex: number, newIndex: number) {
-        return this.repositionArrayItem(guildId, "config.verification.verificationQuestions", oldIndex, newIndex,
+        return this.repositionArrayItem(guildId, "config.verification.questions", oldIndex, newIndex,
             "Successfully repositioned the verification question.",
             "Failed to reposition the verification question.");
     }
@@ -359,7 +406,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setVerificationLog(guildId: string, channelId: string) {
-        return this.setValue(guildId, "config.verification.verificationLog", channelId,
+        return this.setValue(guildId, "config.verification.log", channelId,
             `The verification log is already set to <#${channelId}>.`,
             `Successfully set the verification log to <#${channelId}>.`,
             "Failed to set the verification log.");
@@ -371,10 +418,62 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeVerificationLog(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.verificationLog",
+        return this.unsetValue(guildId, "config.verification.log",
             "The verification log is not set.",
             "Successfully removed the verification log.",
             "Failed to remove the verification log.");
+    }
+
+    /**
+     * Add an approver to the list
+     * @param guildId ID of the guild
+     * @param question Approver to be added
+     * @returns Response indicating success or failure
+     */
+    public addVerificationApprover(guildId: string, approver: string) {
+        return this.addToArray(guildId, "config.verification.approvers", approver,
+            "That approver already exists.",
+            `Successfully added <@${approver}> to the verification approvers list.`,
+            "Failed to add the verification question.");
+    }
+
+    /**
+     * Remove an approver from the list
+     * @param guildId ID of the guild
+     * @param question Approver to be removed
+     * @returns Response indicating success or failure
+     */
+    public removeVerificationApprover(guildId: string, approver: string) {
+        return this.removeFromArray(guildId, "config.verification.approvers", approver, false,
+            "That approver does not exist.",
+            "Successfully removed the user from the verification approvers list.",
+            "Failed to remove the verification question.");
+    }
+
+    /**
+     * Add a pending application to the list
+     * @param guildId ID of the guild
+     * @param applicationId ID of the pending application
+     * @returns Response indicating success or failure
+     */
+    public addPendingApplication(guildId: string, pendingApplication: PendingApplication) {
+        return this.addToArray(guildId, "config.verification.pendingApplications", pendingApplication,
+            "The pending application already exists.",
+            `Successfully added <@${pendingApplication.userId}> to the pending applications list.`,
+            "Failed to add the pending application.");
+    }
+
+    /**
+     * Remove a pending application from the list
+     * @param guildId ID of the guild
+     * @param applicationId ID of the pending application
+     * @returns Response indicating success or failure
+     */
+    public removePendingApplication(guildId: string, pendingApplication: PendingApplication) {
+        return this.removeFromArray(guildId, "config.verification.pendingApplications", pendingApplication, false,
+            "Pending application does not exist.",
+            "Successfully removed the user from the pending applications list.",
+            "Failed to remove the pending application.");
     }
 
     /**
@@ -384,7 +483,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setQuestioningCategory(guildId: string, categoryId: string) {
-        return this.setValue(guildId, "config.verification.questioningCategory", categoryId,
+        return this.setValue(guildId, "config.questioning.ongoingCategory", categoryId,
             `The questioning category is already set to <#${categoryId}>.`,
             `Successfully set the questioning category to <#${categoryId}>.`,
             "Failed to set the questioning category.");
@@ -396,7 +495,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeQuestioningCategory(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.questioningCategory",
+        return this.unsetValue(guildId, "config.questioning.ongoingCategory",
             "The questioning category is not set.",
             "Successfully removed the Questioning category.",
             "Failed to remove the questioning category.");
@@ -409,7 +508,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public addQuestioningChannel(guildId: string, channelId: string) {
-        return this.addToArray(guildId, "config.verification.questioningChannels", channelId,
+        return this.addToArray(guildId, "config.questioning.ongoingChannels", channelId,
             "The questioning channel already exists.",
             `Successfully added<#${channelId}> to the questioning channels list.`,
             "Failed to add the questioning channel.");
@@ -422,7 +521,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeQuestioningChannel(guildId: string, channelId: string) {
-        return this.removeFromArray(guildId, "config.verification.questioningChannels", channelId, false,
+        return this.removeFromArray(guildId, "config.questioning.ongoingChannels", channelId, false,
             "The questioning channel does not exist.",
             "Successfully removed the channel from the questioning channels list.",
             "Failed to remove the questioning channel.");
@@ -435,7 +534,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setQuestioningLog(guildId: string, channelId: string) {
-        return this.setValue(guildId, "config.verification.questioningLog", channelId,
+        return this.setValue(guildId, "config.questioning.log", channelId,
             `The questioning log is already set to <#${channelId}>.`,
             `Successfully set the questioning log to <#${channelId}>.`,
             "Failed to set the questioning log.");
@@ -447,7 +546,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeQuestioningLog(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.questioningLog",
+        return this.unsetValue(guildId, "config.questioning.log",
             "The questioning log is not set.",
             "Successfully removed the questioning log.",
             "Failed to remove the questioning log.");
@@ -460,7 +559,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setWelcomeChannel(guildId: string, channelId: string) {
-        return this.setValue(guildId, "config.verification.welcomeChannel", channelId,
+        return this.setValue(guildId, "config.welcome.channel", channelId,
             `The welcome channel is already set to <#${channelId}>.`,
             `Successfully set the Welcome channel to <#${channelId}>.`,
             "Failed to set the welcome channel.");
@@ -472,7 +571,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeWelcomeChannel(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.welcomeChannel",
+        return this.unsetValue(guildId, "config.welcome.channel",
             "The welcome channel is not set.",
             "Successfully removed the Welcome channel.",
             "Failed to remove the welcome channel.");
@@ -485,9 +584,9 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setWelcomeMessage(guildId: string, message: string) {
-        return this.setValue(guildId, "config.verification.welcomeMessage", message,
+        return this.setValue(guildId, "config.welcome.message", message,
             "The welcome message is already set to that.",
-            `Successfully set the welcome messageto to:\n\n${message}`,
+            trimString(`Successfully set the welcome messageto to:\n\n${message}`, 4000),
             "Failed to set the welcome message.");
     }
 
@@ -497,7 +596,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeWelcomeMessage(guildId: string) {
-        return this.unsetValue(guildId, "config.verification.welcomeMessage",
+        return this.unsetValue(guildId, "config.welcome.message",
             "The welcome message is not set.",
             "Successfully removed the welcome message.",
             "Failed to remove the welcome message.");
@@ -509,7 +608,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public enableWelcomeToggle(guildId: string) {
-        return this.setValue(guildId, "config.verification.welcomeToggle", true,
+        return this.setValue(guildId, "config.welcome.toggle", true,
             "The welcome toggle is already enabled.",
             "Successfully enabled the welcome toggle.",
             "Failed to enable the welcome toggle.");
@@ -521,36 +620,10 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public disableWelcomeToggle(guildId: string) {
-        return this.setValue(guildId, "config.verification.welcomeToggle", false,
+        return this.setValue(guildId, "config.welcome.toggle", false,
             "The welcome toggle is already disabled.",
             "Successfully disabled the welcome toggle.",
             "Failed to disable the welcome toggle.");
-    }
-
-    /**
-     * Add a pending application to the list
-     * @param guildId ID of the guild
-     * @param applicationId ID of the pending application
-     * @returns Response indicating success or failure
-     */
-    public addPendingApplication(guildId: string, applicationId: string) {
-        return this.addToArray(guildId, "config.verification.pendingApplications", applicationId,
-            "The pending application already exists.",
-            `Successfully added <@${applicationId}> to the pending applications list.`,
-            "Failed to add the pending application.");
-
-    }
-    /**
-     * Remove a pending application from the list
-     * @param guildId ID of the guild
-     * @param applicationId ID of the pending application
-     * @returns Response indicating success or failure
-     */
-    public removePendingApplication(guildId: string, applicationId: string) {
-        return this.removeFromArray(guildId, "config.verification.pendingApplications", applicationId, false,
-            "Pending application does not exist.",
-            "Successfully removed the user from the pending applications list.",
-            "Failed to remove the pending application.");
     }
 
     /**
@@ -627,5 +700,380 @@ export default class Database {
             "The staff role does not exist.",
             `Successfully removed <@&${roleId}> from the staff roles list`,
             "Failed to remove the staff role.");
+    }
+
+    /**
+     * Get the guide channel for a specified guild
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getGuideChannel(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const guideChannel = dbGuild?.config?.guide?.channel;
+        if (!guideChannel) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(guideChannel);
+        if (!channel) {
+            await this.removeGuideChannel(guideChannel);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            await this.removeGuideChannel(guideChannel);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
+     * Get the guide message for a specified guild
+     * @param guild The guild to search in
+     * @returns The string if found or nothing
+     */
+    public async getGuideMessage(guild: Guild): Promise<string | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const guideMessage = dbGuild?.config?.guide?.message;
+        if (!guideMessage) {
+            return null;
+        }
+
+        return guideMessage;
+    }
+
+    /**
+     * Get the verification message for a specified guild
+     * @param guild The guild to search in
+     * @returns The string if found or nothing
+     */
+    public async getVerificationMessage(guild: Guild): Promise<string | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationMessage = dbGuild?.config?.verification?.message;
+        if (!verificationMessage) {
+            return null;
+        }
+
+        return verificationMessage;
+    }
+
+    /**
+     * Get the verification questions for a specified guild
+     * @param guild The guild to search in
+     * @returns The array of strings if found or nothing
+     */
+    public async getVerificationQuestions(guild: Guild): Promise<string[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationQuestions = dbGuild?.config?.verification?.questions;
+        if (!verificationQuestions) {
+            return null;
+        }
+
+        return verificationQuestions;
+    }
+
+    /**
+     * Get the verification log channel for a specified guild
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getVerificationLog(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationLog = dbGuild?.config?.verification?.log;
+        if (!verificationLog) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(verificationLog);
+        if (!channel) {
+            await this.removeVerificationLog(verificationLog);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            await this.removeVerificationLog(verificationLog);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
+     * Get the list of verification approvers for a specified guild
+     * @param guild The guild to search in
+     * @returns The list of approvers if found or nothing
+     */
+    public async getVerificationApprovers(guild: Guild): Promise<GuildMember[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const approvers = dbGuild?.config?.verification?.approvers;
+        if (!approvers) {
+            return null;
+        }
+
+        const approverList = [];
+        for (const approverId of approvers) {
+            const member = await guild.members.fetch(approverId);
+            if (!member) {
+                continue;
+            }
+            approverList.push(member);
+        }
+
+        if (approverList.length === 0) {
+            return null;
+        }
+
+        return approverList;
+    }
+
+    /**
+     * Get the questioning category for a specified guild
+     * @param guild The guild to search in
+     * @returns The category if found or nothing
+     */
+    public async getQuestioningCategory(guild: Guild): Promise<CategoryChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const questioningCategory = dbGuild?.config?.questioning?.ongoingCategory;
+        if (!questioningCategory) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(questioningCategory);
+        if (!channel) {
+            await this.removeQuestioningCategory(questioningCategory);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildCategory) {
+            await this.removeQuestioningCategory(questioningCategory);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
+     * Get the questioning channels list for a specified guild
+     * @param guild The guild to search in
+     * @returns The list of channels if found or nothing
+     */
+    public async getQuestioningChannels(guild: Guild): Promise<TextChannel[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const questioningChannels = dbGuild?.config?.questioning?.ongoingChannels;
+        if (!questioningChannels) {
+            return null;
+        }
+
+        const channelList = [];
+        for (const questioningChannel of questioningChannels) {
+            const channel = await guild.channels.fetch(questioningChannel);
+            if (!channel) {
+                await this.removeQuestioningChannel(guild.id, questioningChannel);
+                continue;
+            }
+
+            if (channel.type !== ChannelType.GuildText) {
+                await this.removeQuestioningChannel(guild.id, questioningChannel);
+                continue;
+            }
+
+            channelList.push(channel);
+        }
+
+        if (channelList.length === 0) {
+            return null;
+        }
+
+        return channelList;
+    }
+
+    /**
+     * Get the questioning log channel for a specified guild
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getQuestioningLog(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const questioningLog = dbGuild?.config?.questioning?.log;
+        if (!questioningLog) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(questioningLog);
+        if (!channel) {
+            await this.removeQuestioningLog(questioningLog);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            await this.removeQuestioningLog(questioningLog);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
+     * Get the welcome channel for a specified guild
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getWelcomeChannel(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const welcomeChannel = dbGuild?.config?.welcome?.channel;
+        if (!welcomeChannel) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(welcomeChannel);
+        if (!channel) {
+            await this.removeWelcomeChannel(welcomeChannel);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            await this.removeWelcomeChannel(welcomeChannel);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
+     * Get the welcome message for a specified guild
+     * @param guild The guild to search in
+     * @returns The string if found or nothing
+     */
+    public async getWelcomeMessage(guild: Guild): Promise<string | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const welcomeMessage = dbGuild?.config?.welcome?.message;
+        if (!welcomeMessage) {
+            return null;
+        }
+
+        return welcomeMessage;
+    }
+
+    /**
+     * Get the welcome toggle for a specified guild
+     * @param guild The guild to search in
+     * @returns The boolean if found or false
+     */
+    public async getWelcomeToggle(guild: Guild): Promise<Boolean | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const welcomeToggle = dbGuild?.config?.welcome?.toggle;
+        if (!welcomeToggle) {
+            return false;
+        }
+
+        return welcomeToggle;
+    }
+
+    /**
+     * Get the list of pending application members for a specified guild
+     * @param guild The guild to search in
+     * @returns The list of members if found or nothing
+     */
+    public async getPendingApplications(guild: Guild): Promise<PendingApplication[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const pendingApplications = dbGuild?.config?.verification?.pendingApplications;
+        if (!pendingApplications) {
+            return null;
+        }
+
+        const pendingApplicationList = [];
+        for (const pendingApplication of pendingApplications) {
+            if (!pendingApplication.userId) {
+                await this.removePendingApplication(guild.id, pendingApplication);
+                continue;
+            }
+
+            const member = await guild.members.fetch(pendingApplication.userId);
+            if (!member) {
+                await this.removePendingApplication(guild.id, pendingApplication);
+                continue;
+            }
+
+            pendingApplicationList.push(pendingApplication);
+        }
+
+        if (pendingApplicationList.length === 0) {
+            return null;
+        }
+
+        return pendingApplicationList;
+    }
+
+    /**
+     * Get the member role for a specified guild
+     * @param guild The guild to search in
+     * @returns The role if found or nothing
+     */
+    public async getMemberRole(guild: Guild): Promise<Role | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const memberRole = dbGuild?.config?.roles?.memberRole;
+        if (!memberRole) {
+            return null;
+        }
+
+        const role = await guild.roles.fetch(memberRole);
+        if (!role) {
+            await this.removeMemberRole(memberRole);
+            return null;
+        }
+
+        return role;
+    }
+
+    /**
+     * Get the unverified role for a specified guild
+     * @param guild The guild to search in
+     * @returns The role if found or nothing
+     */
+    public async getUnverifiedRole(guild: Guild): Promise<Role | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const unverifiedRole = dbGuild?.config?.roles?.unverifiedRole;
+        if (!unverifiedRole) {
+            return null;
+        }
+
+        const role = await guild.roles.fetch(unverifiedRole);
+        if (!role) {
+            await this.removeUnverifiedRole(unverifiedRole);
+            return null;
+        }
+
+        return role;
+    }
+
+    /**
+     * Get the list of staff roles for a specified guild
+     * @param guild The guild to search in
+     * @returns The list of roles if found or nothing
+     */
+    public async getStaffRoles(guild: Guild): Promise<Role[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const staffRoles = dbGuild?.config?.roles?.staffRoles;
+        if (!staffRoles) {
+            return null;
+        }
+
+        const roleList = [];
+        for (const staffRole of staffRoles) {
+            const role = await guild.roles.fetch(staffRole);
+            if (!role) {
+                await this.removeStaffRole(guild.id, staffRole);
+                continue;
+            }
+
+            roleList.push(role);
+        }
+
+        if (roleList.length === 0) {
+            return null;
+        }
+
+        return roleList;
     }
 }

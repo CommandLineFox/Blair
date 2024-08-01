@@ -11,6 +11,14 @@ export class VerificationCommand extends Subcommand {
             description: "Manage the verification questions and logging channel",
             subcommands: [
                 {
+                    name: "message",
+                    type: "group",
+                    entries: [
+                        { name: "set", chatInputRun: "chatInputMessageSet", messageRun: "messageMessageSet" },
+                        { name: "remove", chatInputRun: "chatInputMessageRemove", messageRun: "messageMessageRemove" }
+                    ]
+                },
+                {
                     name: "question",
                     type: "group",
                     entries: [
@@ -38,6 +46,21 @@ export class VerificationCommand extends Subcommand {
             builder
                 .setName(this.name)
                 .setDescription(this.description)
+                .addSubcommandGroup((group) =>
+                    group
+                        .setName("message")
+                        .setDescription("Manage the verification message")
+                        .addSubcommand((command) =>
+                            command
+                                .setName("set")
+                                .setDescription("Set the verification message")
+                        )
+                        .addSubcommand((command) =>
+                            command
+                                .setName("remove")
+                                .setDescription("Remove the verification message")
+                        )
+                )
                 .addSubcommandGroup((group) =>
                     group
                         .setName("question")
@@ -104,6 +127,103 @@ export class VerificationCommand extends Subcommand {
                         )
                 )
         );
+    }
+
+    /**
+     * Verification message set slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await interaction.reply("Please enter the message you would like to use as the verification message below within the next 2 minutes");
+
+        const channel = interaction.channel;
+        if (!channel) {
+            await interaction.editReply({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setVerificationMessage(interaction.guildId!, guideMessage.content.trim());
+                await interaction.editReply({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await interaction.editReply({ content: "No message was provided after 2 minutes" });
+            });
+    }
+
+    /**
+     * Verification message set message command logic
+     * @param message Message containing the command
+     * @param args Text message content
+     */
+    public async messageMessageSet(message: Message): Promise<void> {
+        const reply = await message.reply("Please enter the message you would like to use as the verification message below within the next 2 minutes");
+
+        const channel = message.channel;
+        if (!channel) {
+            await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let guideMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                guideMessage = messages.first() as Message | undefined;
+                if (!guideMessage) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setVerificationMessage(message.guildId!, guideMessage.content.trim());
+                await reply.edit({ content: response.message });
+
+                if (guideMessage.deletable) {
+                    guideMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await reply.edit({ content: "No message was provided after 2 minutes" });
+            });
+    }
+
+    /**
+     * Verification message remove slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const response = await Database.getInstance().removeVerificationMessage(interaction.guildId!);
+        await interaction.reply({ content: response.message, ephemeral: !response.success });
+    }
+
+    /**
+     * Verification message remove message command logic
+     * @param message Message containing the command
+     */
+    public async messageMessageRemove(message: Message): Promise<void> {
+        const response = await Database.getInstance().removeVerificationMessage(message.guildId!);
+        await message.reply({ content: response.message });
     }
 
     /**
