@@ -19,6 +19,14 @@ export class VerificationCommand extends Subcommand {
                     ]
                 },
                 {
+                    name: "ending",
+                    type: "group",
+                    entries: [
+                        { name: "set", chatInputRun: "chatInputEndingMessageSet", messageRun: "messageEndingMessageSet" },
+                        { name: "remove", chatInputRun: "chatInputEndingMessageRemove", messageRun: "messageEndingMessageRemove" }
+                    ]
+                },
+                {
                     name: "question",
                     type: "group",
                     entries: [
@@ -49,7 +57,22 @@ export class VerificationCommand extends Subcommand {
                 .addSubcommandGroup((group) =>
                     group
                         .setName("message")
-                        .setDescription("Manage the verification message")
+                        .setDescription("Manage the verification message before questions are sent")
+                        .addSubcommand((command) =>
+                            command
+                                .setName("set")
+                                .setDescription("Set the verification message")
+                        )
+                        .addSubcommand((command) =>
+                            command
+                                .setName("remove")
+                                .setDescription("Remove the verification message")
+                        )
+                )
+                .addSubcommandGroup((group) =>
+                    group
+                        .setName("ending")
+                        .setDescription("Manage the verification ending message after questions are answered")
                         .addSubcommand((command) =>
                             command
                                 .setName("set")
@@ -142,7 +165,7 @@ export class VerificationCommand extends Subcommand {
             return;
         }
 
-        let guideMessage = null;
+        let verificationMessage = null;
         channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
@@ -150,17 +173,17 @@ export class VerificationCommand extends Subcommand {
                     return;
                 }
 
-                guideMessage = messages.first() as Message | undefined;
-                if (!guideMessage) {
+                verificationMessage = messages.first() as Message | undefined;
+                if (!verificationMessage) {
                     await interaction.editReply({ content: "There was an error when fetching the message" });
                     return;
                 }
 
-                const response = await Database.getInstance().setVerificationMessage(interaction.guildId!, guideMessage.content.trim());
+                const response = await Database.getInstance().setVerificationMessage(interaction.guildId!, verificationMessage.content.trim());
                 await interaction.editReply({ content: response.message });
 
-                if (guideMessage.deletable) {
-                    guideMessage.delete();
+                if (verificationMessage.deletable) {
+                    verificationMessage.delete();
                 }
             })
             .catch(async () => {
@@ -182,7 +205,7 @@ export class VerificationCommand extends Subcommand {
             return;
         }
 
-        let guideMessage = null;
+        let verificationMessage = null;
         channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
@@ -190,17 +213,17 @@ export class VerificationCommand extends Subcommand {
                     return;
                 }
 
-                guideMessage = messages.first() as Message | undefined;
-                if (!guideMessage) {
+                verificationMessage = messages.first() as Message | undefined;
+                if (!verificationMessage) {
                     await reply.edit({ content: "There was an error when fetching the message" });
                     return;
                 }
 
-                const response = await Database.getInstance().setVerificationMessage(message.guildId!, guideMessage.content.trim());
+                const response = await Database.getInstance().setVerificationMessage(message.guildId!, verificationMessage.content.trim());
                 await reply.edit({ content: response.message });
 
-                if (guideMessage.deletable) {
-                    guideMessage.delete();
+                if (verificationMessage.deletable) {
+                    verificationMessage.delete();
                 }
             })
             .catch(async () => {
@@ -208,7 +231,7 @@ export class VerificationCommand extends Subcommand {
             });
     }
 
-    /**
+    /** 
      * Verification message remove slash command logic
      * @param interaction Interaction of the command
      */
@@ -223,6 +246,103 @@ export class VerificationCommand extends Subcommand {
      */
     public async messageMessageRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeVerificationMessage(message.guildId!);
+        await message.reply({ content: response.message });
+    }
+
+    /**
+     * Verification ending set slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputEndingMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await interaction.reply("Please enter the message you would like to use as the verification ending message below within the next 2 minutes");
+
+        const channel = interaction.channel;
+        if (!channel) {
+            await interaction.editReply({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let verificationEndingMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                verificationEndingMessage = messages.first() as Message | undefined;
+                if (!verificationEndingMessage) {
+                    await interaction.editReply({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setVerificationEndingMessage(interaction.guildId!, verificationEndingMessage.content.trim());
+                await interaction.editReply({ content: response.message });
+
+                if (verificationEndingMessage.deletable) {
+                    verificationEndingMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await interaction.editReply({ content: "No message was provided after 2 minutes" });
+            });
+    }
+
+    /**
+     * Verification ending set message command logic
+     * @param message Message containing the command
+     * @param args Text message content
+     */
+    public async messageEndingMessageSet(message: Message): Promise<void> {
+        const reply = await message.reply("Please enter the message you would like to use as the verification ending message below within the next 2 minutes");
+
+        const channel = message.channel;
+        if (!channel) {
+            await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        let verificationEndingMessage = null;
+        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+            .then(async (messages) => {
+                if (!messages.first()) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                verificationEndingMessage = messages.first() as Message | undefined;
+                if (!verificationEndingMessage) {
+                    await reply.edit({ content: "There was an error when fetching the message" });
+                    return;
+                }
+
+                const response = await Database.getInstance().setVerificationEndingMessage(message.guildId!, verificationEndingMessage.content.trim());
+                await reply.edit({ content: response.message });
+
+                if (verificationEndingMessage.deletable) {
+                    verificationEndingMessage.delete();
+                }
+            })
+            .catch(async () => {
+                await reply.edit({ content: "No message was provided after 2 minutes" });
+            });
+    }
+
+    /** 
+     * Verification ending remove slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputEndingMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const response = await Database.getInstance().removeVerificationEndingMessage(interaction.guildId!);
+        await interaction.reply({ content: response.message, ephemeral: !response.success });
+    }
+
+    /**
+     * Verification ending remove message command logic
+     * @param message Message containing the command
+     */
+    public async messageEndingMessageRemove(message: Message): Promise<void> {
+        const response = await Database.getInstance().removeVerificationEndingMessage(message.guildId!);
         await message.reply({ content: response.message });
     }
 

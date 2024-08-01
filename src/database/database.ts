@@ -11,6 +11,8 @@ const pendingApplicationSchema = new Schema({
 }, { _id: false });
 
 const verificationSchema = new Schema({
+    message: { type: String },
+    endingMessage: { type: String },
     questions: { type: [String] },
     log: { type: String },
     pendingApplications: { type: [pendingApplicationSchema] },
@@ -236,7 +238,11 @@ export default class Database {
                 return { success: false, message: notExistsMessage };
             }
         } else {
-            index = array.indexOf(valueOrIndex);
+            if (typeof valueOrIndex === 'object') {
+                index = array.findIndex((element: any) => JSON.stringify(element) === JSON.stringify(valueOrIndex));
+            } else {
+                index = array.indexOf(valueOrIndex);
+            }
             if (index === -1) {
                 return { success: false, message: notExistsMessage };
             }
@@ -357,6 +363,31 @@ export default class Database {
         return this.unsetValue(guildId, "config.verification.message",
             "The verification message is not set.",
             "Successfully removed the verification message.",
+            "Failed to remove the verification message.");
+    }
+
+    /**
+     * Set the verification ending message
+     * @param guildId ID of the guild
+     * @param messageId ID of the guide message
+     * @returns Response indicating success or failure
+     */
+    public setVerificationEndingMessage(guildId: string, endingMessage: string) {
+        return this.setValue(guildId, "config.verification.endingMessage", endingMessage,
+            "The verification ending message is already set to that.",
+            trimString(`Successfully set the verification ending message to:\n\n${endingMessage}`, 4000),
+            "Failed to set the verification message.");
+    }
+
+    /**
+     * Remove the verification ending message
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public removeVerificationEndingMessage(guildId: string) {
+        return this.unsetValue(guildId, "config.verification.endingMessage",
+            "The verification ending message is not set.",
+            "Successfully removed the verification ending message.",
             "Failed to remove the verification message.");
     }
 
@@ -756,6 +787,21 @@ export default class Database {
         }
 
         return verificationMessage;
+    }
+
+    /**
+     * Get the verification message for a specified guild
+     * @param guild The guild to search in
+     * @returns The string if found or nothing
+     */
+    public async getVerificationEndingMessage(guild: Guild): Promise<string | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationEndingMessage = dbGuild?.config?.verification?.endingMessage;
+        if (!verificationEndingMessage) {
+            return null;
+        }
+
+        return verificationEndingMessage;
     }
 
     /**

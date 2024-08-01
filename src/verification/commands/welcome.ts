@@ -162,7 +162,7 @@ export class WelcomeCommand extends Subcommand {
             return;
         }
 
-        let guideMessage = null;
+        let welcomeMessage = null;
         channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
@@ -170,17 +170,17 @@ export class WelcomeCommand extends Subcommand {
                     return;
                 }
 
-                guideMessage = messages.first() as Message | undefined;
-                if (!guideMessage) {
+                welcomeMessage = messages.first() as Message | undefined;
+                if (!welcomeMessage) {
                     await interaction.editReply({ content: "There was an error when fetching the message" });
                     return;
                 }
 
-                const response = await Database.getInstance().setWelcomeMessage(interaction.guildId!, guideMessage.content.trim());
+                const response = await Database.getInstance().setWelcomeMessage(interaction.guildId!, welcomeMessage.content.trim());
                 await interaction.editReply({ content: response.message });
 
-                if (guideMessage.deletable) {
-                    guideMessage.delete();
+                if (welcomeMessage.deletable) {
+                    welcomeMessage.delete();
                 }
             })
             .catch(async () => {
@@ -202,7 +202,7 @@ export class WelcomeCommand extends Subcommand {
             return;
         }
 
-        let guideMessage = null;
+        let welcomeMessage = null;
         channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
@@ -210,17 +210,17 @@ export class WelcomeCommand extends Subcommand {
                     return;
                 }
 
-                guideMessage = messages.first() as Message | undefined;
-                if (!guideMessage) {
+                welcomeMessage = messages.first() as Message | undefined;
+                if (!welcomeMessage) {
                     await reply.edit({ content: "There was an error when fetching the message" });
                     return;
                 }
 
-                const response = await Database.getInstance().setWelcomeMessage(message.guildId!, guideMessage.content.trim());
+                const response = await Database.getInstance().setWelcomeMessage(message.guildId!, welcomeMessage.content.trim());
                 await reply.edit({ content: response.message });
 
-                if (guideMessage.deletable) {
-                    guideMessage.delete();
+                if (welcomeMessage.deletable) {
+                    welcomeMessage.delete();
                 }
             })
             .catch(async () => {

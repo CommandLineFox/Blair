@@ -31,6 +31,7 @@ export class ListCommand extends Command {
         const guideMessage = await database.getGuideMessage(guild);
 
         const verificationMessage = await database.getVerificationMessage(guild);
+        const verificationEndingMessage = await database.getVerificationEndingMessage(guild);
         const verificationQuestions = await database.getVerificationQuestions(guild);
         const verificationLog = await database.getVerificationLog(guild);
         const verificationApprovers = await database.getVerificationApprovers(guild);
@@ -50,6 +51,7 @@ export class ListCommand extends Command {
         const displayGuideMessage = guideMessage ? trimString(guideMessage, 1024) : 'Not set';
 
         const displayVerificationMessage = verificationMessage ? trimString(verificationMessage, 1024) : 'Not set';
+        const displayVerificationEndingMessage = verificationEndingMessage ? trimString(verificationEndingMessage, 1024) : 'Not set';
         const displayVerificationQuestions = verificationQuestions ? trimString(verificationQuestions.reduce((accumulator, currentQuestion, index) => accumulator + `${index + 1}. ${currentQuestion}\n`, '').trim(), 1024) : 'Not set';
         const displayVerificationLog = verificationLog ? `<#${verificationLog.id}>` : 'Not set';
         const displayVerificationApprovers = verificationApprovers ? verificationApprovers.map(approver => `<@${approver.id}>`).join(', ') : 'Not set';
@@ -69,6 +71,7 @@ export class ListCommand extends Command {
             'Guide channel',
             'Guide message',
             'Verification message',
+            'Verificaton ending message',
             'Verification questions',
             'Verification log channel',
             'Verification approvers',
@@ -85,6 +88,7 @@ export class ListCommand extends Command {
             displayGuideChannel,
             displayGuideMessage,
             displayVerificationMessage,
+            displayVerificationEndingMessage,
             displayVerificationQuestions,
             displayVerificationLog,
             displayVerificationApprovers,

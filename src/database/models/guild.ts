@@ -5,6 +5,7 @@ export interface PendingApplication {
 
 interface Verification {
     message?: string;
+    endingMessage?: string;
     questions?: string[];
     log?: string;
     pendingApplications?: PendingApplication[];

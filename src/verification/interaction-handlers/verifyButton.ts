@@ -3,6 +3,7 @@ import Database from 'database/database';
 import { PendingApplication } from 'database/models/guild';
 import type { ButtonInteraction, DMChannel, Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from 'types/component';
+import { setTimeout } from 'timers/promises';
 
 export class ButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -40,6 +41,18 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
+        const verificationEndingMessageText = await database.getVerificationEndingMessage(interaction.guild);
+        if (!verificationEndingMessageText) {
+            await interaction.reply({ content: "Couldn't find the verification ending message.", ephemeral: true });
+            return;
+        }
+
+        const pendingApplications = await database.getPendingApplications(interaction.guild);
+        if (pendingApplications?.find(pendingApplication => pendingApplication.userId === user.id)) {
+            await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
+            return;
+        }
+
         let verificationMessage: Message | null = null;
         try {
             verificationMessage = await user.send(verificationMessageText);
@@ -54,14 +67,7 @@ export class ButtonHandler extends InteractionHandler {
         }
 
         const pendingApplication: PendingApplication = { userId: user.id, requiredApprovers: [] };
-        const pendingApplications = await database.getPendingApplications(interaction.guild);
-        if (pendingApplications?.includes(pendingApplication)) {
-            await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
-            return;
-        }
-
         await database.addPendingApplication(interaction.guild.id, pendingApplication);
-
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
         const verificationQuestions = await database.getVerificationQuestions(interaction.guild);
@@ -89,7 +95,6 @@ export class ButtonHandler extends InteractionHandler {
             }
 
             let answerMessage: Message | undefined;
-
             await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
                 .then(async (messages) => {
                     if (!messages.first()) {
@@ -112,9 +117,12 @@ export class ButtonHandler extends InteractionHandler {
                     await database.removePendingApplication(interaction.guild!.id, pendingApplication);
                     return;
                 });
+
+            await setTimeout(500);
         }
 
         const row = getDmVerificationComponent();
-        await dmChannel.send({ content: "If you're satisfied with your answers, press confirm to send the verification to staff. Otherwise retry.", components: [row] });
+        await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
+        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
     }
 }
