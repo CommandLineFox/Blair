@@ -3,7 +3,6 @@ import Database from 'database/database';
 import { PendingApplication } from 'database/models/guild';
 import type { ButtonInteraction, DMChannel, Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from 'types/component';
-import { setTimeout } from 'timers/promises';
 
 export class ButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -78,6 +77,7 @@ export class ButtonHandler extends InteractionHandler {
 
         const verificationAnswers: string[] = [];
         const dmChannel = verificationMessage.channel as DMChannel;
+
         for (const verificationQuestion of verificationQuestions) {
             let questionMessage: Message | null = null;
             try {
@@ -95,7 +95,7 @@ export class ButtonHandler extends InteractionHandler {
             }
 
             let answerMessage: Message | undefined;
-            await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+            await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === user, max: 1, time: 120000 })
                 .then(async (messages) => {
                     if (!messages.first()) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer you sent. Please verify again." });
@@ -117,8 +117,6 @@ export class ButtonHandler extends InteractionHandler {
                     await database.removePendingApplication(interaction.guild!.id, pendingApplication);
                     return;
                 });
-
-            await setTimeout(500);
         }
 
         const row = getDmVerificationComponent();

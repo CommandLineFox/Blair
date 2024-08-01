@@ -203,7 +203,7 @@ export class WelcomeCommand extends Subcommand {
         }
 
         let welcomeMessage = null;
-        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === message.author, max: 1, time: 120000 })
+        channel?.awaitMessages({ errors: ["time"], filter: (msg) => msg.author === message.author, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
                     await reply.edit({ content: "There was an error when fetching the message" });
