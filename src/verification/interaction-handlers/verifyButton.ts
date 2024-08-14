@@ -1,8 +1,8 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
-import Database from 'database/database';
-import { PendingApplication } from 'database/models/guild';
-import type { ButtonInteraction, DMChannel, Message } from 'discord.js';
-import { Buttons, getDmVerificationComponent } from 'types/component';
+import { InteractionHandler, InteractionHandlerTypes } from "@sapphire/framework";
+import Database from "database/database";
+import { PendingApplication } from "database/models/pendingApllication";
+import { ButtonInteraction, Message, DMChannel } from "discord.js";
+import { Buttons, getDmVerificationComponent } from "types/component";
 
 export class ButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -65,8 +65,8 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const pendingApplication: PendingApplication = { userId: user.id, requiredApprovers: [] };
-        await database.addPendingApplication(interaction.guild.id, pendingApplication);
+        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: [] };
+        await database.addPendingApplication(pendingApplication);
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
         const verificationQuestions = await database.getVerificationQuestions(interaction.guild);
@@ -84,13 +84,13 @@ export class ButtonHandler extends InteractionHandler {
                 questionMessage = await dmChannel.send(verificationQuestion)
             } catch (error) {
                 await interaction.editReply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
-                await database.removePendingApplication(interaction.guild.id, pendingApplication);
+                await database.removePendingApplication(pendingApplication);
                 return;
             }
 
             if (!questionMessage) {
                 await interaction.editReply({ content: "Couldn't find the question after sending it please try again." });
-                await database.removePendingApplication(interaction.guild.id, pendingApplication);
+                await database.removePendingApplication(pendingApplication);
                 return;
             }
 
@@ -99,14 +99,14 @@ export class ButtonHandler extends InteractionHandler {
                 .then(async (messages) => {
                     if (!messages.first()) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer you sent. Please verify again." });
-                        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                        await database.removePendingApplication(pendingApplication);
                         return;
                     }
 
                     answerMessage = messages.first();
                     if (!answerMessage) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer message. Please verify again." });
-                        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                        await database.removePendingApplication(pendingApplication);
                         return;
                     }
 
@@ -114,13 +114,13 @@ export class ButtonHandler extends InteractionHandler {
                 })
                 .catch(async () => {
                     await questionMessage.edit({ content: "No message was provided after 2 minutes. Please verify again." });
-                    await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+                    await database.removePendingApplication(pendingApplication);
                     return;
                 });
         }
 
         const row = getDmVerificationComponent();
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
-        await database.removePendingApplication(interaction.guild!.id, pendingApplication);
+        await database.removePendingApplication(pendingApplication);
     }
 }

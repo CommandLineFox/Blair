@@ -42,6 +42,14 @@ export class VerificationCommand extends Subcommand {
                         { name: "set", chatInputRun: "chatInputLogSet", messageRun: "messageLogSet" },
                         { name: "remove", chatInputRun: "chatInputLogRemove", messageRun: "messageLogRemove" }
                     ]
+                },
+                {
+                    name: "history",
+                    type: "group",
+                    entries: [
+                        { name: "set", chatInputRun: "chatInputHistorySet", messageRun: "messageHistorySet" },
+                        { name: "remove", chatInputRun: "chatInputHistoryRemove", messageRun: "messageHistoryRemove" }
+                    ]
                 }
             ],
             runIn: CommandOptionsRunTypeEnum.GuildText,

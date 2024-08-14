@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "fs";
 export type ClientConfig = {
     token: string;
     owners: string[];
+    serverProtectorId: string;
 }
 
 export type ClientOptions = {

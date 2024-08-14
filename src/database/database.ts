@@ -1,22 +1,18 @@
 import { container } from "@sapphire/framework";
 import { DatabaseConfig } from "../types/config";
-import { DatabaseGuild, PendingApplication } from "models/guild";
+import { DatabaseGuild } from "models/guild";
 import mongoose, { Schema, Model, Document } from "mongoose";
-import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel } from "discord.js";
+import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel, User } from "discord.js";
 import { trimString } from "utils/utils";
-
-const pendingApplicationSchema = new Schema({
-    userId: { type: String },
-    requiredApprovers: { type: [String] },
-}, { _id: false });
+import { PendingApplication } from "models/pendingApllication";
 
 const verificationSchema = new Schema({
     message: { type: String },
     endingMessage: { type: String },
     questions: { type: [String] },
     log: { type: String },
-    pendingApplications: { type: [pendingApplicationSchema] },
     approvers: { type: [String] },
+    history: { type: String },
 }, { _id: false });
 
 const questioningSchema = new Schema({
@@ -55,6 +51,12 @@ const guildSchema = new Schema<DatabaseGuild>({
     config: { type: configSchema }
 });
 
+const pendingApplicationSchema = new Schema<PendingApplication>({
+    userId: { type: String, unique: true, required: true },
+    requiredApprovers: { type: [String], required: true },
+    guildId: { type: String, required: true }
+});
+
 export type Response = {
     success: boolean;
     message: string;
@@ -65,10 +67,12 @@ export default class Database {
 
     private config: DatabaseConfig;
     private GuildModel: Model<DatabaseGuild>
+    private PendingApplicationModel: Model<PendingApplication>
 
     private constructor(config: DatabaseConfig) {
         this.config = config;
         this.GuildModel = mongoose.model("Guild", guildSchema);
+        this.PendingApplicationModel = mongoose.model("PendingApplication", pendingApplicationSchema);
 
         mongoose.set("strictQuery", false);
     }
@@ -121,6 +125,27 @@ export default class Database {
         return guild;
     }
 
+    /**
+     * Return data for a specific pending application by user ID
+     * @param userId The user to search by
+     * @returns Pending application or null
+     */
+    public async getPendingApplicationByUserId(userId: string): Promise<PendingApplication | null> {
+        const pendingApplication = await this.PendingApplicationModel.findOne({ userId: userId });
+
+        return pendingApplication;
+    }
+
+    /**
+     * Return data for a specific pending application by user ID
+     * @param guildId The guild to search by
+     * @returns Pending application or null
+     */
+    public async getPendingApplicationByGuildId(guildId: string): Promise<PendingApplication[] | null> {
+        const pendingApplication = await this.PendingApplicationModel.find({ guildId: guildId });
+
+        return pendingApplication;
+    }
 
     /**
      * Set a value in the database
@@ -482,29 +507,28 @@ export default class Database {
     }
 
     /**
-     * Add a pending application to the list
+     * Set the verification history channel
      * @param guildId ID of the guild
-     * @param applicationId ID of the pending application
+     * @param channelId ID of the verification log channel
      * @returns Response indicating success or failure
      */
-    public addPendingApplication(guildId: string, pendingApplication: PendingApplication) {
-        return this.addToArray(guildId, "config.verification.pendingApplications", pendingApplication,
-            "The pending application already exists.",
-            `Successfully added <@${pendingApplication.userId}> to the pending applications list.`,
-            "Failed to add the pending application.");
+    public setVerificationHistory(guildId: string, channelId: string) {
+        return this.setValue(guildId, "config.verification.history", channelId,
+            `The verification history channel is already set to <#${channelId}>.`,
+            `Successfully set the verification history channel to <#${channelId}>.`,
+            "Failed to set the verification history channel.");
     }
 
     /**
-     * Remove a pending application from the list
+     * Remove the verification history channel
      * @param guildId ID of the guild
-     * @param applicationId ID of the pending application
      * @returns Response indicating success or failure
      */
-    public removePendingApplication(guildId: string, pendingApplication: PendingApplication) {
-        return this.removeFromArray(guildId, "config.verification.pendingApplications", pendingApplication, false,
-            "Pending application does not exist.",
-            "Successfully removed the user from the pending applications list.",
-            "Failed to remove the pending application.");
+    public removeVerificationHistory(guildId: string) {
+        return this.unsetValue(guildId, "config.verification.history",
+            "The verification history channel is not set.",
+            "Successfully removed the verification history channel.",
+            "Failed to remove the verification history channel.");
     }
 
     /**
@@ -514,7 +538,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public setQuestioningCategory(guildId: string, categoryId: string) {
-        return this.setValue(guildId, "config.questioning.ongoingCategory", categoryId,
+        return this.setValue(guildId, "config.questioning.category", categoryId,
             `The questioning category is already set to <#${categoryId}>.`,
             `Successfully set the questioning category to <#${categoryId}>.`,
             "Failed to set the questioning category.");
@@ -526,7 +550,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeQuestioningCategory(guildId: string) {
-        return this.unsetValue(guildId, "config.questioning.ongoingCategory",
+        return this.unsetValue(guildId, "config.questioning.category",
             "The questioning category is not set.",
             "Successfully removed the Questioning category.",
             "Failed to remove the questioning category.");
@@ -539,7 +563,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public addQuestioningChannel(guildId: string, channelId: string) {
-        return this.addToArray(guildId, "config.questioning.ongoingChannels", channelId,
+        return this.addToArray(guildId, "ongoingQuestioningChannels", channelId,
             "The questioning channel already exists.",
             `Successfully added<#${channelId}> to the questioning channels list.`,
             "Failed to add the questioning channel.");
@@ -552,7 +576,7 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public removeQuestioningChannel(guildId: string, channelId: string) {
-        return this.removeFromArray(guildId, "config.questioning.ongoingChannels", channelId, false,
+        return this.removeFromArray(guildId, "ongoingQuestioningChannels", channelId, false,
             "The questioning channel does not exist.",
             "Successfully removed the channel from the questioning channels list.",
             "Failed to remove the questioning channel.");
@@ -880,7 +904,7 @@ export default class Database {
      */
     public async getQuestioningCategory(guild: Guild): Promise<CategoryChannel | null> {
         const dbGuild = await this.getGuild(guild.id);
-        const questioningCategory = dbGuild?.config?.questioning?.ongoingCategory;
+        const questioningCategory = dbGuild?.config?.questioning?.category;
         if (!questioningCategory) {
             return null;
         }
@@ -900,13 +924,39 @@ export default class Database {
     }
 
     /**
+     * Get the verification history channel for a specified guild
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getVerificationHistory(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationHistory = dbGuild?.config?.verification?.history;
+        if (!verificationHistory) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(verificationHistory);
+        if (!channel) {
+            await this.removeVerificationHistory(verificationHistory);
+            return null;
+        }
+
+        if (channel.type !== ChannelType.GuildText) {
+            await this.removeVerificationHistory(verificationHistory);
+            return null;
+        }
+
+        return channel;
+    }
+
+    /**
      * Get the questioning channels list for a specified guild
      * @param guild The guild to search in
      * @returns The list of channels if found or nothing
      */
     public async getQuestioningChannels(guild: Guild): Promise<TextChannel[] | null> {
         const dbGuild = await this.getGuild(guild.id);
-        const questioningChannels = dbGuild?.config?.questioning?.ongoingChannels;
+        const questioningChannels = dbGuild?.ongoingQuestioningChannels;
         if (!questioningChannels) {
             return null;
         }
@@ -1017,41 +1067,6 @@ export default class Database {
     }
 
     /**
-     * Get the list of pending application members for a specified guild
-     * @param guild The guild to search in
-     * @returns The list of members if found or nothing
-     */
-    public async getPendingApplications(guild: Guild): Promise<PendingApplication[] | null> {
-        const dbGuild = await this.getGuild(guild.id);
-        const pendingApplications = dbGuild?.config?.verification?.pendingApplications;
-        if (!pendingApplications) {
-            return null;
-        }
-
-        const pendingApplicationList = [];
-        for (const pendingApplication of pendingApplications) {
-            if (!pendingApplication.userId) {
-                await this.removePendingApplication(guild.id, pendingApplication);
-                continue;
-            }
-
-            const member = await guild.members.fetch(pendingApplication.userId);
-            if (!member) {
-                await this.removePendingApplication(guild.id, pendingApplication);
-                continue;
-            }
-
-            pendingApplicationList.push(pendingApplication);
-        }
-
-        if (pendingApplicationList.length === 0) {
-            return null;
-        }
-
-        return pendingApplicationList;
-    }
-
-    /**
      * Get the member role for a specified guild
      * @param guild The guild to search in
      * @returns The role if found or nothing
@@ -1121,5 +1136,88 @@ export default class Database {
         }
 
         return roleList;
+    }
+
+    /**
+     * Add a pending application to the list
+     * @param guildId ID of the guild
+     * @param pendingApplication The pending application object
+     * @returns Response indicating success or failure
+     */
+    public async addPendingApplication(pendingApplication: PendingApplication): Promise<Response> {
+        try {
+            const existingApplication = await this.PendingApplicationModel.findOne({ userId: pendingApplication.userId, guildId: pendingApplication.guildId });
+
+            if (existingApplication) {
+                return { success: false, message: "The pending application already exists." };
+            }
+
+            const newApplication = new this.PendingApplicationModel(pendingApplication);
+
+            await newApplication.save();
+            return { success: true, message: `Successfully added <@${pendingApplication.userId}> to the pending applications list.` };
+        } catch (error) {
+            return { success: false, message: "Failed to add the pending application." };
+        }
+    }
+
+    /**
+     * Remove a pending application from the list
+     * @param guildId ID of the guild
+     * @param userId ID of the user whose application is to be removed
+     * @returns Response indicating success or failure
+     */
+    public async removePendingApplication(pendingApllication: PendingApplication): Promise<Response> {
+        try {
+            const deletedApplication = await this.PendingApplicationModel.findOneAndDelete(pendingApllication);
+
+            if (!deletedApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            return { success: true, message: "Successfully removed the user from the pending applications list." };
+        } catch (error) {
+            return { success: false, message: "Failed to remove the pending application." };
+        }
+    }
+
+    /**
+     * Get the list of pending application members for a specified guild
+     * @param guild The guild to search in
+     * @returns The list of members if found or nothing
+     */
+    public async getPendingApplications(guild: Guild): Promise<PendingApplication[] | null> {
+        const pendingApplications = await this.getPendingApplicationByGuildId(guild.id);
+        if (!pendingApplications) {
+            return null;
+        }
+
+        const pendingApplicationList = [];
+        for (const pendingApplication of pendingApplications) {
+            if (!pendingApplication.userId) {
+                await this.removePendingApplication(pendingApplication);
+                continue;
+            }
+
+            const member = await guild.members.fetch(pendingApplication.userId);
+            if (!member) {
+                await this.removePendingApplication(pendingApplication);
+                continue;
+            }
+
+            pendingApplicationList.push(pendingApplication);
+        }
+
+        if (pendingApplicationList.length === 0) {
+            return null;
+        }
+
+        return pendingApplicationList;
+    }
+
+    public async getPendingApplication(user: User): Promise<PendingApplication | null> {
+        const pendingApplication = await this.getPendingApplicationByUserId(user.id);
+
+        return pendingApplication;
     }
 }
