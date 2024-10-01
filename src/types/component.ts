@@ -29,6 +29,10 @@ export function getGuideComponent(): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>({ components: [verifyButton] });
 }
 
-export function getDmVerificationComponent(): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>({ components: [confirmButton, retryButton] });
+/**
+ * Returns the action row component for the end of the DM verification process
+ * @returns ActionRow with the confirm and retry buttons
+ */
+export function getDmVerificationComponent(guildId: string): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>({ components: [confirmButton.setCustomId(Buttons.CONFIRM_BUTTON + "_" + guildId), retryButton.setCustomId(Buttons.RETRY_BUTTON + "_" + guildId)] });
 }

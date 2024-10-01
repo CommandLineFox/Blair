@@ -46,8 +46,8 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const pendingApplications = await database.getPendingApplications(interaction.guild);
-        if (pendingApplications?.find(pendingApplication => pendingApplication.userId === user.id)) {
+        const existingPendingApplication = await database.getPendingApplication(interaction.user.id, interaction.guild.id);
+        if (existingPendingApplication) {
             await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
             return;
         }
@@ -65,7 +65,7 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: [] };
+        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: [], questions: [], answers: [] };
         await database.addPendingApplication(pendingApplication);
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
@@ -76,7 +76,7 @@ export class ButtonHandler extends InteractionHandler {
         }
 
         const verificationAnswers: string[] = [];
-        const dmChannel = verificationMessage.channel as DMChannel;
+        const dmChannel = await interaction.client.channels.fetch(verificationMessage.channel.id) as DMChannel;
 
         for (const verificationQuestion of verificationQuestions) {
             let questionMessage: Message | null = null;
@@ -84,13 +84,13 @@ export class ButtonHandler extends InteractionHandler {
                 questionMessage = await dmChannel.send(verificationQuestion)
             } catch (error) {
                 await interaction.editReply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
-                await database.removePendingApplication(pendingApplication);
+                await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
 
             if (!questionMessage) {
                 await interaction.editReply({ content: "Couldn't find the question after sending it please try again." });
-                await database.removePendingApplication(pendingApplication);
+                await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
 
@@ -99,14 +99,14 @@ export class ButtonHandler extends InteractionHandler {
                 .then(async (messages) => {
                     if (!messages.first()) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer you sent. Please verify again." });
-                        await database.removePendingApplication(pendingApplication);
+                        await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                         return;
                     }
 
                     answerMessage = messages.first();
                     if (!answerMessage) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer message. Please verify again." });
-                        await database.removePendingApplication(pendingApplication);
+                        await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                         return;
                     }
 
@@ -114,13 +114,15 @@ export class ButtonHandler extends InteractionHandler {
                 })
                 .catch(async () => {
                     await questionMessage.edit({ content: "No message was provided after 2 minutes. Please verify again." });
-                    await database.removePendingApplication(pendingApplication);
+                    await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                     return;
                 });
         }
 
-        const row = getDmVerificationComponent();
+        await database.setPendingApplicationQuestions(interaction.user.id, interaction.guild.id, verificationQuestions);
+        await database.setPendingApplicationAnswers(interaction.user.id, interaction.guild.id, verificationAnswers);
+
+        const row = getDmVerificationComponent(interaction.guild.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
-        await database.removePendingApplication(pendingApplication);
     }
 }
