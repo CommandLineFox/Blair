@@ -1,6 +1,5 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { PendingApplication } from 'database/models/pendingApllication';
 import { type ButtonInteraction, type DMChannel, type Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from 'types/component';
 
@@ -60,12 +59,6 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const existingPendingApplication = await database.getPendingApplication(interaction.user.id, guildId);
-        if (existingPendingApplication) {
-            await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
-            return;
-        }
-
         let verificationMessage: Message | null = null;
         try {
             verificationMessage = await user.send(verificationMessageText);
@@ -79,13 +72,15 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const pendingApplication: PendingApplication = { userId: user.id, guildId: guild.id, requiredApprovers: [], questions: [], answers: [] };
-        await database.addPendingApplication(pendingApplication);
-        await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
+        const pendingApplication = await database.getPendingApplication(interaction.user.id, guildId);
+        if (!pendingApplication) {
+            await interaction.reply({ content: "There was an error finding your current application.", ephemeral: true });
+            return;
+        }
 
         const verificationQuestions = await database.getVerificationQuestions(guild);
         if (!verificationQuestions || verificationQuestions.length === 0) {
-            await interaction.editReply({ content: "Couldn't find the questions." });
+            await interaction.reply({ content: "Couldn't find the questions." });
             return;
         }
 
@@ -137,6 +132,6 @@ export class ButtonHandler extends InteractionHandler {
         await database.setPendingApplicationAnswers(interaction.user.id, guildId, verificationAnswers);
 
         const row = getDmVerificationComponent(guild.id);
-        await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
+        await interaction.reply({ content: verificationEndingMessageText, components: [row] });
     }
 }

@@ -157,6 +157,28 @@ export class VerificationCommand extends Subcommand {
                                 .setDescription("Remove the verification log channel")
                         )
                 )
+
+                .addSubcommandGroup((group) =>
+                    group
+                        .setName("history")
+                        .setDescription("Manage the verification history channel")
+                        .addSubcommand((command) =>
+                            command
+                                .setName("set")
+                                .setDescription("Set the channel where server protector messages are fetched")
+                                .addChannelOption((option) =>
+                                    option
+                                        .setName("channel")
+                                        .setDescription("The text channel for verification history")
+                                        .setRequired(true)
+                                )
+                        )
+                        .addSubcommand((command) =>
+                            command
+                                .setName("remove")
+                                .setDescription("Remove the verification history channel")
+                        )
+                )
         );
     }
 
@@ -491,6 +513,57 @@ export class VerificationCommand extends Subcommand {
      */
     public async messageLogRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeVerificationLog(message.guildId!);
+        await message.reply({ content: response.message });
+    }
+
+
+    /**
+     * Verification history set slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputHistorySet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const channel = interaction.options.getChannel("channel", true);
+        if (channel.type !== ChannelType.GuildText) {
+            await interaction.reply({ content: "You need to provide a valid text channel.", ephemeral: true });
+            return;
+        }
+
+        const response = await Database.getInstance().setVerificationHistory(interaction.guildId!, channel.id);
+        await interaction.reply({ content: response.message, ephemeral: !response.success });
+    }
+
+    /**
+     * Verification history set message command logic
+     * @param message Message containing the command
+     * @param args Text argument containing the channel ID
+     */
+    public async messageHistorySet(message: Message, args: Args): Promise<void> {
+        const channelId = await args.pick("string");
+        const channel = message.guild?.channels.cache.get(channelId);
+        if (!channel || channel.type !== ChannelType.GuildText) {
+            await message.reply({ content: "You need to provide a valid text channel." });
+            return;
+        }
+
+        const response = await Database.getInstance().setVerificationHistory(message.guildId!, channel.id);
+        await message.reply({ content: response.message });
+    }
+
+    /**
+     * Verification history remove slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputHistoryRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        const response = await Database.getInstance().removeVerificationHistory(interaction.guildId!);
+        await interaction.reply({ content: response.message, ephemeral: !response.success });
+    }
+
+    /**
+     * Verification history remove message command logic
+     * @param message Message containing the command
+     */
+    public async messageHistoryRemove(message: Message): Promise<void> {
+        const response = await Database.getInstance().removeVerificationHistory(message.guildId!);
         await message.reply({ content: response.message });
     }
 }

@@ -5,6 +5,7 @@ import mongoose, { Schema, Model, Document } from "mongoose";
 import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel } from "discord.js";
 import { trimString } from "utils/utils";
 import { PendingApplication } from "models/pendingApllication";
+import { OptOut } from "./models/optOut";
 
 const verificationSchema = new Schema({
     message: { type: String },
@@ -59,6 +60,10 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     answers: { type: [String], required: true },
 });
 
+const optOutSchema = new Schema<OptOut>({
+    userId: { type: String, unique: true, required: true }
+});
+
 export type Response = {
     success: boolean;
     message: string;
@@ -68,13 +73,15 @@ export default class Database {
     private static instance: Database | null = null;
 
     private config: DatabaseConfig;
-    private GuildModel: Model<DatabaseGuild>
-    private PendingApplicationModel: Model<PendingApplication>
+    private GuildModel: Model<DatabaseGuild>;
+    private PendingApplicationModel: Model<PendingApplication>;
+    private OptOutModel: Model<OptOut>;
 
     private constructor(config: DatabaseConfig) {
         this.config = config;
         this.GuildModel = mongoose.model("Guild", guildSchema);
         this.PendingApplicationModel = mongoose.model("PendingApplication", pendingApplicationSchema);
+        this.OptOutModel = mongoose.model("OptOut", optOutSchema);
 
         mongoose.set("strictQuery", false);
     }
@@ -101,9 +108,9 @@ export default class Database {
     public async connect(): Promise<void> {
         try {
             await mongoose.connect(this.config.url, { dbName: this.config.name });
-            container.logger.info("Connected to database");
+            console.info("Connected to database");
         } catch (error) {
-            container.logger.error("Failed to connect to the database", error);
+            console.error("Failed to connect to the database", error);
             throw error;
         }
     }
@@ -147,6 +154,21 @@ export default class Database {
         const pendingApplication = await this.PendingApplicationModel.find({ guildId: guildId });
 
         return pendingApplication;
+    }
+
+    /**
+     * Return whether a specific user is opted out of serverprotector
+     * @param userId The ID of the user
+     * @returns Whether or not the user is opted out
+     */
+    public async getOptOut(userId: string): Promise<boolean> {
+        const optOut = await this.OptOutModel.findOne({ userId: userId });
+
+        if (optOut) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

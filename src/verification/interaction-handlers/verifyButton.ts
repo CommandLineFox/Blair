@@ -65,7 +65,19 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: [], questions: [], answers: [] };
+        const approvers = await database.getVerificationApprovers(interaction.guild);
+        if (!approvers) {
+            await interaction.reply({ content: "Couldn't find the list of approvers.", ephemeral: true });
+            return;
+        }
+
+        let requiredApprovers: string[] = [];
+        const optedOut = await database.getOptOut(user.id);
+        if (optedOut) {
+            requiredApprovers = approvers?.map((approver) => approver.id);
+        }
+
+        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: requiredApprovers, questions: [], answers: [] };
         await database.addPendingApplication(pendingApplication);
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
