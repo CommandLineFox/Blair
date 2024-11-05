@@ -44,9 +44,9 @@ export class Config {
      * @param file The file path where the config.json is for reading a new config
      * @returns New or existing Config object
      */
-    public static getInstance(file?: string): Config {
-        console.log("Executed");
-        console.log(this.instance);
+    public static getInstance(): Config {
+        const file = "config.json";
+
         if (!this.instance) {
             if (!file) {
                 throw new Error("You must provide the file path for the config.json");
@@ -65,7 +65,6 @@ export class Config {
             this.instance = new Config(clientConfig, clientOptions, databaseConfig);
         }
 
-        console.log(this.instance);
         return this.instance;
     }
 

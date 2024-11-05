@@ -13,7 +13,6 @@ export class LoadOptOutListener extends Listener {
      * @param client The client that just logged in
      */
     public async run(client: Client): Promise<void> {
-        console.log("run");
         const database = Database.getInstance();
 
         const guilds = client.guilds.cache;
@@ -25,7 +24,26 @@ export class LoadOptOutListener extends Listener {
             }
 
             const messages = await this.getMessages(searchChannel);
-            console.log(messages);
+            for (const message of messages) {
+
+                const embed = message.embeds[0];
+                if (!embed || !embed.title) {
+                    continue;
+                }
+
+                const username = embed.title.split(" ")[0]?.split("#")[0];
+                if (!username) {
+                    continue;
+                }
+
+                await guild.members.fetch();
+                const user = guild.members.cache.find((member) => member.user.username === username)
+                if (!user) {
+                    continue;
+                }
+
+                await database.addOptOut(user.id);
+            }
         }
     }
 

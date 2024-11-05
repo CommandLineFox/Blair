@@ -46,6 +46,12 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
+        const approvers = await database.getVerificationApprovers(interaction.guild);
+        if (!approvers) {
+            await interaction.reply({ content: "Couldn't find the list of approvers.", ephemeral: true });
+            return;
+        }
+
         const existingPendingApplication = await database.getPendingApplication(interaction.user.id, interaction.guild.id);
         if (existingPendingApplication) {
             await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
@@ -65,15 +71,10 @@ export class ButtonHandler extends InteractionHandler {
             return;
         }
 
-        const approvers = await database.getVerificationApprovers(interaction.guild);
-        if (!approvers) {
-            await interaction.reply({ content: "Couldn't find the list of approvers.", ephemeral: true });
-            return;
-        }
-
         let requiredApprovers: string[] = [];
         const optedOut = await database.getOptOut(user.id);
         if (optedOut) {
+            console.log("Needs additional approval btw");
             requiredApprovers = approvers?.map((approver) => approver.id);
         }
 

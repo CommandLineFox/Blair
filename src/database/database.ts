@@ -159,16 +159,12 @@ export default class Database {
     /**
      * Return whether a specific user is opted out of serverprotector
      * @param userId The ID of the user
-     * @returns Whether or not the user is opted out
+     * @returns Whether the user is opted out or not
      */
-    public async getOptOut(userId: string): Promise<boolean> {
+    private async getOptOutByUser(userId: string): Promise<OptOut | null> {
         const optOut = await this.OptOutModel.findOne({ userId: userId });
 
-        if (optOut) {
-            return true;
-        }
-
-        return false;
+        return optOut;
     }
 
     /**
@@ -1292,9 +1288,70 @@ export default class Database {
         return pendingApplicationList;
     }
 
+    /**
+     * Get a pending application by the user ID and the guild ID
+     * @param userId The ID of the user
+     * @param guildId The ID of the guild
+     * @returns Pending application if it exists
+     */
     public async getPendingApplication(userId: string, guildId: string): Promise<PendingApplication | null> {
         const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId);
 
         return pendingApplication;
+    }
+
+    /**
+     * Add a user to the opt-out list
+     * @param userId ID of the user to opt-out
+     * @returns Response indicating success or failure
+     */
+    public async addOptOut(userId: string): Promise<Response> {
+        try {
+            const existingOptOut = await this.OptOutModel.findOne({ userId });
+            if (existingOptOut) {
+                return { success: false, message: "The user is already opted out." };
+            }
+
+            const newOptOut = new this.OptOutModel({ userId });
+            await newOptOut.save();
+            return { success: true, message: `Successfully added <@${userId}> to the opt-out list.` };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "Failed to add the user to the opt-out list." };
+        }
+    }
+
+    /**
+     * Remove a user from the opt-out list
+     * @param userId ID of the user whose opt-out status is to be removed
+     * @returns Response indicating success or failure
+     */
+    public async removeOptOut(userId: string): Promise<Response> {
+        try {
+            const existingOptOut = await this.OptOutModel.findOne({ userId });
+            if (!existingOptOut) {
+                return { success: false, message: "Opt-out record does not exist." };
+            }
+
+            await this.OptOutModel.deleteOne({ userId });
+            return { success: true, message: "Successfully removed the user from the opt-out list." };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "Failed to remove the user from the opt-out list." };
+        }
+    }
+
+    /**
+     * Get whether a user is opted out or not
+     * @param userId ID of the user
+     * @returns Whether the user is opted out
+     */
+    public async getOptOut(userId: string): Promise<boolean> {
+        const optOut = await this.getOptOutByUser(userId);
+
+        if (optOut) {
+            return true;
+        }
+        return false;
     }
 }
