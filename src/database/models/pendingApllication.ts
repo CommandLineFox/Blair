@@ -4,5 +4,6 @@ export interface PendingApplication {
     requiredApprovers: string[];
     questions: string[];
     answers: string[];
+    attempts: number;
     messageId?: string;
 }

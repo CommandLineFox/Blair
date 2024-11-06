@@ -2,6 +2,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import Database from 'database/database';
 import { type ButtonInteraction, type DMChannel, type Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from 'types/component';
+import { postVerificationMessage } from 'utils/utils';
 
 export class RetryButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -37,7 +38,7 @@ export class RetryButtonHandler extends InteractionHandler {
         await interaction.reply("Retrying application:");
         const channel = await interaction.client.channels.fetch(interaction.channelId);
         if (!channel) {
-            await interaction.reply({ content: "Couldn't find the channel.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the channel." });
             return;
         }
 
@@ -50,13 +51,25 @@ export class RetryButtonHandler extends InteractionHandler {
 
         const verificationMessageText = await database.getVerificationMessage(guild);
         if (!verificationMessageText) {
-            await interaction.reply({ content: "Couldn't find the verification message.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the verification message." });
             return;
         }
 
         const verificationEndingMessageText = await database.getVerificationEndingMessage(guild);
         if (!verificationEndingMessageText) {
-            await interaction.reply({ content: "Couldn't find the verification ending message.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the verification ending message." });
+            return;
+        }
+
+        const pendingApplication = await database.getPendingApplication(interaction.user.id, guildId);
+        if (!pendingApplication) {
+            await interaction.editReply({ content: "There was an error finding your current application." });
+            return;
+        }
+
+        if (pendingApplication.attempts === 3) {
+            await interaction.editReply("You tried so hard, and got so far. But in the end, it doesn't even matter");
+            await postVerificationMessage(guild, interaction, user, pendingApplication, true);
             return;
         }
 
@@ -64,24 +77,18 @@ export class RetryButtonHandler extends InteractionHandler {
         try {
             verificationMessage = await user.send(verificationMessageText);
         } catch (error) {
-            await interaction.reply({ content: "Couldn't message you, please make sure your DMs are open.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't message you, please make sure your DMs are open." });
             return;
         }
 
         if (!verificationMessage) {
-            await interaction.reply({ content: "Couldn't find the message after sending it.", ephemeral: true });
-            return;
-        }
-
-        const pendingApplication = await database.getPendingApplication(interaction.user.id, guildId);
-        if (!pendingApplication) {
-            await interaction.reply({ content: "There was an error finding your current application.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the message after sending it." });
             return;
         }
 
         const verificationQuestions = await database.getVerificationQuestions(guild);
         if (!verificationQuestions || verificationQuestions.length === 0) {
-            await interaction.reply({ content: "Couldn't find the questions." });
+            await interaction.editReply({ content: "Couldn't find the questions." });
             return;
         }
 
@@ -93,13 +100,13 @@ export class RetryButtonHandler extends InteractionHandler {
             try {
                 questionMessage = await dmChannel.send(verificationQuestion)
             } catch (error) {
-                await interaction.reply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
+                await interaction.editReply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
                 await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
 
             if (!questionMessage) {
-                await interaction.reply({ content: "Couldn't find the question after sending it please try again." });
+                await interaction.editReply({ content: "Couldn't find the question after sending it please try again." });
                 await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
@@ -129,8 +136,15 @@ export class RetryButtonHandler extends InteractionHandler {
                 });
         }
 
+        const answers = pendingApplication.answers;
+        for (const answer of verificationAnswers) {
+            answers.push(answer);
+        }
+
         await database.setPendingApplicationQuestions(interaction.user.id, guildId, verificationQuestions);
-        await database.setPendingApplicationAnswers(interaction.user.id, guildId, verificationAnswers);
+        await database.setPendingApplicationAnswers(interaction.user.id, guildId, answers);
+        await database.increasePendingApplicationAttempts(interaction.user.id, guild.id);
+
 
         const row = getDmVerificationComponent(guild.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });

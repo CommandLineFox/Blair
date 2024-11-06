@@ -59,6 +59,7 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     messageId: { type: String, unique: true, required: false },
     questions: { type: [String], required: true },
     answers: { type: [String], required: true },
+    attempts: { type: Number, required: true }
 });
 
 const optOutSchema = new Schema<OptOut>({
@@ -1276,6 +1277,30 @@ export default class Database {
             }
 
             pendingApplication.set("messageId", messageId);
+
+            await pendingApplication.save();
+            return { success: true, message: `Successfully updated message ID for <@${userId}> in the pending application.` };
+        } catch (error) {
+            return { success: false, message: "Failed to update the message ID in the pending application." };
+        }
+    }
+
+
+    /**
+     * Add to the attempts counter for a pending application
+     * @param userId The user ID of the pending application
+     * @param guildId The guild ID of the pending application
+     * @returns Response indication success or failure
+     */
+    public async increasePendingApplicationAttempts(userId: string, guildId: string): Promise<Response> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            pendingApplication.set("attempts", pendingApplication.get("attempts") + 1);
 
             await pendingApplication.save();
             return { success: true, message: `Successfully updated message ID for <@${userId}> in the pending application.` };

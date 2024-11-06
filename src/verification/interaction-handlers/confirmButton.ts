@@ -1,7 +1,8 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { EmbedBuilder, PermissionFlagsBits, type ButtonInteraction, type DMChannel } from 'discord.js';
-import { Buttons, getHandlingComponent } from 'types/component';
+import { type ButtonInteraction, type DMChannel } from 'discord.js';
+import { Buttons } from 'types/component';
+import { postVerificationMessage } from 'utils/utils';
 
 export class ConfirmButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -53,48 +54,8 @@ export class ConfirmButtonHandler extends InteractionHandler {
 
         const guild = await interaction.client.guilds.fetch(guildId);
 
-        const verificationLogChannel = await database.getVerificationLog(guild);
-        if (!verificationLogChannel) {
-            await interaction.reply({ content: "Couldn't find the verification log channel.", ephemeral: true });
-            return;
-        }
+        await postVerificationMessage(guild, interaction, user, pendingApplication);
 
-
-        const permissions = verificationLogChannel.permissionsFor(interaction.client.user);
-        if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
-            await interaction.reply({ content: "The bot doesn't have the send messages permission in that channel", ephemeral: true });
-            return;
-        }
-
-        const verificationEmbed = new EmbedBuilder()
-            .setTitle(`Verification for ${user.displayName}`)
-            .setThumbnail(user.avatarURL())
-            .setTimestamp()
-            .addFields([
-                { name: "Username", value: user.username },
-                { name: "User ID", value: user.id }
-            ]);
-
-        const questionAmount = pendingApplication.questions.length;
-        for (let i = 0; i < questionAmount; i++) {
-            const question = pendingApplication.questions[i];
-            const answer = pendingApplication.answers[i];
-            if (!question || !answer) {
-                continue;
-            }
-
-            verificationEmbed.addFields([{ name: question, value: answer }]);
-        }
-
-        if (pendingApplication.requiredApprovers.length > 0) {
-            const mappedApprovers = pendingApplication.requiredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
-            verificationEmbed.addFields([{ name: "Required approvals", value: mappedApprovers }]);
-        }
-
-        const row = getHandlingComponent();
-        const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
-
-        await database.setPendingApplicationMessageId(user.id, guildId, verificationLogMessage.id);
         await interaction.reply({ content: "Successfully applied, please be patient.", ephemeral: true });
     }
 }

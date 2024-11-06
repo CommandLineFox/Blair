@@ -77,7 +77,7 @@ export class VerifyButtonHandler extends InteractionHandler {
             requiredApprovers = approvers?.map((approver) => approver.id);
         }
 
-        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: requiredApprovers, questions: [], answers: [] };
+        const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: requiredApprovers, questions: [], answers: [], attempts: 0 };
         await database.addPendingApplication(pendingApplication);
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
@@ -133,6 +133,7 @@ export class VerifyButtonHandler extends InteractionHandler {
 
         await database.setPendingApplicationQuestions(interaction.user.id, interaction.guild.id, verificationQuestions);
         await database.setPendingApplicationAnswers(interaction.user.id, interaction.guild.id, verificationAnswers);
+        await database.increasePendingApplicationAttempts(interaction.user.id, interaction.guild.id);
 
         const row = getDmVerificationComponent(interaction.guild.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
