@@ -1285,7 +1285,6 @@ export default class Database {
         }
     }
 
-
     /**
      * Add to the attempts counter for a pending application
      * @param userId The user ID of the pending application
@@ -1306,6 +1305,32 @@ export default class Database {
             return { success: true, message: `Successfully updated message ID for <@${userId}> in the pending application.` };
         } catch (error) {
             return { success: false, message: "Failed to update the message ID in the pending application." };
+        }
+    }
+
+    /**
+     * Remove a specified approver from the required approvers of a pending application
+     * @param userId The user ID of the pending application
+     * @param guildId The guild ID of the pending application
+     * @param approverId The ID of the approver to remove
+     * @returns Response indicating success or failure
+     */
+    public async removePendingApplicationApprover(userId: string, guildId: string, approverId: string): Promise<Response> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application not found." };
+            }
+
+            // Remove the specified approver if they exist in the array
+            const updatedApprovers = pendingApplication.get("requiredApprovers").filter((id: string) => id !== approverId);
+            pendingApplication.set("requiredApprovers", updatedApprovers);
+
+            await pendingApplication.save();
+            return { success: true, message: "Successfully removed the approver from the pending application." };
+        } catch (error) {
+            return { success: false, message: "Failed to remove the approver from the pending application." };
         }
     }
 

@@ -1,10 +1,10 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, type ButtonInteraction } from 'discord.js';
+import { Colors, EmbedBuilder, PermissionFlagsBits, TextChannel, type ButtonInteraction } from 'discord.js';
 import { Buttons } from 'types/component';
 import { isStaff } from 'utils/utils';
 
-export class ApproveButtonHandler extends InteractionHandler {
+export class KickButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
         super(ctx, {
             ...options,
@@ -13,7 +13,7 @@ export class ApproveButtonHandler extends InteractionHandler {
     }
 
     public override async parse(interaction: ButtonInteraction) {
-        if (!interaction.customId.startsWith(Buttons.APPROVE_BUTTON)) {
+        if (!interaction.customId.startsWith(Buttons.KICK_BUTTON)) {
             return this.none();
         }
 
@@ -62,54 +62,6 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        if (pendingApplication.requiredApprovers.length > 0) {
-            if (!pendingApplication.requiredApprovers.includes(staffMember.id)) {
-                await interaction.reply({ content: "Still waiting approvals from required approvers", ephemeral: true });
-                return;
-            } else {
-                await database.removePendingApplicationApprover(pendingApplication.userId, pendingApplication.guildId, staffMember.id);
-
-                const oldEmbed = interaction.message.embeds[0];
-                if (!oldEmbed) {
-                    await interaction.reply({ content: "Couldn't find the embed of the message", ephemeral: true });
-                    return;
-                }
-
-                const newEmbed = new EmbedBuilder(oldEmbed.data)
-                    .setFields([]);
-
-                if (!oldEmbed.data.fields) {
-                    await interaction.reply({ content: "Couldn't find embed fields", ephemeral: true });
-                    return;
-                }
-                for (const field of oldEmbed.data.fields) {
-                    if (field.name === "Required approvals") {
-                        continue;
-                    }
-
-                    newEmbed.addFields(field);
-                }
-
-                const filteredApprovers = pendingApplication.requiredApprovers.filter((approver) => approver !== staffMember.id);
-                if (filteredApprovers.length > 0) {
-                    const updatedApprovers = filteredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
-                    newEmbed.addFields({ name: "Required approvals", value: updatedApprovers });
-                }
-
-                await interaction.message.edit({ content: interaction.message.content, embeds: [newEmbed], components: interaction.message.components });
-                await interaction.reply({ content: "Approved, please approve again if no more required approvals are left or wait for others", ephemeral: true });
-                return;
-            }
-        }
-
-        const unverifiedRole = await database.getUnverifiedRole(interaction.guild);
-        const memberRole = await database.getMemberRole(interaction.guild);
-
-        if (!memberRole) {
-            await interaction.reply({ content: "Couldn't find the member role.", ephemeral: true });
-            return;
-        }
-
         const member = await interaction.guild.members.fetch(pendingApplication.userId);
         if (!member) {
             await interaction.reply({ content: "Couldn't find the member.", ephemeral: true });
@@ -122,14 +74,21 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        if (unverifiedRole) {
-            await member.roles.remove(unverifiedRole);
+        const permissions = (channel as TextChannel).permissionsFor(interaction.client.user);
+        if (!permissions?.has(PermissionFlagsBits.KickMembers)) {
+            await interaction.reply({ content: "The bot doesn't have the kick members permission in that channel" });
+            return;
         }
 
-        await member.roles.add(memberRole);
+        if (!member.kickable) {
+            await interaction.reply({ content: "The bot cannot moderate this user as they have the same or higher role than the bot", ephemeral: true });
+            return;
+        }
+
+        await member.kick("Kicked during verification");
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setColor(Colors.Green);
+            .setColor(Colors.Red);
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
         await database.removePendingApplication(member.id, interaction.guild.id);

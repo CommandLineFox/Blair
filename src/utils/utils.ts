@@ -1,6 +1,6 @@
 import Database from "database/database";
 import { PendingApplication } from "database/models/pendingApllication";
-import { ButtonInteraction, EmbedBuilder, Guild, PermissionFlagsBits, User } from "discord.js";
+import { ButtonInteraction, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, User } from "discord.js";
 import { getHandlingComponent } from "types/component";
 
 /**
@@ -85,4 +85,27 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
     const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
 
     await database.setPendingApplicationMessageId(user.id, guild.id, verificationLogMessage.id);
+}
+
+/**
+ * Check if a specific member of a guild is a staff member
+ * @param member The member to check
+ * @returns Whether they're staff or not
+ */
+export async function isStaff(member: GuildMember): Promise<boolean> {
+    const database = Database.getInstance();
+
+    const staffRoles = await database.getStaffRoles(member.guild);
+
+    if (!staffRoles) {
+        return false;
+    }
+
+    for (const staffRole of staffRoles) {
+        if (member.roles.cache.has(staffRole.id)) {
+            return true;
+        }
+    }
+
+    return false;
 }
