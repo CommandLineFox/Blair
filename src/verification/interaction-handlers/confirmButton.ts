@@ -1,9 +1,9 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
 import { EmbedBuilder, PermissionFlagsBits, type ButtonInteraction, type DMChannel } from 'discord.js';
-import { Buttons } from 'types/component';
+import { Buttons, getHandlingComponent } from 'types/component';
 
-export class ButtonHandler extends InteractionHandler {
+export class ConfirmButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
         super(ctx, {
             ...options,
@@ -29,9 +29,8 @@ export class ButtonHandler extends InteractionHandler {
     }
 
     /**
-     * Handle what happens when the Verify button gets pressed in the guide channel
-     * Initiating verification through DMs
-     * @param interaction 
+     * Handle what happens when the confirm button gets pressed in a DM channel
+     * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
         const channel = await interaction.client.channels.fetch(interaction.channelId);
@@ -87,14 +86,15 @@ export class ButtonHandler extends InteractionHandler {
             verificationEmbed.addFields([{ name: question, value: answer }]);
         }
 
-        const requiredApprovers = await database.getVerificationApprovers(guild);
-        if (requiredApprovers) {
-            const mappedApprovers = requiredApprovers?.map((approver) => `<@${approver.id}>`).join(", ").trim();
+        if (pendingApplication.requiredApprovers.length > 0) {
+            const mappedApprovers = pendingApplication.requiredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
             verificationEmbed.addFields([{ name: "Required approvals", value: mappedApprovers }]);
         }
 
-        await verificationLogChannel.send({ embeds: [verificationEmbed] });
-        await database.removePendingApplication(user.id, guildId);
+        const row = getHandlingComponent();
+        const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
+
+        await database.setPendingApplicationMessageId(user.id, guildId, verificationLogMessage.id);
         await interaction.reply({ content: "Successfully applied, please be patient.", ephemeral: true });
     }
 }

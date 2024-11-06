@@ -4,7 +4,7 @@ import { PendingApplication } from "database/models/pendingApllication";
 import { ButtonInteraction, Message, DMChannel } from "discord.js";
 import { Buttons, getDmVerificationComponent } from "types/component";
 
-export class ButtonHandler extends InteractionHandler {
+export class VerifyButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
         super(ctx, {
             ...options,
@@ -22,8 +22,7 @@ export class ButtonHandler extends InteractionHandler {
 
     /**
      * Handle what happens when the Verify button gets pressed in the guide channel
-     * Initiating verification through DMs
-     * @param interaction 
+     * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {
         if (!interaction.guild) {

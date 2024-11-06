@@ -3,7 +3,7 @@ import Database from 'database/database';
 import { type ButtonInteraction, type DMChannel, type Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from 'types/component';
 
-export class ButtonHandler extends InteractionHandler {
+export class RetryButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
         super(ctx, {
             ...options,
@@ -29,11 +29,12 @@ export class ButtonHandler extends InteractionHandler {
     }
 
     /**
-     * Handle what happens when the Verify button gets pressed in the guide channel
-     * Initiating verification through DMs
-     * @param interaction 
+     * Handle what happens when the retry button gets pressed in a DM channel
+     * @param interaction The button interaction
+     * @param guildId The guild that this verification is from
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
+        await interaction.reply("Retrying application:");
         const channel = await interaction.client.channels.fetch(interaction.channelId);
         if (!channel) {
             await interaction.reply({ content: "Couldn't find the channel.", ephemeral: true });
@@ -92,13 +93,13 @@ export class ButtonHandler extends InteractionHandler {
             try {
                 questionMessage = await dmChannel.send(verificationQuestion)
             } catch (error) {
-                await interaction.editReply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
+                await interaction.reply({ content: "Couldn't send a question, please verify again and make sure your DMs are still open." });
                 await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
 
             if (!questionMessage) {
-                await interaction.editReply({ content: "Couldn't find the question after sending it please try again." });
+                await interaction.reply({ content: "Couldn't find the question after sending it please try again." });
                 await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 return;
             }
@@ -132,6 +133,6 @@ export class ButtonHandler extends InteractionHandler {
         await database.setPendingApplicationAnswers(interaction.user.id, guildId, verificationAnswers);
 
         const row = getDmVerificationComponent(guild.id);
-        await interaction.reply({ content: verificationEndingMessageText, components: [row] });
+        await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
     }
 }

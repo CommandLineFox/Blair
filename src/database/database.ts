@@ -56,6 +56,7 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     userId: { type: String, unique: true, required: true },
     requiredApprovers: { type: [String], required: true },
     guildId: { type: String, required: true },
+    messageId: { type: String, unique: true, required: false },
     questions: { type: [String], required: true },
     answers: { type: [String], required: true },
 });
@@ -154,6 +155,17 @@ export default class Database {
         const pendingApplication = await this.PendingApplicationModel.find({ guildId: guildId });
 
         return pendingApplication;
+    }
+
+    /**
+     * Return data for a specific pending application by message ID
+     * @param messageId The ID of the message
+     * @returns Pending application or null
+     */
+    private async getPendingApplicationByMessageId(messageId: string): Promise<PendingApplication | null> {
+        const pendingApllication = await this.PendingApplicationModel.findOne({ messageId: messageId });
+
+        return pendingApllication;
     }
 
     /**
@@ -1188,18 +1200,11 @@ export default class Database {
      */
     public async removePendingApplication(userId: string, guildId: string): Promise<Response> {
         try {
-            const pendingApplications = await this.PendingApplicationModel.find();
+            const result = await this.PendingApplicationModel.findOneAndDelete({ userId, guildId });
 
-            const index = pendingApplications.findIndex(application => application.userId === userId && application.guildId === guildId);
-
-            if (index === -1) {
+            if (!result) {
                 return { success: false, message: "Pending application does not exist." };
             }
-
-            pendingApplications.splice(index, 1);
-
-            // Save the updated list of applications back into the database
-            await Promise.all(pendingApplications.map(app => app.save()));
 
             return { success: true, message: "Successfully removed the user from the pending applications list." };
         } catch (error) {
@@ -1234,6 +1239,7 @@ export default class Database {
     /**
      * Set the answers for a pending application
      * @param userId The user ID of the pending application
+     * @param guildId The guild ID of the pending application
      * @param answers The array of answers to set
      * @returns Response indicating success or failure
      */
@@ -1251,6 +1257,30 @@ export default class Database {
             return { success: true, message: "Successfully updated the answers for the pending application." };
         } catch (error) {
             return { success: false, message: "Failed to update the answers for the pending application." };
+        }
+    }
+
+    /**
+     * Set the message ID for a pending application
+     * @param userId The user ID of the pending application
+     * @param guildId The guild ID of the pending application
+     * @param messageId The ID of the message
+     * @returns Response indication success or failure
+     */
+    public async setPendingApplicationMessageId(userId: string, guildId: string, messageId: string): Promise<Response> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            pendingApplication.set("messageId", messageId);
+
+            await pendingApplication.save();
+            return { success: true, message: `Successfully updated message ID for <@${userId}> in the pending application.` };
+        } catch (error) {
+            return { success: false, message: "Failed to update the message ID in the pending application." };
         }
     }
 
@@ -1296,6 +1326,12 @@ export default class Database {
      */
     public async getPendingApplication(userId: string, guildId: string): Promise<PendingApplication | null> {
         const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId);
+
+        return pendingApplication;
+    }
+
+    public async getPendingApplicationFromMessage(messageId: string): Promise<PendingApplication | null> {
+        const pendingApplication = await this.getPendingApplicationByMessageId(messageId);
 
         return pendingApplication;
     }
