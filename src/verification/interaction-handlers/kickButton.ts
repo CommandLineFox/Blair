@@ -88,7 +88,8 @@ export class KickButtonHandler extends InteractionHandler {
         await member.kick("Kicked during verification");
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setColor(Colors.Red);
+            .setColor(Colors.Red)
+            .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
         await database.removePendingApplication(member.id, interaction.guild.id);

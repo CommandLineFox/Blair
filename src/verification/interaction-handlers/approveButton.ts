@@ -129,7 +129,8 @@ export class ApproveButtonHandler extends InteractionHandler {
         await member.roles.add(memberRole);
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setColor(Colors.Green);
+            .setColor(Colors.Green)
+            .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
         await database.removePendingApplication(member.id, interaction.guild.id);
