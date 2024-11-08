@@ -1248,7 +1248,6 @@ export default class Database {
 
             pendingApplication.set("questioningChannelId", questioningChannelId);
 
-            console.log(pendingApplication);
             await pendingApplication.save();
             return { success: true, message: `Successfully updated questioning channel ID for <@${userId}> in the pending application.` };
         } catch (error) {
