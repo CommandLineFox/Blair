@@ -7,8 +7,8 @@ export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
         super(context, {
             ...options,
-            name: 'approve',
-            description: 'Approve a user during questioning',
+            name: 'deny',
+            description: 'Deny a user during questioning',
             runIn: CommandOptionsRunTypeEnum.GuildText
         });
     }
@@ -21,7 +21,10 @@ export class DenyCommand extends Command {
                 .addStringOption((option) =>
                     option
                         .setName("action")
-                        .addChoices([{ name: "kick", value: "kick" }, { name: "ban", value: "ban" }]))
+                        .setDescription("Choose to kick or ban the user")
+                        .addChoices([{ name: "Kick", value: "kick" }, { name: "Ban", value: "ban" }])
+                        .setRequired(true)
+                )
         );
     }
     public override async chatInputRun(interaction: CommandInteraction) {
@@ -98,14 +101,6 @@ export class DenyCommand extends Command {
         if (!permissionsDeleting?.has(PermissionFlagsBits.ManageChannels)) {
             return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
         }
-
-
-
-
-
-
-
-
 
         const member = await guild.members.fetch(pendingApplication.userId);
         if (!member) {
