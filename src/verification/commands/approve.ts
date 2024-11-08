@@ -22,13 +22,11 @@ export class ApproveCommand extends Command {
     }
 
     public override async chatInputRun(interaction: CommandInteraction) {
-        const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
-        interaction.reply({ content: result.message });
+        await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
     }
 
     public override async messageRun(message: Message) {
-        const result = await this.approveUser(message.guild!, message.channel.id, message.author);
-        message.reply({ content: result.message });
+        await this.approveUser(message.guild!, message.channel.id, message.author);
     }
 
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {
@@ -140,16 +138,30 @@ export class ApproveCommand extends Command {
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
 
         const messages = await (questioningChannel as TextChannel).messages.fetch();
-        const logs = messages.reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
+        const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
         const logBuffer = Buffer.from(logs, 'utf-8');
 
-        await questioningLogChannel.send({
-            content: `Logs from the questioning channel for ${member.user.username} (${member.user.id}):`,
-            files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })]
-        });
+        await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
 
         await questioningChannel.delete("Questioning complete");
         await database.removePendingApplication(member.id, guild.id);
+
+        const welcomeToggle = await database.getWelcomeToggle(guild);
+        if (welcomeToggle) {
+            const welcomeChannel = await database.getWelcomeChannel(guild);
+            if (!welcomeChannel) {
+                return { success: false, message: "Couldn't find the welcome channel" };
+            }
+
+            let welcomeMessage = await database.getWelcomeMessage(guild);
+            if (!welcomeMessage) {
+                return { success: false, message: "Couldn't find the welcome message" };
+            }
+
+            welcomeMessage = welcomeMessage.replace(/\[member\]/g, `<@${member.id}>`);
+            await welcomeChannel.send(welcomeMessage);
+        }
+
         return { success: true, message: "Successfully approved the user" };
     }
 }

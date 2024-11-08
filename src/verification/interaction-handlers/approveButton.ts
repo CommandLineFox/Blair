@@ -139,6 +139,25 @@ export class ApproveButtonHandler extends InteractionHandler {
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
+
+        const welcomeToggle = await database.getWelcomeToggle(interaction.guild);
+        if (welcomeToggle) {
+            const welcomeChannel = await database.getWelcomeChannel(interaction.guild);
+            if (!welcomeChannel) {
+                await interaction.reply({ content: "Couldn't find the welcome channel", ephemeral: true });
+                return;
+            }
+
+            let welcomeMessage = await database.getWelcomeMessage(interaction.guild);
+            if (!welcomeMessage) {
+                await interaction.reply({ content: "Couldn't find the welcome message", ephemeral: true });
+                return;
+            }
+
+            welcomeMessage = welcomeMessage.replace(/\[member\]/g, `<@${member.id}>`);
+            await welcomeChannel.send(welcomeMessage);
+        }
+
         await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }

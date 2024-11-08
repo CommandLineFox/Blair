@@ -154,7 +154,7 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes");
+        await interaction.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
 
         const channel = interaction.channel;
         if (!channel) {
@@ -194,7 +194,7 @@ export class WelcomeCommand extends Subcommand {
      * @param args Text message content
      */
     public async messageMessageSet(message: Message): Promise<void> {
-        const reply = await message.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes");
+        const reply = await message.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
 
         const channel = message.channel;
         if (!channel) {

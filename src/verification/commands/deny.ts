@@ -146,13 +146,10 @@ export class DenyCommand extends Command {
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
 
         const messages = await (questioningChannel as TextChannel).messages.fetch();
-        const logs = messages.reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
+        const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
         const logBuffer = Buffer.from(logs, 'utf-8');
 
-        await questioningLogChannel.send({
-            content: `Logs from the questioning channel for ${member.user.username} (${member.user.id}):`,
-            files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })]
-        });
+        await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
 
         await questioningChannel.delete("Questioning complete");
         await database.removePendingApplication(member.id, guild.id);
