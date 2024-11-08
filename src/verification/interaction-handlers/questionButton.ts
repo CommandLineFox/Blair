@@ -1,6 +1,6 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
+import { ChannelType, Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
 import { Buttons } from 'types/component';
 import { isStaff } from 'utils/utils';
 
@@ -13,7 +13,7 @@ export class KickButtonHandler extends InteractionHandler {
     }
 
     public override async parse(interaction: ButtonInteraction) {
-        if (!interaction.customId.startsWith(Buttons.KICK_BUTTON)) {
+        if (!interaction.customId.startsWith(Buttons.QUESTION_BUTTON)) {
             return this.none();
         }
 
@@ -74,24 +74,25 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const permissions = staffMember.permissions;
-        if (!permissions?.has(PermissionFlagsBits.KickMembers)) {
-            await interaction.reply({ content: "The bot doesn't have the kick members permission in that channel" });
+        const questioningCategory = await database.getQuestioningCategory(interaction.guild);
+        if (!questioningCategory) {
+            await interaction.reply({ content: "The questioning category isn't set.", ephemeral: true });
             return;
         }
 
-        if (!member.kickable) {
-            await interaction.reply({ content: "The bot cannot moderate this user as they have the same or higher role than the bot", ephemeral: true });
+        const permissions = questioningCategory.permissionsFor(staffMember);
+        if (!permissions?.has(PermissionFlagsBits.ManageChannels)) {
+            await interaction.reply({ content: "The bot doesn't have the manage channels permission" });
             return;
         }
 
-        await member.kick("Kicked during verification");
+        const questioningChannel = await questioningCategory.children.create({ name: `${member.user.username}-questioning`, type: ChannelType.GuildText });
+        await database.setPendingApplicationQuestioningChannelId(interaction.user.id, interaction.guild.id, questioningChannel.id);
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setColor(Colors.Red)
-            .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
+            .setColor(Colors.Yellow)
+            .addFields({ name: "Questioned by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
-        await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }

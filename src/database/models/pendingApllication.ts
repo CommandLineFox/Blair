@@ -6,4 +6,5 @@ export interface PendingApplication {
     answers: string[];
     attempts: number;
     messageId?: string;
+    questioningChannelId?: string;
 }

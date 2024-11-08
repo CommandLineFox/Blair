@@ -14,6 +14,14 @@ export class ListCommand extends Command {
         });
     }
 
+    public override registerApplicationCommands(registry: Command.Registry) {
+        registry.registerChatInputCommand((builder) =>
+            builder
+                .setName(this.name)
+                .setDescription(this.description)
+        );
+    }
+
     public override async chatInputRun(interaction: CommandInteraction) {
         const embed = await this.fetchValues(interaction.guild!);
         interaction.reply({ embeds: [embed] });

@@ -1,6 +1,6 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, PermissionFlagsBits, TextChannel, type ButtonInteraction } from 'discord.js';
+import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
 import { Buttons } from 'types/component';
 import { isStaff } from 'utils/utils';
 
@@ -74,7 +74,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const permissions = (channel as TextChannel).permissionsFor(interaction.client.user);
+        const permissions = staffMember.permissions;
         if (!permissions?.has(PermissionFlagsBits.BanMembers)) {
             await interaction.reply({ content: "The bot doesn't have the ban members permission in that channel", ephemeral: true });
             return;

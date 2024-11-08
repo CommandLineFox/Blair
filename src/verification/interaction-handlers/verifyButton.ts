@@ -73,7 +73,6 @@ export class VerifyButtonHandler extends InteractionHandler {
         let requiredApprovers: string[] = [];
         const optedOut = await database.getOptOut(user.id);
         if (optedOut) {
-            console.log("Needs additional approval btw");
             requiredApprovers = approvers?.map((approver) => approver.id);
         }
 

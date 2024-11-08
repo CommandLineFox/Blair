@@ -6,6 +6,7 @@ import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel } f
 import { trimString } from "utils/utils";
 import { PendingApplication } from "models/pendingApllication";
 import { OptOut } from "./models/optOut";
+import { CustomResponse } from "types/customResponse";
 
 const verificationSchema = new Schema({
     message: { type: String },
@@ -17,8 +18,7 @@ const verificationSchema = new Schema({
 }, { _id: false });
 
 const questioningSchema = new Schema({
-    ongoingCategory: { type: String },
-    ongoingChannels: { type: [String] },
+    category: { type: String },
     log: { type: String },
 }, { _id: false });
 
@@ -57,6 +57,7 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     requiredApprovers: { type: [String], required: true },
     guildId: { type: String, required: true },
     messageId: { type: String, unique: true, required: false },
+    questioningChannelId: { type: String, unique: true, required: false },
     questions: { type: [String], required: true },
     answers: { type: [String], required: true },
     attempts: { type: Number, required: true }
@@ -65,11 +66,6 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
 const optOutSchema = new Schema<OptOut>({
     userId: { type: String, unique: true, required: true }
 });
-
-export type Response = {
-    success: boolean;
-    message: string;
-}
 
 export default class Database {
     private static instance: Database | null = null;
@@ -170,6 +166,17 @@ export default class Database {
     }
 
     /**
+     * Return data for a specific pending application by message ID
+     * @param messageId The ID of the message
+     * @returns Pending application or null
+     */
+    private async getPendingApplicationByQuestioningChannelId(questioningChannelId: string): Promise<PendingApplication | null> {
+        const pendingApllication = await this.PendingApplicationModel.findOne({ questioningChannelId: questioningChannelId });
+
+        return pendingApllication;
+    }
+
+    /**
      * Return whether a specific user is opted out of serverprotector
      * @param userId The ID of the user
      * @returns Whether the user is opted out or not
@@ -190,7 +197,7 @@ export default class Database {
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
      */
-    private async setValue(guildId: string, databaseLocation: string, value: any, alreadySetMessage: string, successMessage: string, errorMessage: string): Promise<Response> {
+    private async setValue(guildId: string, databaseLocation: string, value: any, alreadySetMessage: string, successMessage: string, errorMessage: string): Promise<CustomResponse> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild." };
@@ -219,7 +226,7 @@ export default class Database {
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
      */
-    private async unsetValue(guildId: string, databaseLocation: string, notSetMessage: string, successMessage: string, errorMessage: string): Promise<Response> {
+    private async unsetValue(guildId: string, databaseLocation: string, notSetMessage: string, successMessage: string, errorMessage: string): Promise<CustomResponse> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild." };
@@ -249,7 +256,7 @@ export default class Database {
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
      */
-    private async addToArray(guildId: string, databaseLocation: string, value: any, existsMessage: string, successMessage: string, errorMessage: string): Promise<Response> {
+    private async addToArray(guildId: string, databaseLocation: string, value: any, existsMessage: string, successMessage: string, errorMessage: string): Promise<CustomResponse> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild." };
@@ -281,7 +288,7 @@ export default class Database {
      * @param errorMessage Error message for if the value fails to be removed
      * @returns Response indicating success or failure
      */
-    private async removeFromArray(guildId: string, databaseLocation: string, valueOrIndex: any, isIndex: boolean, notExistsMessage: string, successMessage: string, errorMessage: string): Promise<Response> {
+    private async removeFromArray(guildId: string, databaseLocation: string, valueOrIndex: any, isIndex: boolean, notExistsMessage: string, successMessage: string, errorMessage: string): Promise<CustomResponse> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild." };
@@ -326,7 +333,7 @@ export default class Database {
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
      */
-    private async repositionArrayItem(guildId: string, databaseLocation: string, oldIndex: number, newIndex: number, successMessage: string, errorMessage: string): Promise<Response> {
+    private async repositionArrayItem(guildId: string, databaseLocation: string, oldIndex: number, newIndex: number, successMessage: string, errorMessage: string): Promise<CustomResponse> {
         const guild = await this.getGuild(guildId) as Document | null;
         if (!guild) {
             return { success: false, message: "There was an error fetching the guild." };
@@ -590,32 +597,6 @@ export default class Database {
     }
 
     /**
-     * Add a questioning channel to the list
-     * @param guildId ID of the guild
-     * @param channelId ID of the questioning channel
-     * @returns Response indicating success or failure
-     */
-    public addQuestioningChannel(guildId: string, channelId: string) {
-        return this.addToArray(guildId, "ongoingQuestioningChannels", channelId,
-            "The questioning channel already exists.",
-            `Successfully added<#${channelId}> to the questioning channels list.`,
-            "Failed to add the questioning channel.");
-    }
-
-    /**
-     * Remove a questioning channel from the list
-     * @param guildId ID of the guild
-     * @param channelId ID of the questioning channel
-     * @returns Response indicating success or failure
-     */
-    public removeQuestioningChannel(guildId: string, channelId: string) {
-        return this.removeFromArray(guildId, "ongoingQuestioningChannels", channelId, false,
-            "The questioning channel does not exist.",
-            "Successfully removed the channel from the questioning channels list.",
-            "Failed to remove the questioning channel.");
-    }
-
-    /**
      * Set the questioning log channel
      * @param guildId ID of the guild
      * @param channelId ID of the questioning log channel
@@ -770,7 +751,7 @@ export default class Database {
      * @param roleId ID of the role
      * @returns Response indicating success or failure
      */
-    public addStaffRole(guildId: string, roleId: string): Promise<Response> {
+    public addStaffRole(guildId: string, roleId: string): Promise<CustomResponse> {
         return this.addToArray(guildId, "config.roles.staffRoles", roleId,
             "The staff role already exists",
             `Successfully added <@&${roleId}> to the staff roles list.`,
@@ -783,7 +764,7 @@ export default class Database {
      * @param roleId ID of the role
      * @returns Response indicating success or failure
      */
-    public removeStaffRole(guildId: string, roleId: string): Promise<Response> {
+    public removeStaffRole(guildId: string, roleId: string): Promise<CustomResponse> {
         return this.removeFromArray(guildId, "config.roles.staffRoles", roleId, false,
             "The staff role does not exist.",
             `Successfully removed <@&${roleId}> from the staff roles list`,
@@ -983,41 +964,6 @@ export default class Database {
     }
 
     /**
-     * Get the questioning channels list for a specified guild
-     * @param guild The guild to search in
-     * @returns The list of channels if found or nothing
-     */
-    public async getQuestioningChannels(guild: Guild): Promise<TextChannel[] | null> {
-        const dbGuild = await this.getGuild(guild.id);
-        const questioningChannels = dbGuild?.ongoingQuestioningChannels;
-        if (!questioningChannels) {
-            return null;
-        }
-
-        const channelList = [];
-        for (const questioningChannel of questioningChannels) {
-            const channel = await guild.channels.fetch(questioningChannel);
-            if (!channel) {
-                await this.removeQuestioningChannel(guild.id, questioningChannel);
-                continue;
-            }
-
-            if (channel.type !== ChannelType.GuildText) {
-                await this.removeQuestioningChannel(guild.id, questioningChannel);
-                continue;
-            }
-
-            channelList.push(channel);
-        }
-
-        if (channelList.length === 0) {
-            return null;
-        }
-
-        return channelList;
-    }
-
-    /**
      * Get the questioning log channel for a specified guild
      * @param guild The guild to search in
      * @returns The channel if found or nothing
@@ -1177,7 +1123,7 @@ export default class Database {
      * @param pendingApplication The pending application object
      * @returns Response indicating success or failure
      */
-    public async addPendingApplication(pendingApplication: PendingApplication): Promise<Response> {
+    public async addPendingApplication(pendingApplication: PendingApplication): Promise<CustomResponse> {
         try {
             const existingApplication = await this.getPendingApplicationFromDb(pendingApplication.userId, pendingApplication.guildId);
             if (existingApplication) {
@@ -1199,7 +1145,7 @@ export default class Database {
      * @param userId ID of the user whose application is to be removed
      * @returns Response indicating success or failure
      */
-    public async removePendingApplication(userId: string, guildId: string): Promise<Response> {
+    public async removePendingApplication(userId: string, guildId: string): Promise<CustomResponse> {
         try {
             const result = await this.PendingApplicationModel.findOneAndDelete({ userId, guildId });
 
@@ -1220,7 +1166,7 @@ export default class Database {
      * @param questions Array of new questions to be set
      * @returns Response indicating success or failure
      */
-    public async setPendingApplicationQuestions(userId: string, guildId: string, questions: string[]): Promise<Response> {
+    public async setPendingApplicationQuestions(userId: string, guildId: string, questions: string[]): Promise<CustomResponse> {
         try {
             const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
 
@@ -1244,7 +1190,7 @@ export default class Database {
      * @param answers The array of answers to set
      * @returns Response indicating success or failure
      */
-    public async setPendingApplicationAnswers(userId: string, guildId: string, answers: string[]): Promise<Response> {
+    public async setPendingApplicationAnswers(userId: string, guildId: string, answers: string[]): Promise<CustomResponse> {
         try {
             const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
 
@@ -1268,7 +1214,7 @@ export default class Database {
      * @param messageId The ID of the message
      * @returns Response indication success or failure
      */
-    public async setPendingApplicationMessageId(userId: string, guildId: string, messageId: string): Promise<Response> {
+    public async setPendingApplicationMessageId(userId: string, guildId: string, messageId: string): Promise<CustomResponse> {
         try {
             const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
 
@@ -1286,12 +1232,37 @@ export default class Database {
     }
 
     /**
+     * Set the questioning channel ID for a pending application
+     * @param userId The user ID of the pending application
+     * @param guildId The guild ID of the pending application
+     * @param questioningChannelId The ID of the questioning channel
+     * @returns Response indication success or failure
+     */
+    public async setPendingApplicationQuestioningChannelId(userId: string, guildId: string, questioningChannelId: string): Promise<CustomResponse> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            pendingApplication.set("questioningChannelId", questioningChannelId);
+
+            console.log(pendingApplication);
+            await pendingApplication.save();
+            return { success: true, message: `Successfully updated questioning channel ID for <@${userId}> in the pending application.` };
+        } catch (error) {
+            return { success: false, message: "Failed to update the questioning channel ID in the pending application." };
+        }
+    }
+
+    /**
      * Add to the attempts counter for a pending application
      * @param userId The user ID of the pending application
      * @param guildId The guild ID of the pending application
      * @returns Response indication success or failure
      */
-    public async increasePendingApplicationAttempts(userId: string, guildId: string): Promise<Response> {
+    public async increasePendingApplicationAttempts(userId: string, guildId: string): Promise<CustomResponse> {
         try {
             const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
 
@@ -1315,7 +1286,7 @@ export default class Database {
      * @param approverId The ID of the approver to remove
      * @returns Response indicating success or failure
      */
-    public async removePendingApplicationApprover(userId: string, guildId: string, approverId: string): Promise<Response> {
+    public async removePendingApplicationApprover(userId: string, guildId: string, approverId: string): Promise<CustomResponse> {
         try {
             const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
 
@@ -1380,8 +1351,24 @@ export default class Database {
         return pendingApplication;
     }
 
+    /**
+     * Get a pending application by the message ID
+     * @param messageId The ID of the message
+     * @returns Pending application if it exists
+     */
     public async getPendingApplicationFromMessage(messageId: string): Promise<PendingApplication | null> {
         const pendingApplication = await this.getPendingApplicationByMessageId(messageId);
+
+        return pendingApplication;
+    }
+
+    /**
+     * Get a pending application by the questioning channel ID
+     * @param messageId The ID of the message
+     * @returns Pending application if it exists
+     */
+    public async getPendingApplicationFromQuestioningChannel(questioningChannelId: string): Promise<PendingApplication | null> {
+        const pendingApplication = await this.getPendingApplicationByQuestioningChannelId(questioningChannelId);
 
         return pendingApplication;
     }
@@ -1391,7 +1378,7 @@ export default class Database {
      * @param userId ID of the user to opt-out
      * @returns Response indicating success or failure
      */
-    public async addOptOut(userId: string): Promise<Response> {
+    public async addOptOut(userId: string): Promise<CustomResponse> {
         try {
             const existingOptOut = await this.OptOutModel.findOne({ userId });
             if (existingOptOut) {
@@ -1412,7 +1399,7 @@ export default class Database {
      * @param userId ID of the user whose opt-out status is to be removed
      * @returns Response indicating success or failure
      */
-    public async removeOptOut(userId: string): Promise<Response> {
+    public async removeOptOut(userId: string): Promise<CustomResponse> {
         try {
             const existingOptOut = await this.OptOutModel.findOne({ userId });
             if (!existingOptOut) {
