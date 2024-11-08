@@ -154,6 +154,7 @@ export class DenyCommand extends Command {
             files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })]
         });
 
+        await questioningChannel.delete("Questioning complete");
         await database.removePendingApplication(member.id, guild.id);
         return { success: true, message: "Successfully approved the user" };
     }
