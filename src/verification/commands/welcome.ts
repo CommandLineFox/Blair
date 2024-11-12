@@ -1,7 +1,7 @@
 import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "database/database";
-import { PermissionFlagsBits, ChannelType, Message } from "discord.js";
+import { PermissionFlagsBits, ChannelType, Message, TextChannel } from "discord.js";
 
 export class WelcomeCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -163,7 +163,7 @@ export class WelcomeCommand extends Subcommand {
         }
 
         let welcomeMessage = null;
-        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+        (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
                     await interaction.editReply({ content: "There was an error when fetching the message" });
@@ -203,7 +203,7 @@ export class WelcomeCommand extends Subcommand {
         }
 
         let welcomeMessage = null;
-        channel?.awaitMessages({ errors: ["time"], filter: (msg) => msg.author === message.author, max: 1, time: 120000 })
+        (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (msg) => msg.author === message.author, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
                     await reply.edit({ content: "There was an error when fetching the message" });

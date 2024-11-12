@@ -32,6 +32,7 @@ export class ApproveCommand extends Command {
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {
         const database = Database.getInstance();
 
+        //Getting values from the database
         const pendingApplication = await database.getPendingApplicationFromQuestioningChannel(channelId);
         if (!pendingApplication) {
             return { success: false, message: "Couldn't find the pending application" };
@@ -61,16 +62,19 @@ export class ApproveCommand extends Command {
             return { success: false, message: "Couldn't find the questioning log channel" };
         }
 
+        //Checking if the bot can send messages and attach files in the questioning log channel
         const permissionsLogging = questioningLogChannel.permissionsFor(staffMember);
         if (!permissionsLogging?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
             return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel" };
         }
 
+        //Checking if the bot can delete the questioning channel
         const permissionsDeleting = questioningChannel.permissionsFor(staffMember);
         if (!permissionsDeleting?.has(PermissionFlagsBits.ManageChannels)) {
             return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
         }
 
+        //If the pending application requires additional approval, checking for if one of those users ran the command
         if (pendingApplication.requiredApprovers.length > 0) {
             if (!pendingApplication.requiredApprovers.includes(staffMember.id)) {
                 return { success: false, message: "Still waiting approvals from required approvers" };
@@ -78,6 +82,7 @@ export class ApproveCommand extends Command {
 
             await database.removePendingApplicationApprover(pendingApplication.userId, pendingApplication.guildId, staffMember.id);
 
+            //Updating the verification log embed
             const oldEmbed = verificationMessage.embeds[0];
             if (!oldEmbed) {
                 return { success: false, message: "Couldn't find the embed of the message" };
@@ -98,6 +103,7 @@ export class ApproveCommand extends Command {
                 newEmbed.addFields(field);
             }
 
+            //If there's still any approvers left, add the embed field
             const filteredApprovers = pendingApplication.requiredApprovers.filter((approver) => approver !== staffMember.id);
             if (filteredApprovers.length > 0) {
                 const updatedApprovers = filteredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
@@ -108,6 +114,7 @@ export class ApproveCommand extends Command {
             return { success: false, message: "Approved, please approve again if no more required approvals are left or wait for others" };
         }
 
+        //Adding the member role and removing the unverified role from the user
         const unverifiedRole = await database.getUnverifiedRole(guild);
         const memberRole = await database.getMemberRole(guild);
 
@@ -131,12 +138,14 @@ export class ApproveCommand extends Command {
 
         await member.roles.add(memberRole);
 
+        //Updating the embed to indicate approval of a user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
             .setColor(Colors.Green)
             .addFields({ name: "Handled by", value: `${staffMember.username} (${staffMember.id})` });
 
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
 
+        //Putting the contents of the questioning channel into a file and logging it
         const messages = await (questioningChannel as TextChannel).messages.fetch();
         const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
         const logBuffer = Buffer.from(logs, 'utf-8');
@@ -146,6 +155,7 @@ export class ApproveCommand extends Command {
         await questioningChannel.delete("Questioning complete");
         await database.removePendingApplication(member.id, guild.id);
 
+        //Posting the welcome message
         const welcomeToggle = await database.getWelcomeToggle(guild);
         if (welcomeToggle) {
             const welcomeChannel = await database.getWelcomeChannel(guild);

@@ -34,7 +34,7 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
         return;
     }
 
-
+    //Check if the bot can send messages in the verification log
     const permissions = verificationLogChannel.permissionsFor(interaction.client.user);
     if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
         if (edit) {
@@ -46,6 +46,7 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
         return;
     }
 
+    //Create the embed that will be posted in the verification log
     const verificationEmbed = new EmbedBuilder()
         .setTitle(`Verification for ${user.displayName}`)
         .setThumbnail(user.avatarURL())
@@ -58,6 +59,7 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
     const questionAmount = pendingApplication.questions.length;
     const answerAmount = pendingApplication.answers.length;
 
+    //Add all answers including retries to the embed
     let j = 0;
     for (let i = 0; i < answerAmount; i++) {
         const question = pendingApplication.questions[j];
@@ -73,17 +75,22 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
         verificationEmbed.addFields([{ name: question, value: answer }]);
     }
 
+    //Add the required approvals field if there are any
     if (pendingApplication.requiredApprovers.length > 0) {
         const mappedApprovers = pendingApplication.requiredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
         verificationEmbed.addFields([{ name: "Required approvals", value: mappedApprovers }]);
     }
 
+    //Linkin park references
     if (pendingApplication.attempts === 3) {
         verificationEmbed.addFields({ name: "You tried so hard and got so far", value: "But in the end it doesn't even matter" });
     }
+
+    //Post the message with the accept, question, kick and ban buttons
     const row = getHandlingComponent();
     const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
 
+    //Add the message ID to the pending application to access it
     await database.setPendingApplicationMessageId(user.id, guild.id, verificationLogMessage.id);
 }
 

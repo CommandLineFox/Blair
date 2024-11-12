@@ -9,6 +9,7 @@ export class BotClient extends SapphireClient {
     public constructor(options: ClientOptions) {
         super(options);
 
+        //Register verification as a shard
         this.stores.registerPath(join(this.rootData.root, 'verification'));
     }
 }

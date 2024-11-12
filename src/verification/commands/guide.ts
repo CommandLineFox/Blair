@@ -143,7 +143,7 @@ export class GuideCommand extends Subcommand {
         }
 
         let guideMessage = null;
-        channel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
+        (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
                     await interaction.editReply({ content: "There was an error when fetching the message" });
@@ -184,7 +184,7 @@ export class GuideCommand extends Subcommand {
         }
 
         let guideMessage = null;
-        channel?.awaitMessages({ errors: ["time"], filter: (msg) => msg.author === message.author, max: 1, time: 120000 })
+        (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (msg) => msg.author === message.author, max: 1, time: 120000 })
             .then(async (messages) => {
                 if (!messages.first()) {
                     await reply.edit({ content: "There was an error when fetching the message" });

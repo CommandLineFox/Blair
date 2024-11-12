@@ -55,6 +55,9 @@ export class ListCommand extends Command {
         const unverifiedRole = await database.getUnverifiedRole(guild);
         const staffRoles = await database.getStaffRoles(guild);
 
+        const kickReasons = await database.getKickReasons(guild);
+        const banReasons = await database.getBanReasons(guild);
+
         const displayGuideChannel = guideChannel ? `<#${guideChannel.id}>` : 'Not set';
         const displayGuideMessage = guideMessage ? trimString(guideMessage, 1024) : 'Not set';
 
@@ -75,6 +78,9 @@ export class ListCommand extends Command {
         const displayUnverifiedRole = unverifiedRole ? `<@&${unverifiedRole.id}>` : 'Not set';
         const displayStaffRoles = staffRoles ? staffRoles.map(role => `<@&${role.id}>`).join(', ') : 'Not set';
 
+        const displayKickReasons = kickReasons ? trimString(kickReasons.reduce((accumulator, currentReason, index) => accumulator + `${index + 1}. ${currentReason}\n`, '').trim(), 1024) : 'Not set';
+        const displayBanReasons = banReasons ? trimString(banReasons.reduce((accumulator, currentReason, index) => accumulator + `${index + 1}. ${currentReason}\n`, '').trim(), 1024) : 'Not set';
+
         const displayNames = [
             'Guide channel',
             'Guide message',
@@ -91,6 +97,8 @@ export class ListCommand extends Command {
             'Member role',
             'Unverified role',
             'Staff roles',
+            'Kick reasons',
+            'Ban reasons'
         ];
         const displayValues = [
             displayGuideChannel,
@@ -108,6 +116,8 @@ export class ListCommand extends Command {
             displayMemberRole,
             displayUnverifiedRole,
             displayStaffRoles,
+            displayKickReasons,
+            displayBanReasons
         ];
         const embedFields = displayValues.reduce((accumulator, currentValue, index) => accumulator.concat([{ name: displayNames[index]!, value: currentValue }]), [] as { name: string; value: string }[]);
 

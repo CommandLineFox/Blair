@@ -45,12 +45,18 @@ interface Roles {
     staffRoles?: string[]
 }
 
+interface Reason {
+    kick?: string[];
+    ban?: string[];
+}
+
 interface Config {
     verification?: Verification;
     questioning?: Questioning;
     guide?: Guide;
     welcome?: Welcome;
     roles?: Roles;
+    reason?: Reason;
 }
 
 export interface DatabaseGuild {

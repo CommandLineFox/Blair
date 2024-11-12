@@ -18,11 +18,11 @@
   },
   "homepage": "https://github.com/CommandLineFox/Blair#readme",
   "dependencies": {
-    "@sapphire/framework": "^5.2.1",
-    "@sapphire/plugin-subcommands": "^6.0.3",
-    "@sapphire/utilities": "^3.16.2",
-    "discord.js": "^14.15.3",
-    "mongoose": "^8.5.0",
+    "@sapphire/framework": "^5.3.1",
+    "@sapphire/plugin-subcommands": "^7.0.1",
+    "@sapphire/utilities": "^3.18.1",
+    "discord.js": "^14.16.3",
+    "mongoose": "^8.8.1",
     "shx": "^0.3.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"

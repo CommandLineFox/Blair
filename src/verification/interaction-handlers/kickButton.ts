@@ -1,7 +1,7 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
-import { Buttons } from 'types/component';
+import { PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
+import { Buttons, getKickReasonComponent } from 'types/component';
 import { isStaff } from 'utils/utils';
 
 export class KickButtonHandler extends InteractionHandler {
@@ -85,13 +85,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        await member.kick("Kicked during verification");
-
-        const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setColor(Colors.Red)
-            .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
-
-        await interaction.message.edit({ embeds: [newEmbed], components: [] });
-        await database.removePendingApplication(member.id, interaction.guild.id);
+        const row = await getKickReasonComponent(interaction.guild, messageId);
+        await interaction.reply({ content: "Please pick a reason or enter a custom one", components: [row], ephemeral: true });
     }
 }

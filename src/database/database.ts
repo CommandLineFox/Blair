@@ -39,12 +39,18 @@ const rolesSchema = new Schema({
     staffRoles: { type: [String] },
 }, { _id: false });
 
+const reasonSchema = new Schema({
+    kick: { type: [String] },
+    ban: { type: [String] },
+}, { _id: false });
+
 const configSchema = new Schema({
     verification: { type: verificationSchema },
     questioning: { type: questioningSchema },
     guide: { type: guideSchema },
     welcome: { type: welcomeSchema },
     roles: { type: rolesSchema },
+    reason: { type: reasonSchema }
 }, { _id: false });
 
 const guildSchema = new Schema<DatabaseGuild>({
@@ -772,6 +778,58 @@ export default class Database {
     }
 
     /**
+     * Add a kick reason to the list
+     * @param guildId ID of the guild
+     * @param reason Kick reason to be added
+     * @returns Response indicating success or failure
+     */
+    public addKickReason(guildId: string, reason: string) {
+        return this.addToArray(guildId, "config.reason.kick", reason,
+            "That kick reason already exists.",
+            `Successfully added "${reason}" to the kick reasons list.`,
+            "Failed to add the kick reason.");
+    }
+
+    /**
+     * Remove a kick reason from the list
+     * @param guildId ID of the guild
+     * @param reason Kick reason to be removed
+     * @returns Response indicating success or failure
+     */
+    public removeKickReason(guildId: string, questionIndex: number) {
+        return this.removeFromArray(guildId, "config.reason.kick", questionIndex, true,
+            "That kick reason does not exist.",
+            "Successfully removed the kick reason from the kick reasons list.",
+            "Failed to remove the kick reason.");
+    }
+
+    /**
+     * Add a ban reason to the list
+     * @param guildId ID of the guild
+     * @param reason Ban reason to be added
+     * @returns Response indicating success or failure
+     */
+    public addBanReason(guildId: string, reason: string) {
+        return this.addToArray(guildId, "config.reason.ban", reason,
+            "That ban reason already exists.",
+            `Successfully added "${reason}" to the ban reasons list.`,
+            "Failed to add the ban reason.");
+    }
+
+    /**
+     * Remove a ban reason from the list
+     * @param guildId ID of the guild
+     * @param reason Ban reason to be removed
+     * @returns Response indicating success or failure
+     */
+    public removeBanReason(guildId: string, questionIndex: number) {
+        return this.removeFromArray(guildId, "config.reason.ban", questionIndex, true,
+            "That ban reason does not exist.",
+            "Successfully removed the ban reason from the ban reasons list.",
+            "Failed to remove the ban reason.");
+    }
+
+    /**
      * Get the guide channel for a specified guild
      * @param guild The guild to search in
      * @returns The channel if found or nothing
@@ -1115,6 +1173,36 @@ export default class Database {
         }
 
         return roleList;
+    }
+
+    /**
+     * Get the kick reasons for a specified guild
+     * @param guild The guild to search in
+     * @returns The array of strings if found or nothing
+     */
+    public async getKickReasons(guild: Guild): Promise<string[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const kickReasons = dbGuild?.config?.reason?.kick;
+        if (!kickReasons) {
+            return null;
+        }
+
+        return kickReasons;
+    }
+
+    /**
+     * Get the ban reasons for a specified guild
+     * @param guild The guild to search in
+     * @returns The array of strings if found or nothing
+     */
+    public async getBanReasons(guild: Guild): Promise<string[] | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const banReasons = dbGuild?.config?.reason?.ban;
+        if (!banReasons) {
+            return null;
+        }
+
+        return banReasons;
     }
 
     /**
