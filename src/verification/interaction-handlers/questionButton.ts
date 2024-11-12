@@ -90,6 +90,7 @@ export class KickButtonHandler extends InteractionHandler {
         await database.setPendingApplicationQuestioningChannelId(interaction.user.id, interaction.guild.id, questioningChannel.id);
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)
+            .setTitle(`${oldEmbed.title} | Questioned`)
             .setColor(Colors.Yellow)
             .addFields({ name: "Questioned by", value: `${staffMember.user.username} (${staffMember.id})` });
 

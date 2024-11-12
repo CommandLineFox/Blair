@@ -63,6 +63,7 @@ export class DenyCommand extends Command {
     private async denyUser(guild: Guild, channelId: string, staffMember: User, action: string): Promise<CustomResponse> {
         const database = Database.getInstance();
 
+        //Getting values from the database
         const pendingApplication = await database.getPendingApplicationFromQuestioningChannel(channelId);
         if (!pendingApplication) {
             return { success: false, message: "Couldn't find the pending application" };
@@ -92,6 +93,8 @@ export class DenyCommand extends Command {
             return { success: false, message: "Couldn't find the questioning log channel" };
         }
 
+
+        //Checking if the bot can send messages and attach files in the questioning log channel
         const permissionsLogging = questioningLogChannel.permissionsFor(staffMember);
         if (!permissionsLogging?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
             return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel" };
@@ -112,7 +115,7 @@ export class DenyCommand extends Command {
             return { success: false, message: "There was an error finding the embed." };
         }
 
-
+        //Depending on chosen action, kick or ban the user
         if (action === "kick") {
             const permissions = questioningChannel.permissionsFor(staffMember);
             if (!permissions?.has(PermissionFlagsBits.KickMembers)) {
@@ -138,13 +141,16 @@ export class DenyCommand extends Command {
             await member.ban({ reason: "Banned during verification" });
         }
 
+        //Updating the embed to indicate denying a user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
+            .setTitle(`${oldEmbed.title} | ${action === "kick" ? "Kicked" : "Banned"}`)
             .setColor(Colors.Red)
             .addFields({ name: "Handled by", value: `${staffMember.username} (${staffMember.id})` });
 
 
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
 
+        //Putting the contents of the questioning channel into a file and logging it
         const messages = await (questioningChannel as TextChannel).messages.fetch();
         const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
         const logBuffer = Buffer.from(logs, 'utf-8');

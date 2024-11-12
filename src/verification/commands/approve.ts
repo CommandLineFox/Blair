@@ -140,6 +140,7 @@ export class ApproveCommand extends Command {
 
         //Updating the embed to indicate approval of a user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
+            .setTitle(`${oldEmbed.title} | Approved`)
             .setColor(Colors.Green)
             .addFields({ name: "Handled by", value: `${staffMember.username} (${staffMember.id})` });
 

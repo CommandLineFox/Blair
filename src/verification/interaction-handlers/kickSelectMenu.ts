@@ -75,15 +75,24 @@ export class KickMenuHandler extends InteractionHandler {
             return;
         }
 
-        const permissions = channel.permissionsFor(staffMember);
-        if (!permissions?.has(PermissionFlagsBits.ManageRoles)) {
+        //Check if the bot can add the permission override for the channel
+        const permissionsRoles = channel.permissionsFor(staffMember);
+        if (!permissionsRoles?.has(PermissionFlagsBits.ManageRoles)) {
             await interaction.reply({ content: "The bot doesn't have the manage roles permission in that channel", ephemeral: true });
+            return;
+        }
+
+        //Check if the bot can delete the staff member's message in the channel
+        const permissionsDelete = channel.permissionsFor(staffMember);
+        if (!permissionsDelete?.has(PermissionFlagsBits.ManageMessages)) {
+            await interaction.reply({ content: "The bot doesn't have the manage messages permission in that channel", ephemeral: true });
             return;
         }
 
         const choices = interaction.values;
         let reason: string | undefined = choices[0];
 
+        //Get a custom reason by allowing the staff member to write in the channel for 2 minutes
         if (reason === "Custom") {
             //Set permission override to allow staff member to send messages in the channel
             await channel.permissionOverwrites.create(staffMember, { SendMessages: true });
@@ -117,11 +126,14 @@ export class KickMenuHandler extends InteractionHandler {
             }
         }
 
+        //Send the reason to the user and ban them
         reason = reason ?? "Kicked during verification";
         await member.send(`You've been kicked from ${interaction.guild.name} during verification for the following reason: ${reason}`);
         await member.kick(reason);
 
+        //Update the embed to indicate banning the user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
+            .setTitle(`${oldEmbed.title} | Kicked`)
             .setColor(Colors.Red)
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 

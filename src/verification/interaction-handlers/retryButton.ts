@@ -67,6 +67,7 @@ export class RetryButtonHandler extends InteractionHandler {
             return;
         }
 
+        //No more retries
         if (pendingApplication.attempts === 3) {
             await interaction.editReply("You tried so hard, and got so far. But in the end, it doesn't even matter");
             await postVerificationMessage(guild, interaction, user, pendingApplication, true);
@@ -95,6 +96,7 @@ export class RetryButtonHandler extends InteractionHandler {
         const verificationAnswers: string[] = [];
         const dmChannel = verificationMessage.channel as DMChannel;
 
+        //Post questions to the user and gather answers
         for (const verificationQuestion of verificationQuestions) {
             let questionMessage: Message | null = null;
             try {
@@ -144,7 +146,6 @@ export class RetryButtonHandler extends InteractionHandler {
         await database.setPendingApplicationQuestions(interaction.user.id, guildId, verificationQuestions);
         await database.setPendingApplicationAnswers(interaction.user.id, guildId, answers);
         await database.increasePendingApplicationAttempts(interaction.user.id, guild.id);
-
 
         const row = getDmVerificationComponent(guild.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });

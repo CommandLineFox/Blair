@@ -1,6 +1,6 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
+import { Colors, EmbedBuilder, type ButtonInteraction } from 'discord.js';
 import { Buttons } from 'types/component';
 import { isStaff } from 'utils/utils';
 
@@ -41,11 +41,11 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        const permissions = staffMember.permissions;
+        /*const permissions = staffMember.permissions;
         if (!permissions?.has(PermissionFlagsBits.ManageRoles)) {
             await interaction.reply({ content: "The bot doesn't have the manage roles permission" });
             return;
-        }
+        }*/
 
         const staffCheck = await isStaff(staffMember);
         if (!staffCheck) {
@@ -68,6 +68,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
+        //If the pending application requires approval from approvers, first check for those
         if (pendingApplication.requiredApprovers.length > 0) {
             if (!pendingApplication.requiredApprovers.includes(staffMember.id)) {
                 await interaction.reply({ content: "Still waiting approvals from required approvers", ephemeral: true });
@@ -97,6 +98,7 @@ export class ApproveButtonHandler extends InteractionHandler {
                 newEmbed.addFields(field);
             }
 
+            //Update the embed with the remaining required approvals if there are any
             const filteredApprovers = pendingApplication.requiredApprovers.filter((approver) => approver !== staffMember.id);
             if (filteredApprovers.length > 0) {
                 const updatedApprovers = filteredApprovers.map((approver) => `<@${approver}>`).join(", ").trim();
@@ -108,6 +110,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
+        //Adding member role and removing unverified role if it exists
         const unverifiedRole = await database.getUnverifiedRole(interaction.guild);
         const memberRole = await database.getMemberRole(interaction.guild);
 
@@ -134,12 +137,15 @@ export class ApproveButtonHandler extends InteractionHandler {
 
         await member.roles.add(memberRole);
 
+        //Updating the message to indicate approval of user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
+            .setTitle(`${oldEmbed.title} | Approved`)
             .setColor(Colors.Green)
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
 
+        //Sending the welcome message
         const welcomeToggle = await database.getWelcomeToggle(interaction.guild);
         if (welcomeToggle) {
             const welcomeChannel = await database.getWelcomeChannel(interaction.guild);

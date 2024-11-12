@@ -89,6 +89,7 @@ export class VerifyButtonHandler extends InteractionHandler {
         const verificationAnswers: string[] = [];
         const dmChannel = await interaction.client.channels.fetch(verificationMessage.channel.id) as DMChannel;
 
+        //Post questions and gather answers
         for (const verificationQuestion of verificationQuestions) {
             let questionMessage: Message | null = null;
             try {
