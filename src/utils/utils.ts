@@ -1,6 +1,6 @@
 import Database from "database/database";
 import { PendingApplication } from "database/models/pendingApllication";
-import { ButtonInteraction, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, User } from "discord.js";
+import { AttachmentBuilder, ButtonInteraction, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User } from "discord.js";
 import { getHandlingComponent } from "types/component";
 
 /**
@@ -115,4 +115,61 @@ export async function isStaff(member: GuildMember): Promise<boolean> {
     }
 
     return false;
+}
+
+/**
+ * Get a choice for the reason from the dropdown menu
+ * @param interaction The dropdown menu
+ * @param channel The channel this is happening in
+ * @param staffMember The staff member handling it
+ * @returns Reason for moderation
+ */
+export async function getModerationReason(interaction: StringSelectMenuInteraction, channel: TextChannel, staffMember: GuildMember) {
+    const choices = interaction.values;
+    let reason: string | undefined = choices[0];
+
+    //Get a custom reason by allowing the staff member to write in the channel for 2 minutes
+    if (reason === "Custom") {
+        //Set permission override to allow staff member to send messages in the channel
+        await channel.permissionOverwrites.create(staffMember, { SendMessages: true });
+
+        try {
+            const reply = await interaction.reply({ content: "Please provide the custom kick reason within 2 minutes:", ephemeral: true });
+
+            const collectedMessages = await channel.awaitMessages({ filter: (msg) => msg.author.id === staffMember.id, max: 1, time: 120000, errors: ['time'] });
+
+            const customMessage = collectedMessages.first();
+            if (!customMessage) {
+                await reply.edit({ content: "No reason was provided in time." });
+                return;
+            }
+
+            reason = customMessage.content.trim();
+
+            if (customMessage.deletable) {
+                await customMessage.delete();
+            }
+        } catch {
+            await interaction.followUp({ content: "Time expired for providing a custom reason.", ephemeral: true });
+            return;
+        } finally {
+            await channel.permissionOverwrites.delete(staffMember);
+        }
+    }
+
+    return reason ?? "Banned during verification";
+}
+
+/**
+ * Log the messages from a questioning channel to the questioning log
+ * @param questioningChannel The questioning channel that needs to be logged
+ * @param questioningLogChannel The questioning log channel
+ * @param member The member that was questioned
+ */
+export async function logQuestioning(questioningChannel: TextChannel, questioningLogChannel: TextChannel, member: GuildMember) {
+    const messages = await (questioningChannel as TextChannel).messages.fetch();
+    const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
+    const logBuffer = Buffer.from(logs, 'utf-8');
+
+    await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
 }

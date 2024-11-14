@@ -27,6 +27,10 @@ export class newOptOut extends Listener {
 
             const oldEmbed = message.embeds[0];
             if (oldEmbed) {
+                if (oldEmbed.title?.includes("Kicked") || oldEmbed.title?.includes("Banned")) {
+                    return;
+                }
+
                 const newEmbed = new EmbedBuilder(oldEmbed.data)
                     .setTitle(`${oldEmbed.title} | Left`)
                     .setColor(Colors.DarkOrange);

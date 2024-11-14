@@ -74,9 +74,15 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const permissions = staffMember.permissions;
-        if (!permissions?.has(PermissionFlagsBits.KickMembers)) {
-            await interaction.reply({ content: "The bot doesn't have the kick members permission in that channel" });
+        const userPermissions = staffMember.permissions;
+        if (!userPermissions?.has(PermissionFlagsBits.KickMembers)) {
+            await interaction.reply({ content: "You don't have the kick members permission.", ephemeral: true });
+            return;
+        }
+
+        const botPermissions = interaction.guild.members.me?.permissions;
+        if (!botPermissions?.has(PermissionFlagsBits.KickMembers)) {
+            await interaction.reply({ content: "The bot doesn't have the kick members permission in that channel", ephemeral: true });
             return;
         }
 
@@ -85,7 +91,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const row = await getKickReasonComponent(interaction.guild, messageId);
+        const row = await getKickReasonComponent(interaction.guild, channel.id, messageId);
         await interaction.reply({ content: "Please pick a reason or enter a custom one", components: [row], ephemeral: true });
     }
 }

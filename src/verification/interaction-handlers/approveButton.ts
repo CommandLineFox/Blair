@@ -1,6 +1,6 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from 'database/database';
-import { Colors, EmbedBuilder, type ButtonInteraction } from 'discord.js';
+import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
 import { Buttons } from 'types/component';
 import { isStaff } from 'utils/utils';
 
@@ -41,11 +41,11 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        /*const permissions = staffMember.permissions;
-        if (!permissions?.has(PermissionFlagsBits.ManageRoles)) {
+        const botPermissions = interaction.guild.members.me?.permissions;;
+        if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
             await interaction.reply({ content: "The bot doesn't have the manage roles permission" });
             return;
-        }*/
+        }
 
         const staffCheck = await isStaff(staffMember);
         if (!staffCheck) {

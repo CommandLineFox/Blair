@@ -1,7 +1,9 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from 'database/database';
-import { AttachmentBuilder, Colors, CommandInteraction, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import { ActionRowBuilder, CommandInteraction, Message, PermissionFlagsBits, StringSelectMenuBuilder, TextChannel, User } from 'discord.js';
+import { getBanReasonComponent, getKickReasonComponent } from 'types/component';
 import { CustomResponse } from 'types/customResponse';
+import { logQuestioning } from 'utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -39,8 +41,7 @@ export class DenyCommand extends Command {
             return;
         }
 
-        const result = await this.denyUser(interaction.guild!, interaction.channel!.id, interaction.user, action!);
-        await interaction.reply({ content: result.message });
+        await this.denyUser(interaction, interaction.user, action!);
     }
 
     public override async messageRun(message: Message, args: Args) {
@@ -56,11 +57,20 @@ export class DenyCommand extends Command {
             return;
         }
 
-        const result = await this.denyUser(message.guild!, message.channel.id, message.author, action);
-        await message.reply({ content: result.message });
+        await this.denyUser(message, message.author, action);
     }
 
-    private async denyUser(guild: Guild, channelId: string, staffMember: User, action: string): Promise<CustomResponse> {
+    /**
+     * Deny a user from the server
+     * @param interactionOrMessage Interaction or message depending on if it was a slash command or message command 
+     * @param staffMember The staff member handling the application
+     * @param action Kick or ban
+     * @returns Whether it was successful or not and a message
+     */
+    private async denyUser(interactionOrMessage: CommandInteraction | Message, staffMember: User, action: string): Promise<CustomResponse> {
+        const guild = interactionOrMessage.guild!;
+        const channelId = interactionOrMessage.channelId;
+
         const database = Database.getInstance();
 
         //Getting values from the database
@@ -93,15 +103,13 @@ export class DenyCommand extends Command {
             return { success: false, message: "Couldn't find the questioning log channel" };
         }
 
-
         //Checking if the bot can send messages and attach files in the questioning log channel
-        const permissionsLogging = questioningLogChannel.permissionsFor(staffMember);
-        if (!permissionsLogging?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
+        const botPermissions = guild.members.me?.permissions;
+        if (!botPermissions?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
             return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel" };
         }
 
-        const permissionsDeleting = questioningChannel.permissionsFor(staffMember);
-        if (!permissionsDeleting?.has(PermissionFlagsBits.ManageChannels)) {
+        if (!botPermissions?.has(PermissionFlagsBits.ManageChannels)) {
             return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
         }
 
@@ -126,9 +134,10 @@ export class DenyCommand extends Command {
                 return { success: false, message: "The bot cannot moderate this user as they have the same or higher role than the bot" };
             }
 
-            await member.kick("Kicked during verification");
-        } else {
 
+            const row = await getKickReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
+            await this.sendMessage(interactionOrMessage, row, "Please pick a reason or enter a custom one");
+        } else {
             const permissions = questioningChannel.permissionsFor(staffMember);
             if (!permissions?.has(PermissionFlagsBits.BanMembers)) {
                 return { success: false, message: "The bot doesn't have the ban members permission in that channel" };
@@ -138,27 +147,27 @@ export class DenyCommand extends Command {
                 return { success: false, message: "The bot cannot moderate this user as they have the same or higher role than the bot" };
             }
 
-            await member.ban({ reason: "Banned during verification" });
+            const row = await getBanReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
+            await this.sendMessage(interactionOrMessage, row, "Please pick a reason or enter a custom one");
         }
 
-        //Updating the embed to indicate denying a user
-        const newEmbed = new EmbedBuilder(oldEmbed.data)
-            .setTitle(`${oldEmbed.title} | ${action === "kick" ? "Kicked" : "Banned"}`)
-            .setColor(Colors.Red)
-            .addFields({ name: "Handled by", value: `${staffMember.username} (${staffMember.id})` });
-
-
-        await verificationMessage.edit({ embeds: [newEmbed], components: [] });
-
         //Putting the contents of the questioning channel into a file and logging it
-        const messages = await (questioningChannel as TextChannel).messages.fetch();
-        const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
-        const logBuffer = Buffer.from(logs, 'utf-8');
+        await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
 
-        await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
+        return { success: true, message: "Please choose a reason to deny the user with" };
+    }
 
-        await questioningChannel.delete("Questioning complete");
-        await database.removePendingApplication(member.id, guild.id);
-        return { success: true, message: "Successfully approved the user" };
+    /**
+     * Send the reason choice dropdown
+     * @param interactionOrMessage Interaction or message depending on if it was a slash command or message command
+     * @param component The action row with the dropdown in it
+     * @param content The message content
+     */
+    private async sendMessage(interactionOrMessage: CommandInteraction | Message, component: ActionRowBuilder<StringSelectMenuBuilder>, content: string) {
+        if (interactionOrMessage instanceof CommandInteraction) {
+            await interactionOrMessage.reply({ content, components: [component], ephemeral: true });
+        } else {
+            await interactionOrMessage.reply({ content, components: [component] });
+        }
     }
 }

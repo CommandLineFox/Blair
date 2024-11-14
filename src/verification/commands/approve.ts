@@ -1,7 +1,8 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from 'database/database';
-import { AttachmentBuilder, Colors, CommandInteraction, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import { Colors, CommandInteraction, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
 import { CustomResponse } from 'types/customResponse';
+import { logQuestioning } from 'utils/utils';
 
 export class ApproveCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -63,14 +64,13 @@ export class ApproveCommand extends Command {
         }
 
         //Checking if the bot can send messages and attach files in the questioning log channel
-        const permissionsLogging = questioningLogChannel.permissionsFor(staffMember);
-        if (!permissionsLogging?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
+        const botPermissions = guild.members.me?.permissions;
+        if (!botPermissions?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
             return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel" };
         }
 
         //Checking if the bot can delete the questioning channel
-        const permissionsDeleting = questioningChannel.permissionsFor(staffMember);
-        if (!permissionsDeleting?.has(PermissionFlagsBits.ManageChannels)) {
+        if (!botPermissions?.has(PermissionFlagsBits.ManageChannels)) {
             return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
         }
 
@@ -147,13 +147,9 @@ export class ApproveCommand extends Command {
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
 
         //Putting the contents of the questioning channel into a file and logging it
-        const messages = await (questioningChannel as TextChannel).messages.fetch();
-        const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
-        const logBuffer = Buffer.from(logs, 'utf-8');
-
-        await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
-
+        await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
         await questioningChannel.delete("Questioning complete");
+
         await database.removePendingApplication(member.id, guild.id);
 
         //Posting the welcome message

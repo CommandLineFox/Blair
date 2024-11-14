@@ -88,14 +88,15 @@ export function getHandlingComponent(): ActionRowBuilder<ButtonBuilder> {
 /**
  * Returns the action row component for ban reasons
  * @param guild The guild that verification is happening in
- * @param messageId The message ID of the verification log post
+ * @param verificationLogChannelId The verification log channel ID
+ * @param verificationMessageId The message ID of the verification log post
  * @returns ActionRow with the ban reason menu
  */
-export async function getBanReasonComponent(guild: Guild, messageId: string): Promise<ActionRowBuilder<StringSelectMenuBuilder>> {
+export async function getBanReasonComponent(guild: Guild, verificationLogChannelId: string, verificationMessageId: string): Promise<ActionRowBuilder<StringSelectMenuBuilder>> {
     const database = Database.getInstance()
     const banReasons = await database.getKickReasons(guild);
     let banMenu = banReasonMenu;
-    banMenu.setCustomId(Menus.BAN_MENU + "_" + messageId);
+    banMenu.setCustomId(`${Menus.BAN_MENU}_${verificationLogChannelId}_${verificationMessageId}`);
 
     if (banReasons) {
         for (const reason of banReasons) {
@@ -110,15 +111,16 @@ export async function getBanReasonComponent(guild: Guild, messageId: string): Pr
 /**
  * Returns the action row component for kick reasons
  * @param guild The guild that verification is happening in
- * @param messageId The message ID of the verification log post
+ * @param verificationLogChannelId The verification log channel ID
+ * @param verificationMessageId The message ID of the verification log post
  * @returns ActionRow with the kick reason menu
  */
-export async function getKickReasonComponent(guild: Guild, messageId: string): Promise<ActionRowBuilder<StringSelectMenuBuilder>> {
+export async function getKickReasonComponent(guild: Guild, verificationLogChannelId: string, verificationMessageId: string): Promise<ActionRowBuilder<StringSelectMenuBuilder>> {
     const database = Database.getInstance()
     const kickReasons = await database.getKickReasons(guild);
 
     let kickMenu = kickReasonMenu;
-    kickMenu.setCustomId(Menus.KICK_MENU + "_" + messageId);
+    kickMenu.setCustomId(`${Menus.KICK_MENU}_${verificationLogChannelId}_${verificationMessageId}`);
 
     if (kickReasons) {
         for (const reason of kickReasons) {

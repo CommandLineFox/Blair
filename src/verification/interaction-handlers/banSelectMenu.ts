@@ -2,6 +2,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import Database from 'database/database';
 import { Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction } from 'discord.js';
 import { Menus } from 'types/component';
+import { getModerationReason, isStaff } from 'utils/utils';
 
 export class BanMenunHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -16,12 +17,23 @@ export class BanMenunHandler extends InteractionHandler {
             return this.none();
         }
 
-        const messageId = interaction.customId.split("_")[1];
+        const split = interaction.customId.split("_");
+        const channelId = split[1];
+        if (!channelId) {
+            return this.none();
+        }
+
+        const verificationLogChannel = await interaction.guild?.channels.fetch(channelId);
+        if (!verificationLogChannel) {
+            return this.none();
+        }
+
+        const messageId = split[2];
         if (!messageId) {
             return this.none();
         }
 
-        const verificationMessage = await interaction.channel?.messages.fetch(messageId);
+        const verificationMessage = await (verificationLogChannel as TextChannel).messages.fetch(messageId);
         if (!verificationMessage) {
             return this.none();
         }
@@ -48,6 +60,13 @@ export class BanMenunHandler extends InteractionHandler {
             await interaction.reply({ content: "Couldn't find the member in the server", ephemeral: true });
             return;
         }
+
+        const staffCheck = await isStaff(staffMember);
+        if (!staffCheck) {
+            await interaction.reply({ content: "Only staff members can interact with this", ephemeral: true });
+            return;
+        }
+
 
         const channel = await interaction.client.channels.fetch(interaction.channelId) as TextChannel;
         if (!channel) {
@@ -77,58 +96,20 @@ export class BanMenunHandler extends InteractionHandler {
         }
 
         //Check if the bot can add the permission override for the channel
-        const permissionsRoles = channel.permissionsFor(staffMember);
-        if (!permissionsRoles?.has(PermissionFlagsBits.ManageRoles)) {
+        const botPermissions = channel.permissionsFor(interaction.client.user);
+        if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
             await interaction.reply({ content: "The bot doesn't have the manage roles permission in that channel", ephemeral: true });
             return;
         }
 
         //Check if the bot can delete the staff member's message in the channel
-        const permissionsDelete = channel.permissionsFor(staffMember);
-        if (!permissionsDelete?.has(PermissionFlagsBits.ManageMessages)) {
+        if (!botPermissions?.has(PermissionFlagsBits.ManageMessages)) {
             await interaction.reply({ content: "The bot doesn't have the manage messages permission in that channel", ephemeral: true });
             return;
         }
 
-        const choices = interaction.values;
-        let reason: string | undefined = choices[0];
-
-        //Get a custom reason by allowing the staff member to write in the channel for 2 minutes
-        if (reason === "Custom") {
-            //Set permission override to allow staff member to send messages in the channel
-            await channel.permissionOverwrites.create(staffMember, { SendMessages: true });
-
-            try {
-                const reply = await interaction.reply({ content: "Please provide the custom kick reason within 2 minutes:", ephemeral: true });
-
-                const collectedMessages = await channel.awaitMessages({
-                    filter: (msg) => msg.author.id === staffMember.id,
-                    max: 1,
-                    time: 120000,
-                    errors: ['time']
-                });
-
-                const customMessage = collectedMessages.first();
-                if (!customMessage) {
-                    await reply.edit({ content: "No reason was provided in time." });
-                    return;
-                }
-
-                reason = customMessage.content.trim();
-
-                if (customMessage.deletable) {
-                    await customMessage.delete();
-                }
-            } catch {
-                await interaction.followUp({ content: "Time expired for providing a custom reason.", ephemeral: true });
-                return;
-            } finally {
-                await channel.permissionOverwrites.delete(staffMember);
-            }
-        }
-
-        //Send the reason to the user and ban them
-        reason = reason ?? "Banned during verification";
+        //Get the reason for moderating and send it to the user
+        const reason = await getModerationReason(interaction, channel, staffMember);
         await member.send(`You've been banned from ${interaction.guild.name} during verification for the following reason: ${reason}`);
         await member.ban({ reason: reason });
 
@@ -139,7 +120,18 @@ export class BanMenunHandler extends InteractionHandler {
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.followUp({ content: "Banned", ephemeral: true });
+
+        //If there's ongoing questioning delete the channel
+        const questioningChannelId = pendingApplication.questioningChannelId;
+        if (questioningChannelId) {
+            const questioningChannel = await interaction.guild.channels.fetch(questioningChannelId);
+            if (questioningChannel) {
+                questioningChannel.delete("Questioning completed");
+            }
+        }
+
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
         await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }
+
