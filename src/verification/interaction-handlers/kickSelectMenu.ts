@@ -117,7 +117,10 @@ export class KickMenuHandler extends InteractionHandler {
             .setColor(Colors.Red)
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
-        await interaction.followUp({ content: "Kicked", ephemeral: true });
+        if (interaction.replied) {
+            await interaction.editReply({ content: "Kicked" });
+        }
+        await interaction.reply({ content: "Kicked", ephemeral: true });
 
         //If there's ongoing questioning delete the channel
         const questioningChannelId = pendingApplication.questioningChannelId;

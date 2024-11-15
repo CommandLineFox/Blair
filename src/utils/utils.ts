@@ -60,19 +60,25 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
     const answerAmount = pendingApplication.answers.length;
 
     //Add all answers including retries to the embed
-    let j = 0;
-    for (let i = 0; i < answerAmount; i++) {
-        const question = pendingApplication.questions[j];
-        const answer = pendingApplication.answers[i];
+    let currentQuestion = 0;
+    let attempt = 1;
+    let answers = "";
+
+    for (let currentAnswer = 0; currentAnswer < answerAmount; currentAnswer++) {
+        const question = pendingApplication.questions[currentQuestion];
+        const answer = pendingApplication.answers[currentAnswer];
+
+        answers += `**Q${currentQuestion + 1}**: ${answer}\n`;
         if (!question || !answer) {
             continue;
         }
 
-        if (++j === questionAmount) {
-            j = 0;
+        if (++currentQuestion === questionAmount) {
+            verificationEmbed.addFields([{ name: `Attempt ${attempt}`, value: answers.trim() }]);
+            currentQuestion = 0;
+            attempt++;
+            answers = "";
         }
-
-        verificationEmbed.addFields([{ name: question, value: answer }]);
     }
 
     //Add the required approvals field if there are any
@@ -168,7 +174,12 @@ export async function getModerationReason(interaction: StringSelectMenuInteracti
  */
 export async function logQuestioning(questioningChannel: TextChannel, questioningLogChannel: TextChannel, member: GuildMember) {
     const messages = await (questioningChannel as TextChannel).messages.fetch();
-    const logs = messages.reverse().reduce((log, msg) => log + `${msg.author.tag}: ${msg.content}\n`, '');
+
+    const logs = messages.reverse().reduce((log, msg) => {
+        const timestamp = new Date(msg.createdTimestamp).toLocaleString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', });
+        return log + `[${timestamp}] ${msg.author.tag}: ${msg.content}\n`;
+    }, '');
+
     const logBuffer = Buffer.from(logs, 'utf-8');
 
     await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });

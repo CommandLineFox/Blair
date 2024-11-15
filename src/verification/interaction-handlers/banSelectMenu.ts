@@ -119,7 +119,10 @@ export class BanMenunHandler extends InteractionHandler {
             .setColor(Colors.Red)
             .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
 
-        await interaction.followUp({ content: "Banned", ephemeral: true });
+        if (interaction.replied) {
+            await interaction.editReply({ content: "Banned" });
+        }
+        await interaction.reply({ content: "Banned", ephemeral: true });
 
         //If there's ongoing questioning delete the channel
         const questioningChannelId = pendingApplication.questioningChannelId;
@@ -134,4 +137,3 @@ export class BanMenunHandler extends InteractionHandler {
         await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }
-
