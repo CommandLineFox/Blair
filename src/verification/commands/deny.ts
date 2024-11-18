@@ -1,9 +1,9 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { ActionRowBuilder, CommandInteraction, Message, PermissionFlagsBits, StringSelectMenuBuilder, TextChannel, User } from 'discord.js';
-import { getBanReasonComponent, getKickReasonComponent } from 'types/component';
-import { CustomResponse } from 'types/customResponse';
-import { logQuestioning } from 'utils/utils';
+import { getBanReasonComponent, getKickReasonComponent } from '../../types/component';
+import { CustomResponse } from '../../types/customResponse';
+import { logQuestioning } from '../../utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {

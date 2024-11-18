@@ -1,6 +1,6 @@
 import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import Database from "database/database";
+import Database from "../../database/database";
 import { PermissionFlagsBits, ChannelType, Message, TextChannel } from "discord.js";
 
 export class WelcomeCommand extends Subcommand {

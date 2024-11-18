@@ -28,21 +28,7 @@
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
         "esModuleInterop": true,
-        "target": "es2021",
-        "paths": {
-            "database/*": [
-                "./src/database/*"
-            ],
-            "types/*": [
-                "./src/types/*"
-            ],
-            "models/*": [
-                "./src/database/models/*"
-            ],
-            "utils/*": [
-                "./src/utils/*"
-            ]
-        }
+        "target": "es2021"
     },
     "include": [
         "src/**/*"

@@ -1,8 +1,8 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { ChannelType, Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
-import { Buttons } from 'types/component';
-import { isStaff } from 'utils/utils';
+import { Buttons } from '../../types/component';
+import { isStaff } from '../../utils/utils';
 
 export class KickButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {

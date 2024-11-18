@@ -1,7 +1,7 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { CommandInteraction, Guild, Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
-import { trimString } from "utils/utils";
+import { trimString } from "../../utils/utils";
 
 export class ListCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {

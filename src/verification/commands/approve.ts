@@ -1,8 +1,8 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { Colors, CommandInteraction, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
-import { CustomResponse } from 'types/customResponse';
-import { logQuestioning } from 'utils/utils';
+import { CustomResponse } from '../../types/customResponse';
+import { logQuestioning } from '../../utils/utils';
 
 export class ApproveCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {

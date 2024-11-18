@@ -1,8 +1,8 @@
 import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { ChannelType, Message, PermissionFlagsBits, TextChannel } from 'discord.js';
-import { getGuideComponent } from 'types/component';
+import { getGuideComponent } from '../../types/component';
 
 export class GuideCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {

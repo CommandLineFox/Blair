@@ -1,12 +1,13 @@
 import { GatewayIntentBits, Partials } from "discord.js";
 import { existsSync, readFileSync } from "fs";
+import * as dotenv from "dotenv";
 
 export type ClientConfig = {
     token: string;
     owners: string[];
     serverProtectorId: string;
     serverProtectorMessage: string;
-}
+};
 
 export type ClientOptions = {
     disableMentions: "all" | "everyone" | "none";
@@ -18,13 +19,12 @@ export type ClientOptions = {
 export type DatabaseConfig = {
     name: string;
     url: string;
-}
+};
 
 type FileConfig = {
-    bot: ClientConfig;
+    bot: Omit<ClientConfig, "token">; // Exclude token as it's loaded from .env
     options: ClientOptions;
-    database: DatabaseConfig;
-}
+};
 
 export class Config {
     private static instance: Config | null = null;
@@ -41,26 +41,23 @@ export class Config {
 
     /**
      * Create or return an instance of the config
-     * @param file The file path where the config.json is for reading a new config
      * @returns New or existing Config object
      */
     public static getInstance(): Config {
-        const file = "config.json";
-
         if (!this.instance) {
-            if (!file) {
-                throw new Error("You must provide the file path for the config.json");
-            }
+            const file = "config.json";
+
+            dotenv.config();
 
             if (!existsSync(file)) {
-                throw new Error("Couldn't find the config file");
+                throw new Error("Couldn't find the config.json file");
             }
 
-            const parsedConfig: FileConfig = JSON.parse(readFileSync(file).toString())
+            const parsedConfig: FileConfig = JSON.parse(readFileSync(file, "utf-8"));
 
-            const clientConfig: ClientConfig = parsedConfig.bot;
+            const clientConfig: ClientConfig = { token: process.env.TOKEN ?? "", ...parsedConfig.bot };
             const clientOptions: ClientOptions = parsedConfig.options;
-            const databaseConfig: DatabaseConfig = parsedConfig.database;
+            const databaseConfig: DatabaseConfig = { name: process.env.DB_NAME ?? "", url: process.env.DB_URL ?? "", };
 
             this.instance = new Config(clientConfig, clientOptions, databaseConfig);
         }

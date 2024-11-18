@@ -1,8 +1,8 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction } from 'discord.js';
-import { Menus } from 'types/component';
-import { getModerationReason, isStaff } from 'utils/utils';
+import { Menus } from '../../types/component';
+import { getModerationReason, isStaff } from '../../utils/utils';
 
 export class BanMenunHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {

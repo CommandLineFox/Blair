@@ -1,6 +1,6 @@
 import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import Database from "database/database";
+import Database from "../../database/database";
 import { Message, PermissionFlagsBits } from "discord.js";
 
 export class ReasonCommand extends Subcommand {

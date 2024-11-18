@@ -1,8 +1,8 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
-import Database from 'database/database';
+import Database from '../../database/database';
 import { type ButtonInteraction, type DMChannel } from 'discord.js';
-import { Buttons } from 'types/component';
-import { postVerificationMessage } from 'utils/utils';
+import { Buttons } from '../../types/component';
+import { postVerificationMessage } from '../../utils/utils';
 
 export class ConfirmButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {

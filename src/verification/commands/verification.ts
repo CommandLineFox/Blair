@@ -1,6 +1,6 @@
 import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
-import Database from "database/database";
+import Database from "../../database/database";
 import { ChannelType, Message, PermissionFlagsBits, TextChannel } from "discord.js";
 
 export class VerificationCommand extends Subcommand {

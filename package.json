@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "shx rm -rf ./dist/ && tsc --project tsconfig.json",
-    "start": "npm run build && ts-node -r tsconfig-paths/register dist/index.js"
+    "start": "npm run build && node dist/index.js",
+    "dev": "npm run build && cross-env DOTENV_CONFIG_PATH=./.env.dev ts-node -r dotenv/config dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -21,10 +22,11 @@
     "@sapphire/framework": "^5.3.1",
     "@sapphire/plugin-subcommands": "^7.0.1",
     "@sapphire/utilities": "^3.18.1",
+    "cross-env": "^7.0.3",
     "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
     "mongoose": "^8.8.1",
     "shx": "^0.3.4",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0"
+    "ts-node": "^10.9.2"
   }
 }
