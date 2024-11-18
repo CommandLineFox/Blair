@@ -22,5 +22,7 @@ RUN npm install --production --save-dev cross-env
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
 
+WORKDIR /usr/src/app/dist
+
 # Run the app with cross-env to set environment variables
-CMD ["npx", "cross-env", "NODE_ENV=production", "node", "dist/index.js"]
+CMD ["npx", "cross-env", "NODE_ENV=production", "node", "index.js"]

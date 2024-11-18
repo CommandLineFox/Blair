@@ -45,7 +45,7 @@ export class Config {
      */
     public static getInstance(): Config {
         if (!this.instance) {
-            const file = "config.json";
+            const file = "../config.json";
 
             dotenv.config();
 

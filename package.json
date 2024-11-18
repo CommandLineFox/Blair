@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "shx rm -rf ./dist/ && tsc --project tsconfig.json",
-    "start": "npm run build && node dist/index.js",
+    "start": "npm run build && cross-env DOTENV_CONFIG_PATH=./.env.production ts-node -r dotenv/config dist/index.js",
     "dev": "npm run build && cross-env DOTENV_CONFIG_PATH=./.env.dev ts-node -r dotenv/config dist/index.js"
   },
   "repository": {
