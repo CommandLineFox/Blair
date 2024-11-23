@@ -23,11 +23,17 @@ export class ApproveCommand extends Command {
     }
 
     public override async chatInputRun(interaction: CommandInteraction) {
-        await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
+        const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
+        if (!result.success) {
+            await interaction.reply({ content: result.message, ephemeral: true });
+        }
     }
 
     public override async messageRun(message: Message) {
-        await this.approveUser(message.guild!, message.channel.id, message.author);
+        const result = await this.approveUser(message.guild!, message.channel.id, message.author);
+        if (!result.success) {
+            await message.reply({ content: result.message });
+        }
     }
 
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {

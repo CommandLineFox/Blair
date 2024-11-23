@@ -41,7 +41,10 @@ export class DenyCommand extends Command {
             return;
         }
 
-        await this.denyUser(interaction, interaction.user, action!);
+        const result = await this.denyUser(interaction, interaction.user, action!);
+        if (!result.success) {
+            await interaction.reply({ content: result.message, ephemeral: true });
+        }
     }
 
     public override async messageRun(message: Message, args: Args) {
@@ -57,7 +60,10 @@ export class DenyCommand extends Command {
             return;
         }
 
-        await this.denyUser(message, message.author, action);
+        const result = await this.denyUser(message, message.author, action);
+        if (!result.success) {
+            await message.reply({ content: result.message });
+        }
     }
 
     /**
@@ -127,20 +133,19 @@ export class DenyCommand extends Command {
         if (action === "kick") {
             const permissions = questioningChannel.permissionsFor(staffMember);
             if (!permissions?.has(PermissionFlagsBits.KickMembers)) {
-                return { success: false, message: "The bot doesn't have the kick members permission in that channel" };
+                return { success: false, message: "You don't have the kick members permission in that channel" };
             }
 
             if (!member.kickable) {
                 return { success: false, message: "The bot cannot moderate this user as they have the same or higher role than the bot" };
             }
 
-
             const row = await getKickReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
             await this.sendMessage(interactionOrMessage, row, "Please pick a reason or enter a custom one");
         } else {
             const permissions = questioningChannel.permissionsFor(staffMember);
             if (!permissions?.has(PermissionFlagsBits.BanMembers)) {
-                return { success: false, message: "The bot doesn't have the ban members permission in that channel" };
+                return { success: false, message: "You don't have the ban members permission in that channel" };
             }
 
             if (!member.bannable) {

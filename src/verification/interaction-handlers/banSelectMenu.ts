@@ -110,6 +110,11 @@ export class BanMenunHandler extends InteractionHandler {
 
         //Get the reason for moderating and send it to the user
         const reason = await getModerationReason(interaction, channel, staffMember);
+        if (!reason) {
+            await interaction.reply({ content: "Couldn't find the reason", ephemeral: true });
+            return;
+        }
+
         await member.send(`You've been banned from ${interaction.guild.name} during verification for the following reason: ${reason}`);
         await member.ban({ reason: reason });
 
@@ -117,7 +122,7 @@ export class BanMenunHandler extends InteractionHandler {
         const newEmbed = new EmbedBuilder(oldEmbed.data)
             .setTitle(`${oldEmbed.title} | Banned`)
             .setColor(Colors.Red)
-            .addFields({ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` });
+            .addFields([{ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` }, { name: "Reason", value: reason }]);
 
         if (interaction.replied) {
             await interaction.editReply({ content: "Banned" });
