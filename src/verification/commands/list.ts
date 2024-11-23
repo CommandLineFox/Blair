@@ -82,23 +82,23 @@ export class ListCommand extends Command {
         const displayBanReasons = banReasons ? trimString(banReasons.reduce((accumulator, currentReason, index) => accumulator + `${index + 1}. ${currentReason}\n`, '').trim(), 1024) : 'Not set';
 
         const displayNames = [
-            'Guide channel',
-            'Guide message',
-            'Verification message',
-            'Verificaton ending message',
-            'Verification questions',
-            'Verification log channel',
-            'Verification approvers',
-            'Questioning category',
-            'Questioning log channel',
-            'Welcome channel',
-            'Welcome message',
-            'Welcome toggle',
+            'Guide channel (Where the message with the verify button will be posted)',
+            'Guide message (the message with the verify button)',
+            'Verification starting message (the message to post in a DM before verification',
+            'Verificaton ending message (the message to post at the end of a DM verification with confirm and deny buttons)',
+            'Verification questions (the list of questions)',
+            'Verification log channel (the channel to put successful DM verifications in)',
+            'Verification approvers (the special approvers list for serverprotector integration)',
+            'Questioning category (the category to create channels for questioning in)',
+            'Questioning log channel (the channel to log questioning)',
+            'Welcome channel (the channel to welcome the user in after approval)',
+            'Welcome message (the message to greet the user with, [member] replaces user mention)',
+            'Welcome toggle (toggle whether the welcome message is posted)',
             'Member role',
             'Unverified role',
             'Staff roles',
-            'Kick reasons',
-            'Ban reasons'
+            'Kick reasons (list of reasons to choose from for kicking)',
+            'Ban reasons (list of reasons to choose from for banning)'
         ];
         const displayValues = [
             displayGuideChannel,

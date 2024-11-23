@@ -46,7 +46,7 @@ export class RetryButtonHandler extends InteractionHandler {
         await message.edit({ content: interaction.message.content, components: [] });
 
         const guild = await interaction.client.guilds.fetch(guildId);
-        const user = interaction.user;
+        const user = await interaction.user.fetch();
         const database = Database.getInstance();
 
         const verificationMessageText = await database.getVerificationMessage(guild);
@@ -143,11 +143,27 @@ export class RetryButtonHandler extends InteractionHandler {
             answers.push(answer);
         }
 
-        await database.setPendingApplicationQuestions(interaction.user.id, guildId, verificationQuestions);
-        await database.setPendingApplicationAnswers(interaction.user.id, guildId, answers);
-        await database.increasePendingApplicationAttempts(interaction.user.id, guild.id);
+        const questionResult = await database.setPendingApplicationQuestions(user.id, guild.id, verificationQuestions);
+        if (!questionResult.success) {
+            await interaction.editReply({ content: "There was an error when saving the questions." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
 
-        const row = getDmVerificationComponent(guild.id);
+        const answerResult = await database.setPendingApplicationAnswers(user.id, guild.id, answers);
+        if (!answerResult.success) {
+            await interaction.editReply({ content: "There was an error when saving the answers." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+
+        const increaseAttemptsResult = await database.increasePendingApplicationAttempts(user.id, guild.id);
+        if (!increaseAttemptsResult.success) {
+            await interaction.editReply({ content: "There was an error when increasing a counter." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+        const row = getDmVerificationComponent(guild.id, user.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
     }
 }

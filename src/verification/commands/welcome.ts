@@ -162,6 +162,12 @@ export class WelcomeCommand extends Subcommand {
             return;
         }
 
+        const permissions = (channel as TextChannel).permissionsFor(interaction.client.user);
+        if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
+            await interaction.editReply({ content: "The bot doesn't have the permission to see the channel" });
+            return;
+        }
+
         let welcomeMessage = null;
         (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
@@ -199,6 +205,12 @@ export class WelcomeCommand extends Subcommand {
         const channel = message.channel;
         if (!channel) {
             await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        const permissions = (channel as TextChannel).permissionsFor(message.client.user);
+        if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
+            await reply.edit({ content: "The bot doesn't have the permission to see the channel" });
             return;
         }
 

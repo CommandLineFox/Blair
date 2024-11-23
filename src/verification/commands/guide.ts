@@ -46,7 +46,7 @@ export class GuideCommand extends Subcommand {
                         .addSubcommand((command) =>
                             command
                                 .setName("set")
-                                .setDescription("Set the channel that guide messages will be sent in")
+                                .setDescription("Set the channel that the message with the Verify button will be sent in")
                                 .addChannelOption((option) =>
                                     option
                                         .setName("channel")
@@ -57,7 +57,7 @@ export class GuideCommand extends Subcommand {
                         .addSubcommand((command) =>
                             command
                                 .setName("remove")
-                                .setDescription("Remove the channel that guide messages will be sent in")
+                                .setDescription("Remove the channel that the message with the Verify button will be sent in")
                         )
                 )
                 .addSubcommandGroup((group) =>
@@ -67,12 +67,12 @@ export class GuideCommand extends Subcommand {
                         .addSubcommand((command) =>
                             command
                                 .setName("set")
-                                .setDescription("Set the message that will be sent in the guide channel")
+                                .setDescription("Set the message that will be sent with the verify button")
                         )
                         .addSubcommand((command) =>
                             command
                                 .setName("remove")
-                                .setDescription("Remove the message that will be sent in the guide channel")
+                                .setDescription("Remove the message that will be sent with the verify button")
                         )
                         .addSubcommand((command) =>
                             command
@@ -97,7 +97,6 @@ export class GuideCommand extends Subcommand {
         const response = await Database.getInstance().setGuideChannel(interaction.guildId!, channel.id);
         await interaction.reply({ content: response.message, ephemeral: !response.success });
     }
-
 
     /**
      * Guide channel set message command logic
@@ -142,6 +141,12 @@ export class GuideCommand extends Subcommand {
             return;
         }
 
+        const permissions = (channel as TextChannel).permissionsFor(interaction.client.user);
+        if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
+            await interaction.editReply({ content: "The bot doesn't have the permission to see the channel" });
+            return;
+        }
+
         let guideMessage = null;
         (channel as TextChannel).awaitMessages({ errors: ["time"], filter: (message) => message.author === interaction.user, max: 1, time: 120000 })
             .then(async (messages) => {
@@ -180,6 +185,12 @@ export class GuideCommand extends Subcommand {
         const channel = message.channel;
         if (!channel) {
             await reply.edit({ content: "There was an error finding the channel that the command was executed in" });
+            return;
+        }
+
+        const permissions = (channel as TextChannel).permissionsFor(message.client.user);
+        if (!permissions?.has(PermissionFlagsBits.ViewChannel)) {
+            await reply.edit({ content: "The bot doesn't have the permission to see the channel" });
             return;
         }
 

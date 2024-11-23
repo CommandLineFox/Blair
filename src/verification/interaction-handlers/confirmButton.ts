@@ -43,7 +43,7 @@ export class ConfirmButtonHandler extends InteractionHandler {
         const message = await (channel as DMChannel).messages.fetch(interaction.message.id);
         await message.edit({ content: interaction.message.content, components: [] });
 
-        const user = interaction.user;
+        const user = await interaction.user.fetch();
         const database = Database.getInstance();
 
         const pendingApplication = await database.getPendingApplication(user.id, guildId);

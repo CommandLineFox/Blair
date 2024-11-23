@@ -73,16 +73,16 @@ export function getGuideComponent(): ActionRowBuilder<ButtonBuilder> {
  * Returns the action row component for the end of the DM verification process
  * @returns ActionRow with the confirm and retry buttons
  */
-export function getDmVerificationComponent(guildId: string): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>({ components: [confirmButton.setCustomId(Buttons.CONFIRM_BUTTON + "_" + guildId), retryButton.setCustomId(Buttons.RETRY_BUTTON + "_" + guildId)] });
+export function getDmVerificationComponent(guildId: string, userId: string): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>({ components: [confirmButton.setCustomId(`${Buttons.CONFIRM_BUTTON}_${guildId}_${userId}`), retryButton.setCustomId(`${Buttons.RETRY_BUTTON}_${guildId}_${userId}`)] });
 }
 
 /**
  * Returns the action row component for the verification log embeds
  * @returns ActionRow with the approve, question, kick and ban buttons
  */
-export function getHandlingComponent(): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>({ components: [approveButton, questionButton, kickButton, banButton] });
+export function getHandlingComponent(userId: string): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>({ components: [approveButton.setCustomId(`${Buttons.APPROVE_BUTTON}_${userId}`), questionButton.setCustomId(`${Buttons.QUESTION_BUTTON}_${userId}`), kickButton.setCustomId(`${Buttons.KICK_BUTTON}_${userId}`), banButton.setCustomId(`${Buttons.BAN_BUTTON}_${userId}`)] });
 }
 
 /**

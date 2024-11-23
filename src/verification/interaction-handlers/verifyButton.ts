@@ -77,7 +77,14 @@ export class VerifyButtonHandler extends InteractionHandler {
         }
 
         const pendingApplication: PendingApplication = { userId: user.id, guildId: interaction.guild.id, requiredApprovers: requiredApprovers, questions: [], answers: [], attempts: 0 };
-        await database.addPendingApplication(pendingApplication);
+
+        const createApplicationResult = await database.addPendingApplication(pendingApplication);
+        if (!createApplicationResult.success) {
+            await interaction.editReply({ content: "There was an error creating the pending application." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+
         await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
 
         const verificationQuestions = await database.getVerificationQuestions(interaction.guild);
@@ -131,11 +138,28 @@ export class VerifyButtonHandler extends InteractionHandler {
                 });
         }
 
-        await database.setPendingApplicationQuestions(interaction.user.id, interaction.guild.id, verificationQuestions);
-        await database.setPendingApplicationAnswers(interaction.user.id, interaction.guild.id, verificationAnswers);
-        await database.increasePendingApplicationAttempts(interaction.user.id, interaction.guild.id);
+        const questionResult = await database.setPendingApplicationQuestions(user.id, interaction.guild.id, verificationQuestions);
+        if (!questionResult.success) {
+            await interaction.editReply({ content: "There was an error when saving the questions." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
 
-        const row = getDmVerificationComponent(interaction.guild.id);
+        const answerResult = await database.setPendingApplicationAnswers(user.id, interaction.guild.id, verificationAnswers);
+        if (!answerResult.success) {
+            await interaction.editReply({ content: "There was an error when saving the answers." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+
+        const increaseAttemptsResult = await database.increasePendingApplicationAttempts(user.id, interaction.guild.id);
+        if (!increaseAttemptsResult.success) {
+            await interaction.editReply({ content: "There was an error when increasing a counter." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+
+        const row = getDmVerificationComponent(interaction.guild.id, user.id);
         await dmChannel.send({ content: verificationEndingMessageText, components: [row] });
     }
 }

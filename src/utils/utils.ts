@@ -93,7 +93,7 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
     }
 
     //Post the message with the accept, question, kick and ban buttons
-    const row = getHandlingComponent();
+    const row = getHandlingComponent(user.id);
     const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
 
     //Add the message ID to the pending application to access it
