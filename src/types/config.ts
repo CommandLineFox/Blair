@@ -45,15 +45,18 @@ export class Config {
      */
     public static getInstance(): Config {
         if (!this.instance) {
-            const file = "config.json";
-
             dotenv.config();
 
-            if (!existsSync(file)) {
+            const configPath = process.env.CONFIG_PATH;
+            if (!configPath) {
+                throw new Error("Couldn't find the environment variable for config location");
+            }
+
+            if (!existsSync(configPath)) {
                 throw new Error("Couldn't find the config.json file");
             }
 
-            const parsedConfig: FileConfig = JSON.parse(readFileSync(file, "utf-8"));
+            const parsedConfig: FileConfig = JSON.parse(readFileSync(configPath, "utf-8"));
 
             const clientConfig: ClientConfig = { token: process.env.TOKEN ?? "", ...parsedConfig.bot };
             const clientOptions: ClientOptions = parsedConfig.options;

@@ -13,7 +13,7 @@ export class VerifyButtonHandler extends InteractionHandler {
     }
 
     public override parse(interaction: ButtonInteraction) {
-        if (interaction.customId !== Buttons.VERIFY_BUTTON) {
+        if (!interaction.customId.startsWith(Buttons.VERIFY_BUTTON)) {
             return this.none();
         }
 
@@ -80,7 +80,7 @@ export class VerifyButtonHandler extends InteractionHandler {
 
         const createApplicationResult = await database.addPendingApplication(pendingApplication);
         if (!createApplicationResult.success) {
-            await interaction.editReply({ content: "There was an error creating the pending application." });
+            await interaction.reply({ content: "There was an error creating the pending application." });
             await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
             return;
         }

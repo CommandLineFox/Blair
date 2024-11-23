@@ -277,7 +277,7 @@ export class GuideCommand extends Subcommand {
 
         channel as TextChannel;
 
-        const row = getGuideComponent();
+        const row = getGuideComponent(interaction.guild!.id);
         const postedMessage = await channel.send({ content: guideMessage, components: [row] });
         await interaction.reply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
     }
@@ -320,7 +320,7 @@ export class GuideCommand extends Subcommand {
 
         channel as TextChannel;
 
-        const row = getGuideComponent();
+        const row = getGuideComponent(channel.guild.id);
         const postedMessage = await channel.send({ content: guideMessage, components: [row] });
         await message.reply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
     }

@@ -65,8 +65,8 @@ const kickReasonMenu = new StringSelectMenuBuilder()
  * Returns the action row component for the guide message
  * @returns ActionRow with the verify button
  */
-export function getGuideComponent(): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>({ components: [verifyButton] });
+export function getGuideComponent(guildId: string): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>({ components: [verifyButton.setCustomId(`${Buttons.VERIFY_BUTTON}_${guildId}`)] });
 }
 
 /**
