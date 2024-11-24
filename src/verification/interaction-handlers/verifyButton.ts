@@ -57,19 +57,6 @@ export class VerifyButtonHandler extends InteractionHandler {
             return;
         }
 
-        let verificationMessage: Message | null = null;
-        try {
-            verificationMessage = await user.send(verificationMessageText);
-        } catch (error) {
-            await interaction.reply({ content: "Couldn't message you, please make sure your DMs are open.", ephemeral: true });
-            return;
-        }
-
-        if (!verificationMessage) {
-            await interaction.reply({ content: "Couldn't find the message after sending it.", ephemeral: true });
-            return;
-        }
-
         let requiredApprovers: string[] = [];
         const optedOut = await database.getOptOut(user.id);
         if (optedOut) {
@@ -82,6 +69,19 @@ export class VerifyButtonHandler extends InteractionHandler {
         if (!createApplicationResult.success) {
             await interaction.reply({ content: "There was an error creating the pending application or you are applying elsewhere", ephemeral: true });
             await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
+            return;
+        }
+
+        let verificationMessage: Message | null = null;
+        try {
+            verificationMessage = await user.send(verificationMessageText);
+        } catch (error) {
+            await interaction.reply({ content: "Couldn't message you, please make sure your DMs are open.", ephemeral: true });
+            return;
+        }
+
+        if (!verificationMessage) {
+            await interaction.reply({ content: "Couldn't find the message after sending it.", ephemeral: true });
             return;
         }
 
