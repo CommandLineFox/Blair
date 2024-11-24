@@ -9,6 +9,7 @@ export class ApproverCommand extends Subcommand {
             ...options,
             name: "approver",
             description: "Manage the list of verification approvers",
+            detailedDescription: "Manage the list of verification approvers",
             subcommands: [
                 {
                     name: "add",

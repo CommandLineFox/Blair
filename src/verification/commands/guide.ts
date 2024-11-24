@@ -10,6 +10,7 @@ export class GuideCommand extends Subcommand {
             ...options,
             name: "guide",
             description: "Manage the guide channel and message for verification",
+            detailedDescription: "Manage the message with the verify button and the channel it's posted in",
             subcommands: [
                 {
                     name: "channel",

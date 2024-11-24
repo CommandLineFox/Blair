@@ -8,7 +8,8 @@ export class ListCommand extends Command {
         super(context, {
             ...options,
             name: 'list',
-            description: 'List all configuration settings for the guild.',
+            description: 'List all configuration settings for the guild',
+            detailedDescription: "List all configuration settings for the guild",
             runIn: CommandOptionsRunTypeEnum.GuildText,
             requiredUserPermissions: [PermissionFlagsBits.Administrator]
         });

@@ -9,6 +9,7 @@ export class QuestioningCommand extends Subcommand {
             ...options,
             name: "questioning",
             description: "Manage the questioning category and logs",
+            detailedDescription: "Manage the category to create questioning channels in and log to post questioning after completion in",
             subcommands: [
                 {
                     name: "category",

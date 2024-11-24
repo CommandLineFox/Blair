@@ -8,7 +8,8 @@ export class ReasonCommand extends Subcommand {
         super(context, {
             ...options,
             name: "reason",
-            description: "Manage the ban and kick reasons for the server",
+            description: "Manage the ban and kick reasons for the guild",
+            detailedDescription: "Manage the ban and kick reasons for the guild",
             subcommands: [
                 {
                     name: "ban",

@@ -1,13 +1,14 @@
-import { Command } from '@sapphire/framework';
-import { Message } from 'discord.js';
+import { ApplicationCommandRegistries, Command } from '@sapphire/framework';
+import { EmbedBuilder, Guild, Message, PermissionFlagsBits } from 'discord.js';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
         super(context, {
             ...options,
             name: "help",
-            description: 'Lists all available commands',
-            preconditions: ['OwnerOnly']
+            description: 'List all available commands',
+            detailedDescription: "List all available commands",
+            requiredUserPermissions: [PermissionFlagsBits.Administrator]
         });
     }
 
@@ -20,12 +21,36 @@ export class PingCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-        interaction.reply({ content: "Help" });
+        const embed = await this.createHelpEmbed(interaction.guild!);
+        interaction.reply({ embeds: [embed] });
     }
 
     public override async messageRun(message: Message) {
-        message.reply({ content: "Help" });
+        const embed = await this.createHelpEmbed(message.guild!);
+        message.reply({ embeds: [embed] });
+    }
+
+    private async createHelpEmbed(guild: Guild): Promise<EmbedBuilder> {
+        const helpEmbed = new EmbedBuilder()
+            .setTitle(`List of commands for ${guild.name}`)
+            .setColor("Yellow")
+            .setTimestamp();
+
+        const registries = ApplicationCommandRegistries.registries;
+        for (const [_, registry] of registries) {
+            if (!registry.command) {
+                continue;
+            }
+
+            if (helpEmbed.data.fields?.length === 25) {
+                continue;
+            }
+
+            const fieldName = registry.command.name;
+            const fieldValue = `${registry.command.detailedDescription}`.trim();
+            helpEmbed.addFields({ name: fieldName, value: fieldValue });
+        }
+
+        return helpEmbed;
     }
 }
-
-//On hold til I figure out a way to actually list subcommands

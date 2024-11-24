@@ -1,5 +1,5 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { Message } from 'discord.js';
+import { Message, PermissionFlagsBits } from 'discord.js';
 import { CustomResponse } from '../../types/customResponse';
 import Database from '../../database/database';
 
@@ -9,8 +9,9 @@ export class ClearCommand extends Command {
             ...options,
             name: "clear",
             description: 'Removes a pending application',
-            preconditions: ['OwnerOnly'],
-            runIn: CommandOptionsRunTypeEnum.GuildText
+            detailedDescription: "Removes a pending application",
+            runIn: CommandOptionsRunTypeEnum.GuildText,
+            requiredUserPermissions: [PermissionFlagsBits.Administrator]
         });
     }
 

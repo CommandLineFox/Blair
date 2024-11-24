@@ -6,7 +6,8 @@ export class PingCommand extends Command {
         super(context, {
             ...options,
             name: "ping",
-            description: 'Checks if the bot is responsive',
+            description: 'Check if the bot is responsive',
+            detailedDescription: "Check if the bot is responsive",
             preconditions: ['OwnerOnly']
         });
     }

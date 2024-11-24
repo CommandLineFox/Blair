@@ -9,6 +9,7 @@ export class RoleCommand extends Subcommand {
             ...options,
             name: "role",
             description: "Manage member, unverified, and staff roles",
+            detailedDescription: "Manage member role, unverified role, and staff role list",
             subcommands: [
                 {
                     name: "member",

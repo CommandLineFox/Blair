@@ -10,6 +10,7 @@ export class ApproveCommand extends Command {
             ...options,
             name: 'approve',
             description: 'Approve a user during questioning',
+            detailedDescription: "Approve a user during questioning",
             runIn: CommandOptionsRunTypeEnum.GuildText
         });
     }

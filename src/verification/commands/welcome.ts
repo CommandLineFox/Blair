@@ -9,6 +9,7 @@ export class WelcomeCommand extends Subcommand {
             ...options,
             name: "welcome",
             description: "Manage the welcome channel, message, and toggle",
+            detailedDescription: "Manage the channel to welcome users in, message to welcome them with and toggle the feature on or off",
             subcommands: [
                 {
                     name: "channel",

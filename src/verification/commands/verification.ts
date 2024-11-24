@@ -9,6 +9,7 @@ export class VerificationCommand extends Subcommand {
             ...options,
             name: "verification",
             description: "Manage the verification questions and logging channel",
+            detailedDescription: "Manage the verification questions, starting message, ending message, log to post verifications in and the serverprotector history channel",
             subcommands: [
                 {
                     name: "message",

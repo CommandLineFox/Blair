@@ -11,6 +11,7 @@ export class DenyCommand extends Command {
             ...options,
             name: 'deny',
             description: 'Deny a user during questioning',
+            detailedDescription: "'Deny a user during questioning",
             runIn: CommandOptionsRunTypeEnum.GuildText
         });
     }
