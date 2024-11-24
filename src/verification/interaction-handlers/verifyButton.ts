@@ -80,7 +80,7 @@ export class VerifyButtonHandler extends InteractionHandler {
 
         const createApplicationResult = await database.addPendingApplication(pendingApplication);
         if (!createApplicationResult.success) {
-            await interaction.reply({ content: createApplicationResult.message, ephemeral: true });
+            await interaction.reply({ content: "There was an error creating the pending application or you are applying elsewhere", ephemeral: true });
             await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
             return;
         }

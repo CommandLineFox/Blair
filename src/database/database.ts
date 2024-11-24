@@ -59,7 +59,7 @@ const guildSchema = new Schema<DatabaseGuild>({
 });
 
 const pendingApplicationSchema = new Schema<PendingApplication>({
-    userId: { type: String, required: true },
+    userId: { type: String, unique: true, required: true },
     requiredApprovers: { type: [String], required: true },
     guildId: { type: String, required: true },
     messageId: { type: String, unique: true, required: false },
