@@ -30,14 +30,15 @@ export class PingCommand extends Command {
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         const messageContent = interaction.options.getString('message', true);
+        await interaction.deferReply({ ephemeral: true });
 
         if (!interaction.channel) {
-            await interaction.reply({ content: "Couldn't find the channel", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the channel" });
             return;
         }
 
         const result = await this.echo(interaction.channel, messageContent);
-        await interaction.reply({ content: result.message, ephemeral: true });
+        await interaction.editReply({ content: result.message });
     }
 
     public override async messageRun(message: Message, args: Args) {
