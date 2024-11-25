@@ -80,7 +80,8 @@ export class GuideCommand extends Subcommand {
                                 .setName("post")
                                 .setDescription("Post or edit the guide message in the guide channel")
                         )
-                )
+                ),
+            { idHints: ["1310732497809707100"] }
         );
     }
 

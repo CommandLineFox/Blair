@@ -63,7 +63,8 @@ export class ApproverCommand extends Subcommand {
                     command
                         .setName("list")
                         .setDescription("List all verification approvers")
-                )
+                ),
+            { idHints: ["1310732493108019331"] }
         );
     }
 

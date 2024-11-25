@@ -1,8 +1,8 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, CommandInteraction, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import { Colors, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
 import { CustomResponse } from '../../types/customResponse';
-import { logQuestioning } from '../../utils/utils';
+import { isStaff, logQuestioning } from '../../utils/utils';
 
 export class ApproveCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -19,11 +19,12 @@ export class ApproveCommand extends Command {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
-                .setDescription(this.description)
-        );
+                .setDescription(this.description),
+            { idHints: ["1310732490390114324"] }
+        )
     }
 
-    public override async chatInputRun(interaction: CommandInteraction) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
         if (!result.success) {
             await interaction.reply({ content: result.message, ephemeral: true });
@@ -38,6 +39,12 @@ export class ApproveCommand extends Command {
     }
 
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {
+        const staffmemberMember = await guild.members.fetch(staffMember);
+        const staffCheck = await isStaff(staffmemberMember);
+        if (!staffCheck) {
+            return { success: false, message: "Only staff members can interact with this" };
+        }
+
         const database = Database.getInstance();
 
         //Getting values from the database

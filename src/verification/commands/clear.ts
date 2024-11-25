@@ -25,7 +25,8 @@ export class ClearCommand extends Command {
                         .setName("user")
                         .setDescription("ID of user to remove the pending application of")
                         .setRequired(true)
-                )
+                ),
+            { idHints: ["1310732494290555033"] }
         );
     }
 

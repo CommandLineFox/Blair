@@ -86,7 +86,21 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const questioningChannel = await questioningCategory.children.create({ name: `${member.user.username}-questioning`, type: ChannelType.GuildText });
+        if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
+            await interaction.reply({ content: "The bot doesn't have the manage permissions permission" });
+            return;
+        }
+
+        let questioningChannel;
+        //Create the questioning channel and assign permissions to the member that's questioned to be able to see it
+        try {
+            questioningChannel = await questioningCategory.children.create({ name: `${member.user.username}-questioning`, type: ChannelType.GuildText });
+            await questioningChannel.permissionOverwrites.create(member.user, { ViewChannel: true, SendMessages: true, ReadMessageHistory: true, });
+        } catch (error) {
+            await interaction.reply({ content: "Something went wrong when creating the channel and setting up permissions for them", ephemeral: true });
+            return;
+        }
+
         await database.setPendingApplicationQuestioningChannelId(member.id, interaction.guild.id, questioningChannel.id);
 
         const newEmbed = new EmbedBuilder(oldEmbed.data)

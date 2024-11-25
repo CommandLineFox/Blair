@@ -114,7 +114,8 @@ export class RoleCommand extends Subcommand {
                                         .setRequired(true)
                                 )
                         )
-                )
+                ),
+            { idHints: ["1310732581364437135"] }
         );
     }
 

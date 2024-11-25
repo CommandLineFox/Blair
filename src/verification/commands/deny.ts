@@ -3,7 +3,7 @@ import Database from '../../database/database';
 import { ActionRowBuilder, CommandInteraction, Message, PermissionFlagsBits, StringSelectMenuBuilder, TextChannel, User } from 'discord.js';
 import { getBanReasonComponent, getKickReasonComponent } from '../../types/component';
 import { CustomResponse } from '../../types/customResponse';
-import { logQuestioning } from '../../utils/utils';
+import { isStaff, logQuestioning } from '../../utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -27,15 +27,11 @@ export class DenyCommand extends Command {
                         .setDescription("Choose to kick or ban the user")
                         .addChoices([{ name: "Kick", value: "kick" }, { name: "Ban", value: "ban" }])
                         .setRequired(true)
-                )
+                ),
+            { idHints: ["1310732496198963241"] }
         );
     }
-    public override async chatInputRun(interaction: CommandInteraction) {
-        if (!interaction.isChatInputCommand()) {
-            await interaction.reply({ content: "Invalid interaction", ephemeral: true });
-            return;
-        }
-
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         const action = interaction.options.getString('action');
         if (!['kick', 'ban'].includes(action!)) {
             await interaction.reply({ content: 'Invalid action. Choose either "kick" or "ban".', ephemeral: true });
@@ -77,6 +73,12 @@ export class DenyCommand extends Command {
     private async denyUser(interactionOrMessage: CommandInteraction | Message, staffMember: User, action: string): Promise<CustomResponse> {
         const guild = interactionOrMessage.guild!;
         const channelId = interactionOrMessage.channelId;
+
+        const staffmemberMember = await guild.members.fetch(staffMember);
+        const staffCheck = await isStaff(staffmemberMember);
+        if (!staffCheck) {
+            return { success: false, message: "Only staff members can interact with this" };
+        }
 
         const database = Database.getInstance();
 

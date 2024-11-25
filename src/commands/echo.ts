@@ -24,7 +24,8 @@ export class PingCommand extends Command {
                         .setName("message")
                         .setDescription("The message to echo")
                         .setRequired(true)
-                )
+                ),
+            { idHints: ["1310732664600268922"] }
         );
     }
 

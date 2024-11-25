@@ -179,7 +179,8 @@ export class VerificationCommand extends Subcommand {
                                 .setName("remove")
                                 .setDescription("Remove the verification history channel")
                         )
-                )
+                ),
+            { idHints: ["1310732583482556446"] }
         );
     }
 

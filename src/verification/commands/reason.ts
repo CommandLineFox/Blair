@@ -91,7 +91,8 @@ export class ReasonCommand extends Subcommand {
                                         .setRequired(true)
                                 )
                         )
-                )
+                ),
+            { idHints: ["1310732579573338232"] }
         );
     }
 

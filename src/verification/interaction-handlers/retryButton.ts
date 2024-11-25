@@ -69,7 +69,7 @@ export class RetryButtonHandler extends InteractionHandler {
 
         //No more retries
         if (pendingApplication.attempts === 3) {
-            await interaction.editReply("You tried so hard, and got so far. But in the end, it doesn't even matter");
+            await interaction.editReply("You tried so hard, and got so far. But in the end, it doesn't even matter.");
             await postVerificationMessage(guild, interaction, user, pendingApplication, true);
             return;
         }

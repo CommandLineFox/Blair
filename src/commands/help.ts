@@ -16,7 +16,8 @@ export class PingCommand extends Command {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
-                .setDescription(this.description)
+                .setDescription(this.description),
+            { idHints: ["1310732666542231613"] }
         );
     }
 

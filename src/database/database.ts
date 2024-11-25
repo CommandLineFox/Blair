@@ -1235,7 +1235,7 @@ export default class Database {
      */
     public async removePendingApplication(userId: string, guildId: string): Promise<CustomResponse> {
         try {
-            const result = await this.PendingApplicationModel.findOneAndDelete({ userId, guildId });
+            const result = await this.PendingApplicationModel.findOneAndDelete({ userId: userId, guildId: guildId });
 
             if (!result) {
                 return { success: false, message: "Pending application does not exist." };

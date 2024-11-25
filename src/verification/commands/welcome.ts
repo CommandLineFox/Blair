@@ -96,7 +96,8 @@ export class WelcomeCommand extends Subcommand {
                                 .setName("disable")
                                 .setDescription("Disable the welcome message feature")
                         )
-                )
+                ),
+            { idHints: ["1310732662385803315"] }
         );
     }
 

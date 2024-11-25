@@ -79,7 +79,8 @@ export class QuestioningCommand extends Subcommand {
                                 .setName("remove")
                                 .setDescription("Remove the questioning log channel")
                         )
-                )
+                ),
+            { idHints: ["1310732577987891282"] }
         );
     }
 
