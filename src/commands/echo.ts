@@ -48,6 +48,7 @@ export class PingCommand extends Command {
             return;
         }
 
+        await message.delete();
         await this.echo(message.channel, messageContent);
     }
 
