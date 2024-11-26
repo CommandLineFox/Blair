@@ -167,5 +167,6 @@ export class ApproveButtonHandler extends InteractionHandler {
         }
 
         await database.removePendingApplication(member.id, interaction.guild.id);
+        await interaction.editReply("Approved");
     }
 }
