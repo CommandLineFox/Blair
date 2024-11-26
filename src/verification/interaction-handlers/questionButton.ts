@@ -25,7 +25,7 @@ export class KickButtonHandler extends InteractionHandler {
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
 
         if (!interaction.guild) {
             await interaction.editReply({ content: "This button can only work in a guild" });
@@ -111,5 +111,6 @@ export class KickButtonHandler extends InteractionHandler {
             .addFields({ name: "Questioned by", value: `${staffMember.user.username} (${staffMember.id})` });
 
         await interaction.message.edit({ embeds: [newEmbed], components: [] });
+        await interaction.editReply({ content: "Questioning" });
     }
 }
