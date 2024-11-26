@@ -33,7 +33,7 @@ export class ReasonCommand extends Subcommand {
         });
     }
 
-    public override registerApplicationCommands(registry: Subcommand.Registry) {
+    public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -101,9 +101,11 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const reason = interaction.options.getString("reason", true);
         const response = await Database.getInstance().addBanReason(interaction.guildId!, reason);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -127,9 +129,11 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const index = interaction.options.getInteger("index", true);
         const response = await Database.getInstance().removeBanReason(interaction.guildId!, index);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -153,9 +157,11 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const reason = interaction.options.getString("reason", true);
         const response = await Database.getInstance().addKickReason(interaction.guildId!, reason);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -179,9 +185,11 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const index = interaction.options.getInteger("index", true);
         const response = await Database.getInstance().removeKickReason(interaction.guildId!, index);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**

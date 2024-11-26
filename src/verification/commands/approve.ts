@@ -15,7 +15,7 @@ export class ApproveCommand extends Command {
         });
     }
 
-    public override registerApplicationCommands(registry: Command.Registry) {
+    public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -24,14 +24,16 @@ export class ApproveCommand extends Command {
         )
     }
 
-    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
         if (!result.success) {
-            await interaction.reply({ content: result.message, ephemeral: true });
+            await interaction.editReply({ content: result.message });
         }
     }
 
-    public override async messageRun(message: Message) {
+    public override async messageRun(message: Message): Promise<void> {
         const result = await this.approveUser(message.guild!, message.channel.id, message.author);
         if (!result.success) {
             await message.reply({ content: result.message });
@@ -42,7 +44,7 @@ export class ApproveCommand extends Command {
         const staffmemberMember = await guild.members.fetch(staffMember);
         const staffCheck = await isStaff(staffmemberMember);
         if (!staffCheck) {
-            return { success: false, message: "Only staff members can interact with this" };
+            return { success: false, message: "Only staff members can interact with this." };
         }
 
         const database = Database.getInstance();
@@ -50,48 +52,48 @@ export class ApproveCommand extends Command {
         //Getting values from the database
         const pendingApplication = await database.getPendingApplicationFromQuestioningChannel(channelId);
         if (!pendingApplication) {
-            return { success: false, message: "Couldn't find the pending application" };
+            return { success: false, message: "Couldn't find the pending application." };
         }
 
         const questioningChannel = await guild.channels.fetch(channelId);
         if (!questioningChannel) {
-            return { success: false, message: "Couldn't find the questioning channel" };
+            return { success: false, message: "Couldn't find the questioning channel." };
         }
 
         const verificationLogChannel = await database.getVerificationLog(guild);
         if (!verificationLogChannel) {
-            return { success: false, message: "Couldn't find the verification log channel" };
+            return { success: false, message: "Couldn't find the verification log channel." };
         }
 
         if (!pendingApplication.messageId) {
-            return { success: false, message: "Couldn't find the message ID for the message in the verification log channel" };
+            return { success: false, message: "Couldn't find the message ID for the message in the verification log channel." };
         }
 
         const verificationMessage = await verificationLogChannel.messages.fetch(pendingApplication.messageId);
         if (!verificationMessage) {
-            return { success: false, message: "Couldn't find the message in the channel" };
+            return { success: false, message: "Couldn't find the message in the channel." };
         }
 
         const questioningLogChannel = await database.getQuestioningLog(guild);
         if (!questioningLogChannel) {
-            return { success: false, message: "Couldn't find the questioning log channel" };
+            return { success: false, message: "Couldn't find the questioning log channel." };
         }
 
         //Checking if the bot can send messages and attach files in the questioning log channel
         const botPermissions = guild.members.me?.permissions;
         if (!botPermissions?.has(PermissionFlagsBits.SendMessages | PermissionFlagsBits.AttachFiles)) {
-            return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel" };
+            return { success: false, message: "The bot doesn't have the send messages or attach files permission in the questioning log channel." };
         }
 
         //Checking if the bot can delete the questioning channel
         if (!botPermissions?.has(PermissionFlagsBits.ManageChannels)) {
-            return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
+            return { success: false, message: "The bot doesn't have the permission to delete the questioning channel." };
         }
 
         //If the pending application requires additional approval, checking for if one of those users ran the command
         if (pendingApplication.requiredApprovers.length > 0) {
             if (!pendingApplication.requiredApprovers.includes(staffMember.id)) {
-                return { success: false, message: "Still waiting approvals from required approvers" };
+                return { success: false, message: "Still waiting approvals from required approvers." };
             }
 
             await database.removePendingApplicationApprover(pendingApplication.userId, pendingApplication.guildId, staffMember.id);
@@ -99,14 +101,14 @@ export class ApproveCommand extends Command {
             //Updating the verification log embed
             const oldEmbed = verificationMessage.embeds[0];
             if (!oldEmbed) {
-                return { success: false, message: "Couldn't find the embed of the message" };
+                return { success: false, message: "Couldn't find the embed of the message." };
             }
 
             const newEmbed = new EmbedBuilder(oldEmbed.data)
                 .setFields([]);
 
             if (!oldEmbed.data.fields) {
-                return { success: false, message: "Couldn't find embed fields" };
+                return { success: false, message: "Couldn't find embed fields." };
             }
 
             for (const field of oldEmbed.data.fields) {
@@ -125,7 +127,7 @@ export class ApproveCommand extends Command {
             }
 
             await verificationMessage.edit({ content: verificationMessage.content, embeds: [newEmbed], components: verificationMessage.components });
-            return { success: false, message: "Approved, please approve again if no more required approvals are left or wait for others" };
+            return { success: false, message: "Approved, please approve again if no more required approvals are left or wait for others." };
         }
 
         //Adding the member role and removing the unverified role from the user
@@ -171,18 +173,18 @@ export class ApproveCommand extends Command {
         if (welcomeToggle) {
             const welcomeChannel = await database.getWelcomeChannel(guild);
             if (!welcomeChannel) {
-                return { success: false, message: "Couldn't find the welcome channel" };
+                return { success: false, message: "Couldn't find the welcome channel." };
             }
 
             let welcomeMessage = await database.getWelcomeMessage(guild);
             if (!welcomeMessage) {
-                return { success: false, message: "Couldn't find the welcome message" };
+                return { success: false, message: "Couldn't find the welcome message." };
             }
 
             welcomeMessage = welcomeMessage.replace(/\[member\]/g, `<@${member.id}>`);
             await welcomeChannel.send(welcomeMessage);
         }
 
-        return { success: true, message: "Successfully approved the user" };
+        return { success: true, message: "Successfully approved the user." };
     }
 }

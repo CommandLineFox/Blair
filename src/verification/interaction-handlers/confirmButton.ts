@@ -34,9 +34,11 @@ export class ConfirmButtonHandler extends InteractionHandler {
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         const channel = await interaction.client.channels.fetch(interaction.channelId);
         if (!channel) {
-            await interaction.reply({ content: "Couldn't find the channel.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the channel." });
             return;
         }
 
@@ -48,7 +50,7 @@ export class ConfirmButtonHandler extends InteractionHandler {
 
         const pendingApplication = await database.getPendingApplication(user.id, guildId);
         if (!pendingApplication) {
-            await interaction.reply({ content: "There was an error finding your application.", ephemeral: true });
+            await interaction.editReply({ content: "There was an error finding your application." });
             return;
         }
 
@@ -56,6 +58,6 @@ export class ConfirmButtonHandler extends InteractionHandler {
 
         await postVerificationMessage(guild, interaction, user, pendingApplication);
 
-        await interaction.reply({ content: "Successfully applied, please be patient.", ephemeral: true });
+        await interaction.editReply({ content: "Successfully applied, please be patient." });
     }
 }

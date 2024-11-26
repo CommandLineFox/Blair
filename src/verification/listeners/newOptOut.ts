@@ -1,6 +1,6 @@
 import { Listener } from '@sapphire/framework';
 import Database from '../../database/database';
-import type { Message } from 'discord.js';
+import { PermissionFlagsBits, type Message } from 'discord.js';
 import { Config } from '../../types/config';
 
 export class newOptOut extends Listener {
@@ -19,7 +19,17 @@ export class newOptOut extends Listener {
             return;
         }
 
+
         if (message.channel !== searchChannel) {
+            return;
+        }
+
+        if (!message.guild.members.me) {
+            return;
+        }
+
+        const botPermissions = searchChannel.permissionsFor(message.guild.members.me);
+        if (!botPermissions.has(PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory)) {
             return;
         }
 

@@ -35,7 +35,9 @@ export class RetryButtonHandler extends InteractionHandler {
      * @param guildId The guild that this verification is from
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
-        await interaction.reply("Retrying application:");
+        await interaction.deferReply({ ephemeral: true });
+        await interaction.editReply("Retrying application:");
+
         const channel = await interaction.client.channels.fetch(interaction.channelId);
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the channel." });
@@ -70,7 +72,7 @@ export class RetryButtonHandler extends InteractionHandler {
         //No more retries
         if (pendingApplication.attempts === 3) {
             await interaction.editReply("You tried so hard, and got so far. But in the end, it doesn't even matter.");
-            await postVerificationMessage(guild, interaction, user, pendingApplication, true);
+            await postVerificationMessage(guild, interaction, user, pendingApplication);
             return;
         }
 

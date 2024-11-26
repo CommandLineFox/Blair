@@ -32,7 +32,7 @@ export class ApproverCommand extends Subcommand {
         });
     }
 
-    public override registerApplicationCommands(registry: Subcommand.Registry) {
+    public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -73,10 +73,12 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const user = interaction.options.getUser("user", true);
 
         const response = await Database.getInstance().addVerificationApprover(interaction.guildId!, user.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -96,10 +98,12 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const user = interaction.options.getUser("user", true);
 
         const response = await Database.getInstance().removeVerificationApprover(interaction.guildId!, user.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -119,14 +123,16 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverList(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const approvers = await Database.getInstance().getVerificationApprovers(interaction.guild!);
         if (!approvers) {
-            await interaction.reply({ content: "No verification approvers found." });
+            await interaction.editReply({ content: "No verification approvers found." });
             return;
         }
 
         const approverMentions = approvers.map((approver) => `<@${approver.id}>`).join("\n");
-        await interaction.reply({ content: `Verification approvers:\n${approverMentions}` });
+        await interaction.editReply({ content: `Verification approvers:\n${approverMentions}` });
     }
 
     /**

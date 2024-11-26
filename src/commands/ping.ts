@@ -12,7 +12,7 @@ export class PingCommand extends Command {
         });
     }
 
-    public override registerApplicationCommands(registry: Command.Registry) {
+    public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -21,11 +21,12 @@ export class PingCommand extends Command {
         );
     }
 
-    public override chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-        interaction.reply({ content: "Pong" });
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+        await interaction.editReply({ content: "Pong" });
     }
 
-    public override messageRun(message: Message) {
-        message.reply({ content: "Pong" });
+    public override async messageRun(message: Message): Promise<void> {
+        await message.reply({ content: "Pong" });
     }
 }

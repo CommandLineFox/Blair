@@ -1,6 +1,6 @@
 import { Listener } from '@sapphire/framework';
 import Database from '../../database/database';
-import type { Client, Message, TextChannel } from 'discord.js';
+import { PermissionFlagsBits, type Client, type Message, type TextChannel } from 'discord.js';
 import { Config } from '../../types/config';
 
 export class LoadOptOutListener extends Listener {
@@ -20,6 +20,15 @@ export class LoadOptOutListener extends Listener {
         for (const [_guildId, guild] of guilds) {
             const searchChannel = await database.getVerificationHistory(guild);
             if (!searchChannel) {
+                continue;
+            }
+
+            if (!guild.members.me) {
+                continue;
+            }
+
+            const botPermissions = searchChannel.permissionsFor(guild.members.me);
+            if (!botPermissions.has(PermissionFlagsBits.ViewChannel | PermissionFlagsBits.ReadMessageHistory)) {
                 continue;
             }
 

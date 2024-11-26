@@ -45,32 +45,34 @@ export class BanMenunHandler extends InteractionHandler {
      * @param interaction The menu interaction
      */
     public async run(interaction: StringSelectMenuInteraction, verificationMessage: Message): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         if (!interaction.guild) {
-            await interaction.reply({ content: "This menu can only work in a guild", ephemeral: true });
+            await interaction.editReply({ content: "This menu can only work in a guild" });
             return;
         }
 
         if (!interaction.member) {
-            await interaction.reply({ content: "Couldn't find the member that started the interaction", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member that started the interaction" });
             return;
         }
 
         const staffMember = await interaction.guild.members.fetch(interaction.member.user.id);
         if (!staffMember) {
-            await interaction.reply({ content: "Couldn't find the member in the server", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member in the server" });
             return;
         }
 
         const staffCheck = await isStaff(staffMember);
         if (!staffCheck) {
-            await interaction.reply({ content: "Only staff members can interact with this", ephemeral: true });
+            await interaction.editReply({ content: "Only staff members can interact with this" });
             return;
         }
 
 
         const channel = await interaction.client.channels.fetch(interaction.channelId) as TextChannel;
         if (!channel) {
-            await interaction.reply({ content: "Couldn't find the channel.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the channel." });
             return;
         }
 
@@ -79,39 +81,39 @@ export class BanMenunHandler extends InteractionHandler {
         const messageId = verificationMessage.id;
         const pendingApplication = await database.getPendingApplicationFromMessage(messageId);
         if (!pendingApplication) {
-            await interaction.reply({ content: "Couldn't find the pending application.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the pending application." });
             return;
         }
 
         const member = await interaction.guild.members.fetch(pendingApplication.userId);
         if (!member) {
-            await interaction.reply({ content: "Couldn't find the member.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member." });
             return;
         }
 
         const oldEmbed = verificationMessage.embeds[0];
         if (!oldEmbed) {
-            await interaction.reply({ content: "There was an error finding the embed.", ephemeral: true });
+            await interaction.editReply({ content: "There was an error finding the embed." });
             return;
         }
 
         //Check if the bot can add the permission override for the channel
         const botPermissions = channel.permissionsFor(interaction.client.user);
         if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
-            await interaction.reply({ content: "The bot doesn't have the manage roles permission in that channel", ephemeral: true });
+            await interaction.editReply({ content: "The bot doesn't have the manage roles permission in that channel" });
             return;
         }
 
         //Check if the bot can delete the staff member's message in the channel
         if (!botPermissions?.has(PermissionFlagsBits.ManageMessages)) {
-            await interaction.reply({ content: "The bot doesn't have the manage messages permission in that channel", ephemeral: true });
+            await interaction.editReply({ content: "The bot doesn't have the manage messages permission in that channel" });
             return;
         }
 
         //Get the reason for moderating and send it to the user
         const reason = await getModerationReason(interaction, channel, staffMember);
         if (!reason) {
-            await interaction.reply({ content: "Couldn't find the reason", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the reason" });
             return;
         }
 
@@ -124,10 +126,7 @@ export class BanMenunHandler extends InteractionHandler {
             .setColor(Colors.Red)
             .addFields([{ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` }, { name: "Reason", value: reason }]);
 
-        if (interaction.replied) {
-            await interaction.editReply({ content: "Banned" });
-        }
-        await interaction.reply({ content: "Banned", ephemeral: true });
+        await interaction.editReply({ content: "Banned" });
 
         //If there's ongoing questioning delete the channel
         const questioningChannelId = pendingApplication.questioningChannelId;

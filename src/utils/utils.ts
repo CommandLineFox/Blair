@@ -20,29 +20,19 @@ export function trimString(str: string, length: number): string {
  * @param user The user that is verifying
  * @param pendingApplication The pending application
  */
-export async function postVerificationMessage(guild: Guild, interaction: ButtonInteraction, user: User, pendingApplication: PendingApplication, edit?: boolean): Promise<void> {
+export async function postVerificationMessage(guild: Guild, interaction: ButtonInteraction, user: User, pendingApplication: PendingApplication): Promise<void> {
     const database = Database.getInstance();
 
     const verificationLogChannel = await database.getVerificationLog(guild);
     if (!verificationLogChannel) {
-        if (edit) {
-            await interaction.editReply({ content: "Couldn't find the verification log channel." });
-        } else {
-            await interaction.reply({ content: "Couldn't find the verification log channel.", ephemeral: true });
-        }
-
+        await interaction.editReply({ content: "Couldn't find the verification log channel." });
         return;
     }
 
     //Check if the bot can send messages in the verification log
     const permissions = verificationLogChannel.permissionsFor(interaction.client.user);
     if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
-        if (edit) {
-            await interaction.editReply({ content: "The bot doesn't have the send messages permission in that channel" });
-        } else {
-            await interaction.reply({ content: "The bot doesn't have the send messages permission in that channel", ephemeral: true });
-        }
-
+        await interaction.editReply({ content: "The bot doesn't have the send messages permission in that channel." });
         return;
     }
 
@@ -140,7 +130,7 @@ export async function getModerationReason(interaction: StringSelectMenuInteracti
         await channel.permissionOverwrites.create(staffMember, { SendMessages: true });
 
         try {
-            const reply = await interaction.reply({ content: "Please provide the custom kick reason within 2 minutes:", ephemeral: true });
+            const reply = await interaction.editReply({ content: "Please provide the custom kick reason within 2 minutes:" });
 
             const collectedMessages = await channel.awaitMessages({ filter: (msg) => msg.author.id === staffMember.id, max: 1, time: 120000, errors: ['time'] });
 
@@ -156,7 +146,7 @@ export async function getModerationReason(interaction: StringSelectMenuInteracti
                 await customMessage.delete();
             }
         } catch {
-            await interaction.followUp({ content: "Time expired for providing a custom reason.", ephemeral: true });
+            await interaction.editReply({ content: "Time expired for providing a custom reason." });
             return;
         } finally {
             await channel.permissionOverwrites.delete(staffMember);

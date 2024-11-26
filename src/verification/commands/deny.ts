@@ -32,15 +32,17 @@ export class DenyCommand extends Command {
         );
     }
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+        await interaction.deferReply({ ephemeral: true });
+
         const action = interaction.options.getString('action');
         if (!['kick', 'ban'].includes(action!)) {
-            await interaction.reply({ content: 'Invalid action. Choose either "kick" or "ban".', ephemeral: true });
+            await interaction.editReply({ content: 'Invalid action. Choose either "kick" or "ban".' });
             return;
         }
 
         const result = await this.denyUser(interaction, interaction.user, action!);
         if (!result.success) {
-            await interaction.reply({ content: result.message, ephemeral: true });
+            await interaction.editReply({ content: result.message });
         }
     }
 

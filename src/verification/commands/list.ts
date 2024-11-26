@@ -1,6 +1,6 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { CommandInteraction, Guild, Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { Guild, Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { trimString } from "../../utils/utils";
 
 export class ListCommand extends Command {
@@ -15,7 +15,7 @@ export class ListCommand extends Command {
         });
     }
 
-    public override registerApplicationCommands(registry: Command.Registry) {
+    public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -24,14 +24,16 @@ export class ListCommand extends Command {
         );
     }
 
-    public override async chatInputRun(interaction: CommandInteraction) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const embed = await this.fetchValues(interaction.guild!);
-        interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     }
 
-    public override async messageRun(message: Message) {
+    public override async messageRun(message: Message): Promise<void> {
         const embed = await this.fetchValues(message.guild!);
-        message.reply({ embeds: [embed] });
+        await message.reply({ embeds: [embed] });
     }
 
     private async fetchValues(guild: Guild): Promise<EmbedBuilder> {

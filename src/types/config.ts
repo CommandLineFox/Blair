@@ -22,7 +22,7 @@ export type DatabaseConfig = {
 };
 
 type FileConfig = {
-    bot: Omit<ClientConfig, "token">; // Exclude token as it's loaded from .env
+    bot: Omit<ClientConfig, "token">;
     options: ClientOptions;
 };
 

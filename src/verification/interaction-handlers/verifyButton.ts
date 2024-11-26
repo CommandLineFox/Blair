@@ -25,8 +25,10 @@ export class VerifyButtonHandler extends InteractionHandler {
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         if (!interaction.guild) {
-            await interaction.reply({ content: "This button can only work in a guild", ephemeral: true });
+            await interaction.editReply({ content: "This button can only work in a guild" });
             return;
         }
 
@@ -35,25 +37,25 @@ export class VerifyButtonHandler extends InteractionHandler {
 
         const verificationMessageText = await database.getVerificationMessage(interaction.guild);
         if (!verificationMessageText) {
-            await interaction.reply({ content: "Couldn't find the verification message.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the verification message." });
             return;
         }
 
         const verificationEndingMessageText = await database.getVerificationEndingMessage(interaction.guild);
         if (!verificationEndingMessageText) {
-            await interaction.reply({ content: "Couldn't find the verification ending message.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the verification ending message." });
             return;
         }
 
         const approvers = await database.getVerificationApprovers(interaction.guild);
         if (!approvers) {
-            await interaction.reply({ content: "Couldn't find the list of approvers.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the list of approvers." });
             return;
         }
 
         const existingPendingApplication = await database.getPendingApplication(interaction.user.id, interaction.guild.id);
         if (existingPendingApplication) {
-            await interaction.reply({ content: "You already started the verification process.", ephemeral: true });
+            await interaction.editReply({ content: "You already started the verification process." });
             return;
         }
 
@@ -67,7 +69,7 @@ export class VerifyButtonHandler extends InteractionHandler {
 
         const createApplicationResult = await database.addPendingApplication(pendingApplication);
         if (!createApplicationResult.success) {
-            await interaction.reply({ content: "There was an error creating the pending application or you are applying elsewhere", ephemeral: true });
+            await interaction.editReply({ content: "There was an error creating the pending application or you are applying elsewhere" });
             await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
             return;
         }
@@ -76,16 +78,16 @@ export class VerifyButtonHandler extends InteractionHandler {
         try {
             verificationMessage = await user.send(verificationMessageText);
         } catch (error) {
-            await interaction.reply({ content: "Couldn't message you, please make sure your DMs are open.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't message you, please make sure your DMs are open." });
             return;
         }
 
         if (!verificationMessage) {
-            await interaction.reply({ content: "Couldn't find the message after sending it.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the message after sending it." });
             return;
         }
 
-        await interaction.reply({ content: "Please check your DMs.", ephemeral: true });
+        await interaction.editReply({ content: "Please check your DMs." });
 
         const verificationQuestions = await database.getVerificationQuestions(interaction.guild);
         if (!verificationQuestions || verificationQuestions.length === 0) {

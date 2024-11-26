@@ -25,37 +25,39 @@ export class ApproveButtonHandler extends InteractionHandler {
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {
+        await interaction.deferReply({ ephemeral: true });
+
         if (!interaction.guild) {
-            await interaction.reply({ content: "This button can only work in a guild", ephemeral: true });
+            await interaction.editReply({ content: "This button can only work in a guild" });
             return;
         }
 
         if (!interaction.member) {
-            await interaction.reply({ content: "Couldn't find the member that started the interaction", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member that started the interaction" });
             return;
         }
 
         const staffMember = await interaction.guild.members.fetch(interaction.member.user.id);
         if (!staffMember) {
-            await interaction.reply({ content: "Couldn't find the member in the server", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member in the server" });
             return;
         }
 
         const botPermissions = interaction.guild.members.me?.permissions;;
         if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
-            await interaction.reply({ content: "The bot doesn't have the manage roles permission" });
+            await interaction.editReply({ content: "The bot doesn't have the manage roles permission" });
             return;
         }
 
         const staffCheck = await isStaff(staffMember);
         if (!staffCheck) {
-            await interaction.reply({ content: "Only staff members can interact with this", ephemeral: true });
+            await interaction.editReply({ content: "Only staff members can interact with this" });
             return;
         }
 
         const channel = await interaction.client.channels.fetch(interaction.channelId);
         if (!channel) {
-            await interaction.reply({ content: "Couldn't find the channel.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the channel." });
             return;
         }
 
@@ -64,14 +66,14 @@ export class ApproveButtonHandler extends InteractionHandler {
         const messageId = interaction.message.id;
         const pendingApplication = await database.getPendingApplicationFromMessage(messageId);
         if (!pendingApplication) {
-            await interaction.reply({ content: "Couldn't find the pending application.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the pending application." });
             return;
         }
 
         //If the pending application requires approval from approvers, first check for those
         if (pendingApplication.requiredApprovers.length > 0) {
             if (!pendingApplication.requiredApprovers.includes(staffMember.id)) {
-                await interaction.reply({ content: "Still waiting approvals from required approvers", ephemeral: true });
+                await interaction.editReply({ content: "Still waiting approvals from required approvers" });
                 return;
             }
 
@@ -79,7 +81,7 @@ export class ApproveButtonHandler extends InteractionHandler {
 
             const oldEmbed = interaction.message.embeds[0];
             if (!oldEmbed) {
-                await interaction.reply({ content: "Couldn't find the embed of the message", ephemeral: true });
+                await interaction.editReply({ content: "Couldn't find the embed of the message" });
                 return;
             }
 
@@ -87,7 +89,7 @@ export class ApproveButtonHandler extends InteractionHandler {
                 .setFields([]);
 
             if (!oldEmbed.data.fields) {
-                await interaction.reply({ content: "Couldn't find embed fields", ephemeral: true });
+                await interaction.editReply({ content: "Couldn't find embed fields" });
                 return;
             }
             for (const field of oldEmbed.data.fields) {
@@ -106,7 +108,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             }
 
             await interaction.message.edit({ content: interaction.message.content, embeds: [newEmbed], components: interaction.message.components });
-            await interaction.reply({ content: "Approved, please approve again if no more required approvals are left or wait for others", ephemeral: true });
+            await interaction.editReply({ content: "Approved, please approve again if no more required approvals are left or wait for others" });
             return;
         }
 
@@ -115,19 +117,19 @@ export class ApproveButtonHandler extends InteractionHandler {
         const memberRole = await database.getMemberRole(interaction.guild);
 
         if (!memberRole) {
-            await interaction.reply({ content: "Couldn't find the member role.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member role." });
             return;
         }
 
         const member = await interaction.guild.members.fetch(pendingApplication.userId);
         if (!member) {
-            await interaction.reply({ content: "Couldn't find the member.", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the member." });
             return;
         }
 
         const oldEmbed = interaction.message.embeds[0];
         if (!oldEmbed) {
-            await interaction.reply({ content: "There was an error finding the embed.", ephemeral: true });
+            await interaction.editReply({ content: "There was an error finding the embed." });
             return;
         }
 
@@ -150,13 +152,13 @@ export class ApproveButtonHandler extends InteractionHandler {
         if (welcomeToggle) {
             const welcomeChannel = await database.getWelcomeChannel(interaction.guild);
             if (!welcomeChannel) {
-                await interaction.reply({ content: "Couldn't find the welcome channel", ephemeral: true });
+                await interaction.editReply({ content: "Couldn't find the welcome channel" });
                 return;
             }
 
             let welcomeMessage = await database.getWelcomeMessage(interaction.guild);
             if (!welcomeMessage) {
-                await interaction.reply({ content: "Couldn't find the welcome message", ephemeral: true });
+                await interaction.editReply({ content: "Couldn't find the welcome message" });
                 return;
             }
 

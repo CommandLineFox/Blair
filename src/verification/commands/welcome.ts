@@ -41,7 +41,7 @@ export class WelcomeCommand extends Subcommand {
         });
     }
 
-    public override registerApplicationCommands(registry: Subcommand.Registry) {
+    public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -106,14 +106,16 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
-            await interaction.reply({ content: "You need to provide a valid text channel.", ephemeral: true });
+            await interaction.editReply({ content: "You need to provide a valid text channel." });
             return;
         }
 
         const response = await Database.getInstance().setWelcomeChannel(interaction.guildId!, channel.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -138,8 +140,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeWelcomeChannel(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -156,7 +160,8 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.reply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
+        await await interaction.deferReply({ ephemeral: true });
+        await interaction.editReply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
 
         const channel = interaction.channel;
         if (!channel) {
@@ -247,8 +252,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeWelcomeMessage(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -265,8 +272,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleEnable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().enableWelcomeToggle(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -283,8 +292,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleDisable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().disableWelcomeToggle(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**

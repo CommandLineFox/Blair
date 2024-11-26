@@ -35,7 +35,7 @@ export class GuideCommand extends Subcommand {
         });
     }
 
-    public override registerApplicationCommands(registry: Subcommand.Registry) {
+    public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -90,14 +90,16 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
-            await interaction.reply({ content: "The channel has to be a text channel", ephemeral: true });
+            await interaction.editReply({ content: "The channel has to be a text channel" });
             return;
         }
 
         const response = await Database.getInstance().setGuideChannel(interaction.guildId!, channel.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -121,8 +123,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeGuideChannel(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -135,7 +139,8 @@ export class GuideCommand extends Subcommand {
     }
 
     public async chatInputGuideMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.reply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
+        await await interaction.deferReply({ ephemeral: true });
+        await interaction.editReply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
 
         const channel = interaction.channel;
         if (!channel) {
@@ -173,7 +178,6 @@ export class GuideCommand extends Subcommand {
             .catch(async () => {
                 await interaction.editReply({ content: "No message was provided after 2 minutes" });
             });
-
     }
 
     /**
@@ -227,8 +231,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeGuideMessage(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
 
     }
 
@@ -246,34 +252,41 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessagePost(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const database = Database.getInstance();
         const guideChannel = await database.getGuideChannel(interaction.guild!);
         const guideMessage = await database.getGuideMessage(interaction.guild!);
 
         if (!guideChannel) {
-            await interaction.reply({ content: "The guide channel isn't set", ephemeral: true });
+            await interaction.editReply({ content: "The guide channel isn't set" });
             return;
         }
 
         if (!guideMessage) {
-            await interaction.reply({ content: "The guide message isn't set", ephemeral: true });
+            await interaction.editReply({ content: "The guide message isn't set" });
             return;
         }
 
         const channel = await interaction.guild?.channels.fetch(guideChannel.id);
         if (!channel) {
-            await interaction.reply({ content: "Couldn't find the guide channel", ephemeral: true });
+            await interaction.editReply({ content: "Couldn't find the guide channel" });
             return;
         }
 
         if (channel?.type !== ChannelType.GuildText) {
-            await interaction.reply({ content: "The guide channel has to be a text channel", ephemeral: true });
+            await interaction.editReply({ content: "The guide channel has to be a text channel" });
             return;
         }
 
-        const permissions = channel.permissionsFor(interaction.client.user);
-        if (!permissions?.has(PermissionFlagsBits.SendMessages)) {
-            await interaction.reply({ content: "The bot doesn't have the send messages permission in that channel", ephemeral: true });
+        const botPermissions = channel.permissionsFor(interaction.client.user);
+        if (!botPermissions?.has(PermissionFlagsBits.SendMessages)) {
+            await interaction.editReply({ content: "The bot doesn't have the send messages permission in that channel" });
+            return;
+        }
+
+        if (!botPermissions.has(PermissionFlagsBits.ViewChannel)) {
+            await interaction.editReply({ content: "The bot doesn't have the view channel permission in that channel" });
             return;
         }
 
@@ -281,7 +294,7 @@ export class GuideCommand extends Subcommand {
 
         const row = getGuideComponent(interaction.guild!.id);
         const postedMessage = await channel.send({ content: guideMessage, components: [row] });
-        await interaction.reply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
+        await interaction.editReply({ content: `Posted the guide message, you can check it out [here](<${postedMessage.url}>)` });
     }
 
     /**

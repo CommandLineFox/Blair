@@ -33,7 +33,7 @@ export class QuestioningCommand extends Subcommand {
         });
     }
 
-    public override registerApplicationCommands(registry: Subcommand.Registry) {
+    public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -89,15 +89,17 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategorySet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const categoryId = interaction.options.getString("category", true);
         const category = await interaction.guild?.channels.fetch(categoryId);
         if (!category || category.type !== ChannelType.GuildCategory) {
-            await interaction.reply({ content: "You need to provide a valid category channel.", ephemeral: true });
+            await interaction.editReply({ content: "You need to provide a valid category channel." });
             return;
         }
 
         const response = await Database.getInstance().setQuestioningCategory(interaction.guildId!, category.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -122,8 +124,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategoryRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeQuestioningCategory(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -140,14 +144,16 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
-            await interaction.reply({ content: "You need to provide a valid text channel.", ephemeral: true });
+            await interaction.editReply({ content: "You need to provide a valid text channel." });
             return;
         }
 
         const response = await Database.getInstance().setQuestioningLog(interaction.guildId!, channel.id);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**
@@ -172,8 +178,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const response = await Database.getInstance().removeQuestioningLog(interaction.guildId!);
-        await interaction.reply({ content: response.message, ephemeral: !response.success });
+        await interaction.editReply({ content: response.message });
     }
 
     /**

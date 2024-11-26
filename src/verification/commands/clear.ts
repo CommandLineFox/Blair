@@ -15,7 +15,7 @@ export class ClearCommand extends Command {
         });
     }
 
-    public override registerApplicationCommands(registry: Command.Registry) {
+    public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
             builder
                 .setName(this.name)
@@ -30,16 +30,18 @@ export class ClearCommand extends Command {
         );
     }
 
-    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+    public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        await await interaction.deferReply({ ephemeral: true });
+
         const userId = interaction.options.getString('user', true);
 
         const result = await this.removePendingApp(userId, interaction.guildId!);
         if (!result.success) {
-            await interaction.reply({ content: result.message, ephemeral: true });
+            await interaction.editReply({ content: result.message });
         }
     }
 
-    public override async messageRun(message: Message, args: Args) {
+    public override async messageRun(message: Message, args: Args): Promise<void> {
         const userId = await args.rest("string");
 
         if (!userId) {
