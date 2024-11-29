@@ -31,14 +31,12 @@ export class ClearCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const userId = interaction.options.getString('user', true);
 
         const result = await this.removePendingApp(userId, interaction.guildId!);
-        if (!result.success) {
-            await interaction.editReply({ content: result.message });
-        }
+        await interaction.editReply({ content: result.message });
     }
 
     public override async messageRun(message: Message, args: Args): Promise<void> {
@@ -50,9 +48,7 @@ export class ClearCommand extends Command {
         }
 
         const result = await this.removePendingApp(userId, message.guildId!);
-        if (!result.success) {
-            await message.reply({ content: result.message });
-        }
+        await message.reply({ content: result.message });
     }
 
     private async removePendingApp(userId: string, guildId: string): Promise<CustomResponse> {

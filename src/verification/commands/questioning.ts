@@ -89,7 +89,7 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategorySet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const categoryId = interaction.options.getString("category", true);
         const category = await interaction.guild?.channels.fetch(categoryId);
@@ -124,7 +124,7 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategoryRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeQuestioningCategory(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -144,7 +144,7 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -178,7 +178,7 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeQuestioningLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });

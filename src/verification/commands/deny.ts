@@ -1,9 +1,9 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { ActionRowBuilder, CommandInteraction, Message, PermissionFlagsBits, StringSelectMenuBuilder, TextChannel, User } from 'discord.js';
+import { CommandInteraction, Message, PermissionFlagsBits, User } from 'discord.js';
 import { getBanReasonComponent, getKickReasonComponent } from '../../types/component';
 import { CustomResponse } from '../../types/customResponse';
-import { isStaff, logQuestioning } from '../../utils/utils';
+import { isStaff } from '../../utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -41,9 +41,7 @@ export class DenyCommand extends Command {
         }
 
         const result = await this.denyUser(interaction, interaction.user, action!);
-        if (!result.success) {
-            await interaction.editReply({ content: result.message });
-        }
+        await interaction.editReply({ content: result.message });
     }
 
     public override async messageRun(message: Message, args: Args) {
@@ -146,7 +144,7 @@ export class DenyCommand extends Command {
             }
 
             const row = await getKickReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
-            await this.sendMessage(interactionOrMessage, row, "Please pick a reason or enter a custom one");
+            return { success: true, message: "Please choose a reason to deny the user with", components: [row] };
         } else {
             const permissions = questioningChannel.permissionsFor(staffMember);
             if (!permissions?.has(PermissionFlagsBits.BanMembers)) {
@@ -158,26 +156,7 @@ export class DenyCommand extends Command {
             }
 
             const row = await getBanReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
-            await this.sendMessage(interactionOrMessage, row, "Please pick a reason or enter a custom one");
-        }
-
-        //Putting the contents of the questioning channel into a file and logging it
-        await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
-
-        return { success: true, message: "Please choose a reason to deny the user with" };
-    }
-
-    /**
-     * Send the reason choice dropdown
-     * @param interactionOrMessage Interaction or message depending on if it was a slash command or message command
-     * @param component The action row with the dropdown in it
-     * @param content The message content
-     */
-    private async sendMessage(interactionOrMessage: CommandInteraction | Message, component: ActionRowBuilder<StringSelectMenuBuilder>, content: string) {
-        if (interactionOrMessage instanceof CommandInteraction) {
-            await interactionOrMessage.reply({ content, components: [component], ephemeral: true });
-        } else {
-            await interactionOrMessage.reply({ content, components: [component] });
+            return { success: true, message: "Please choose a reason to deny the user with", components: [row] };
         }
     }
 }

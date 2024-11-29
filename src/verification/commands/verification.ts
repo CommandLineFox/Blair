@@ -189,7 +189,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
         await interaction.editReply("Please enter the message you would like to use as the starting verification message below within the next 2 minutes");
 
         const channel = interaction.channel;
@@ -281,7 +281,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeVerificationMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -301,7 +301,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputEndingMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
         await interaction.editReply("Please enter the message you would like to use as the verification ending message below within the next 2 minutes");
 
         const channel = interaction.channel;
@@ -393,7 +393,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputEndingMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeVerificationEndingMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -413,7 +413,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputQuestionsAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const question = interaction.options.getString("question", true);
         const response = await Database.getInstance().addVerificationQuestion(interaction.guildId!, question);
@@ -441,7 +441,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputQuestionsRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const index = interaction.options.getInteger("index", true);
         if (index < 0) {
@@ -474,7 +474,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputQuestionsMove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const fromIndex = interaction.options.getInteger("from", true) - 1;
         const toIndex = interaction.options.getInteger("to", true) - 1;
@@ -509,7 +509,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -543,7 +543,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeVerificationLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -564,7 +564,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputHistorySet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -598,7 +598,7 @@ export class VerificationCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputHistoryRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeVerificationHistory(interaction.guildId!);
         await interaction.editReply({ content: response.message });

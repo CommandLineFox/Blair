@@ -28,16 +28,12 @@ export class ApproveCommand extends Command {
         await interaction.deferReply({ ephemeral: true });
 
         const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
-        if (!result.success) {
-            await interaction.editReply({ content: result.message });
-        }
+        await interaction.editReply({ content: result.message });
     }
 
     public override async messageRun(message: Message): Promise<void> {
         const result = await this.approveUser(message.guild!, message.channel.id, message.author);
-        if (!result.success) {
-            await message.reply({ content: result.message });
-        }
+        await message.reply({ content: result.message });
     }
 
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {

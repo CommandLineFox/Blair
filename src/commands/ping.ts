@@ -22,7 +22,7 @@ export class PingCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
         await interaction.editReply({ content: "Pong" });
     }
 

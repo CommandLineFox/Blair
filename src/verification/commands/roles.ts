@@ -124,7 +124,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMemberRoleSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().setMemberRole(interaction.guildId!, role.id);
@@ -153,7 +153,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMemberRoleRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeMemberRole(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -173,7 +173,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputUnverifiedRoleSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().setUnverifiedRole(interaction.guildId!, role.id);
@@ -202,7 +202,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputUnverifiedRoleRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeUnverifiedRole(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -222,7 +222,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputStaffRoleAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().addStaffRole(interaction.guildId!, role.id);
@@ -251,7 +251,7 @@ export class RoleCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputStaffRoleRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().removeStaffRole(interaction.guildId!, role.id);

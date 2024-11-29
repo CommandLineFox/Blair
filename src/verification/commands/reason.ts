@@ -101,7 +101,7 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const reason = interaction.options.getString("reason", true);
         const response = await Database.getInstance().addBanReason(interaction.guildId!, reason);
@@ -129,7 +129,7 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const index = interaction.options.getInteger("index", true);
         const response = await Database.getInstance().removeBanReason(interaction.guildId!, index);
@@ -157,7 +157,7 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const reason = interaction.options.getString("reason", true);
         const response = await Database.getInstance().addKickReason(interaction.guildId!, reason);
@@ -185,7 +185,7 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ ephemeral: true });
 
         const index = interaction.options.getInteger("index", true);
         const response = await Database.getInstance().removeKickReason(interaction.guildId!, index);
