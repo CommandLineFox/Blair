@@ -58,9 +58,7 @@ export class DenyCommand extends Command {
         }
 
         const result = await this.denyUser(message, message.author, action);
-        if (!result.success) {
-            await message.reply({ content: result.message });
-        }
+        await message.reply({ content: result.message });
     }
 
     /**
