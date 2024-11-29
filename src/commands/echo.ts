@@ -10,7 +10,8 @@ export class PingCommand extends Command {
             description: 'Echo',
             detailedDescription: "Echo",
             requiredUserPermissions: [PermissionFlagsBits.Administrator],
-            runIn: CommandOptionsRunTypeEnum.GuildText
+            runIn: CommandOptionsRunTypeEnum.GuildText,
+            preconditions: ['UptimeCheck']
         });
     }
 

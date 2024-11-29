@@ -11,7 +11,8 @@ export class ListCommand extends Command {
             description: 'List all configuration settings for the guild',
             detailedDescription: "List all configuration settings for the guild",
             runIn: CommandOptionsRunTypeEnum.GuildText,
-            requiredUserPermissions: [PermissionFlagsBits.Administrator]
+            requiredUserPermissions: [PermissionFlagsBits.Administrator],
+            preconditions: ['UptimeCheck']
         });
     }
 

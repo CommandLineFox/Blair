@@ -29,7 +29,8 @@ export class ReasonCommand extends Subcommand {
                 },
             ],
             runIn: CommandOptionsRunTypeEnum.GuildText,
-            requiredUserPermissions: [PermissionFlagsBits.Administrator]
+            requiredUserPermissions: [PermissionFlagsBits.Administrator],
+            preconditions: ['UptimeCheck']
         });
     }
 

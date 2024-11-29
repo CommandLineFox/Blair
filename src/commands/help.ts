@@ -8,7 +8,8 @@ export class PingCommand extends Command {
             name: "help",
             description: 'List all available commands',
             detailedDescription: "List all available commands",
-            requiredUserPermissions: [PermissionFlagsBits.Administrator]
+            requiredUserPermissions: [PermissionFlagsBits.Administrator],
+            preconditions: ['UptimeCheck']
         });
     }
 

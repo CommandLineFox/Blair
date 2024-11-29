@@ -11,7 +11,8 @@ export class ApproveCommand extends Command {
             name: 'approve',
             description: 'Approve a user during questioning',
             detailedDescription: "Approve a user during questioning",
-            runIn: CommandOptionsRunTypeEnum.GuildText
+            runIn: CommandOptionsRunTypeEnum.GuildText,
+            preconditions: ['UptimeCheck']
         });
     }
 

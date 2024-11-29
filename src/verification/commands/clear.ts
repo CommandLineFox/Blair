@@ -12,7 +12,8 @@ export class ClearCommand extends Command {
             description: 'Removes a pending application',
             detailedDescription: "Removes a pending application",
             runIn: CommandOptionsRunTypeEnum.GuildText,
-            requiredUserPermissions: [PermissionFlagsBits.Administrator]
+            requiredUserPermissions: [PermissionFlagsBits.Administrator],
+            preconditions: ['UptimeCheck']
         });
     }
 
