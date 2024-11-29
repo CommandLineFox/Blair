@@ -106,6 +106,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
@@ -140,6 +144,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeWelcomeChannel(interaction.guildId!);
@@ -160,6 +168,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
         await interaction.editReply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
 
@@ -252,6 +264,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeWelcomeMessage(interaction.guildId!);
@@ -272,6 +288,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleEnable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().enableWelcomeToggle(interaction.guildId!);
@@ -292,6 +312,10 @@ export class WelcomeCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleDisable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().disableWelcomeToggle(interaction.guildId!);

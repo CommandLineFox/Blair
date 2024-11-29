@@ -90,6 +90,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
@@ -123,6 +127,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeGuideChannel(interaction.guildId!);
@@ -139,6 +147,10 @@ export class GuideCommand extends Subcommand {
     }
 
     public async chatInputGuideMessageSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
         await interaction.editReply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
 
@@ -231,6 +243,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessageRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeGuideMessage(interaction.guildId!);
@@ -252,6 +268,10 @@ export class GuideCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputGuideMessagePost(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const database = Database.getInstance();

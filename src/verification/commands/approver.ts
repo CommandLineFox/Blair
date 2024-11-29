@@ -73,6 +73,10 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const user = interaction.options.getUser("user", true);
@@ -98,6 +102,10 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const user = interaction.options.getUser("user", true);
@@ -123,6 +131,10 @@ export class ApproverCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputApproverList(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const approvers = await Database.getInstance().getVerificationApprovers(interaction.guild!);

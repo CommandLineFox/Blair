@@ -8,7 +8,7 @@ export class PingCommand extends Command {
             name: "ping",
             description: 'Check if the bot is responsive',
             detailedDescription: "Check if the bot is responsive",
-            preconditions: ['OwnerOnly']
+            preconditions: ['OwnerOnly', 'UptimeCheck']
         });
     }
 
@@ -22,6 +22,10 @@ export class PingCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
         await interaction.editReply({ content: "Pong" });
     }

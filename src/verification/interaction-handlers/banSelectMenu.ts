@@ -2,7 +2,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import Database from '../../database/database';
 import { Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction } from 'discord.js';
 import { Menus } from '../../types/component';
-import { getModerationReason, isStaff, logQuestioning } from '../../utils/utils';
+import { blockFreshInteraction, getModerationReason, isStaff, logQuestioning } from '../../utils/utils';
 
 export class BanMenunHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -45,7 +45,17 @@ export class BanMenunHandler extends InteractionHandler {
      * @param interaction The menu interaction
      */
     public async run(interaction: StringSelectMenuInteraction, verificationMessage: Message): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
+
+        //Prevent this from running if the bot was started less than 5 minutes ago
+        const blockInteraction = await blockFreshInteraction(interaction);
+        if (blockInteraction) {
+            return;
+        }
 
         if (!interaction.guild) {
             await interaction.editReply({ content: "This menu can only work in a guild" });

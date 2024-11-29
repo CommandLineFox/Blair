@@ -2,7 +2,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import Database from '../../database/database';
 import { PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
 import { Buttons, getKickReasonComponent } from '../../types/component';
-import { isStaff } from '../../utils/utils';
+import { blockFreshInteraction, isStaff } from '../../utils/utils';
 
 export class KickButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -25,7 +25,17 @@ export class KickButtonHandler extends InteractionHandler {
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
+
+        //Prevent this from running if the bot was started less than 5 minutes ago
+        const blockInteraction = await blockFreshInteraction(interaction);
+        if (blockInteraction) {
+            return;
+        }
 
         if (!interaction.guild) {
             await interaction.editReply({ content: "This button can only work in a guild" });

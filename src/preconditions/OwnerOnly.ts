@@ -5,17 +5,17 @@ import { Config } from "../types/config";
 export class OwnerOnlyPrecondition extends Precondition {
     public override async messageRun(message: Message): Promise<Result<unknown, UserError>> {
         // for Message Commands
-        return this.checkOwner(message.author.id);
+        return await this.checkOwner(message.author.id);
     }
 
     public override async chatInputRun(interaction: CommandInteraction): Promise<Result<unknown, UserError>> {
         // for Slash Commands
-        return this.checkOwner(interaction.user.id);
+        return await this.checkOwner(interaction.user.id);
     }
 
     public override async contextMenuRun(interaction: ContextMenuCommandInteraction): Promise<Result<unknown, UserError>> {
         // for Context Menu Command
-        return this.checkOwner(interaction.user.id);
+        return await this.checkOwner(interaction.user.id);
     }
 
     /**

@@ -25,6 +25,10 @@ export class ApproveCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);

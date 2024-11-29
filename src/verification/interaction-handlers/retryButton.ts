@@ -2,7 +2,7 @@ import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework
 import Database from '../../database/database';
 import { type ButtonInteraction, type DMChannel, type Message } from 'discord.js';
 import { Buttons, getDmVerificationComponent } from '../../types/component';
-import { postVerificationMessage } from '../../utils/utils';
+import { blockFreshInteraction, postVerificationMessage } from '../../utils/utils';
 
 export class RetryButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -35,7 +35,17 @@ export class RetryButtonHandler extends InteractionHandler {
      * @param guildId The guild that this verification is from
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
+
+        //Prevent this from running if the bot was started less than 5 minutes ago
+        const blockInteraction = await blockFreshInteraction(interaction);
+        if (blockInteraction) {
+            return;
+        }
         await interaction.editReply("Retrying application:");
 
         const channel = await interaction.client.channels.fetch(interaction.channelId);

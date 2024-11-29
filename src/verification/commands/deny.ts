@@ -32,6 +32,10 @@ export class DenyCommand extends Command {
         );
     }
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const action = interaction.options.getString('action');

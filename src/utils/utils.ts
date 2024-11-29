@@ -1,6 +1,6 @@
 import Database from "../database/database";
 import { PendingApplication } from "../database/models/pendingApllication";
-import { AttachmentBuilder, ButtonInteraction, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User } from "discord.js";
+import { AttachmentBuilder, ButtonInteraction, ChatInputCommandInteraction, Client, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User } from "discord.js";
 import { getHandlingComponent } from "../types/component";
 
 /**
@@ -173,4 +173,45 @@ export async function logQuestioning(questioningChannel: TextChannel, questionin
     const logBuffer = Buffer.from(logs, 'utf-8');
 
     await questioningLogChannel.send({ content: `Questioning logs ${member.user.username} (${member.user.id}):`, files: [new AttachmentBuilder(logBuffer, { name: 'questioning_log.txt' })] });
+}
+
+/**
+ * Checks if the bot's uptime exceeds the specified minimum time.
+ * @param client The bot client
+ * @returns The remaining time in milliseconds if the bot hasn't reached the uptime or null
+ */
+export function getRemainingUptime(client: Client): number | null {
+    const minUptime = 5 * 60 * 1000;
+    const currentTime = Date.now();
+    const botStartTime = client.readyTimestamp ?? currentTime;
+
+    // Calculate the elapsed uptime
+    const elapsedTime = currentTime - botStartTime;
+
+    // If the bot has exceeded the minimum uptime, return null
+    if (elapsedTime >= minUptime) {
+        return null;
+    }
+
+    // Otherwise, return the remaining time
+    return minUptime - elapsedTime;
+}
+
+/**
+ * Prevent an interaction from running if the bot has been freshly started
+ * @param interaction The button or select menu interaction
+ */
+export async function blockFreshInteraction(interaction: ChatInputCommandInteraction | ButtonInteraction | StringSelectMenuInteraction): Promise<boolean> {
+    const remainingTime = getRemainingUptime(interaction.client);
+    if (!remainingTime) {
+        return false;
+    }
+
+    if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ content: `The bot is still warming up! Please wait ${Math.ceil(remainingTime / 1000)} more seconds.` });
+    } else {
+        await interaction.reply({ content: `The bot is still warming up! Please wait ${Math.ceil(remainingTime / 1000)} more seconds.` });
+    }
+
+    return true;
 }

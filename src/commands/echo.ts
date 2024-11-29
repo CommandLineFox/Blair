@@ -30,6 +30,10 @@ export class PingCommand extends Command {
     }
 
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         const messageContent = interaction.options.getString('message', true);
         await interaction.deferReply({ ephemeral: true });
 

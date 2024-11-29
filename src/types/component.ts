@@ -94,7 +94,7 @@ export function getHandlingComponent(userId: string): ActionRowBuilder<ButtonBui
  */
 export async function getBanReasonComponent(guild: Guild, verificationLogChannelId: string, verificationMessageId: string): Promise<ActionRowBuilder<StringSelectMenuBuilder>> {
     const database = Database.getInstance()
-    const banReasons = await database.getKickReasons(guild);
+    const banReasons = await database.getBanReasons(guild);
     let banMenu = banReasonMenu;
     banMenu.setCustomId(`${Menus.BAN_MENU}_${verificationLogChannelId}_${verificationMessageId}`);
 
@@ -102,9 +102,10 @@ export async function getBanReasonComponent(guild: Guild, verificationLogChannel
         for (const reason of banReasons) {
             banMenu.addOptions({ label: reason, value: reason });
         }
-
-        banMenu.addOptions({ label: "Custom", value: "Custom" });
     }
+
+    banMenu.addOptions({ label: "Custom", value: "Custom" });
+
     return new ActionRowBuilder<StringSelectMenuBuilder>({ components: [banMenu] });
 }
 
@@ -126,9 +127,9 @@ export async function getKickReasonComponent(guild: Guild, verificationLogChanne
         for (const reason of kickReasons) {
             kickMenu.addOptions(({ label: reason, value: reason }));
         }
-
-        kickMenu.addOptions({ label: "Custom", value: "Custom" });
     }
+
+    kickMenu.addOptions({ label: "Custom", value: "Custom" });
 
     return new ActionRowBuilder<StringSelectMenuBuilder>({ components: [kickMenu] });
 }

@@ -101,6 +101,10 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const reason = interaction.options.getString("reason", true);
@@ -129,6 +133,10 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputBanRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const index = interaction.options.getInteger("index", true);
@@ -157,6 +165,10 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickAdd(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const reason = interaction.options.getString("reason", true);
@@ -185,6 +197,10 @@ export class ReasonCommand extends Subcommand {
      * @param interaction Interaction for the command
      */
     public async chatInputKickRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const index = interaction.options.getInteger("index", true);

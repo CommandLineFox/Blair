@@ -89,6 +89,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategorySet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const categoryId = interaction.options.getString("category", true);
@@ -124,6 +128,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputCategoryRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeQuestioningCategory(interaction.guildId!);
@@ -144,6 +152,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const channel = interaction.options.getChannel("channel", true);
@@ -178,6 +190,10 @@ export class QuestioningCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputLogRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
         await interaction.deferReply({ ephemeral: true });
 
         const response = await Database.getInstance().removeQuestioningLog(interaction.guildId!);
