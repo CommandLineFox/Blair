@@ -96,10 +96,16 @@ export async function getBanReasonComponent(guild: Guild, verificationLogChannel
     const database = Database.getInstance()
     const banReasons = await database.getBanReasons(guild);
     let banMenu = banReasonMenu;
-    banMenu.setCustomId(`${Menus.BAN_MENU}_${verificationLogChannelId}_${verificationMessageId}`);
+    banMenu
+        .setCustomId(`${Menus.BAN_MENU}_${verificationLogChannelId}_${verificationMessageId}`)
+        .setOptions([]);
 
     if (banReasons) {
         for (const reason of banReasons) {
+            if (reason === "Custom") {
+                continue;
+            }
+
             banMenu.addOptions({ label: reason, value: reason });
         }
     }
@@ -121,10 +127,16 @@ export async function getKickReasonComponent(guild: Guild, verificationLogChanne
     const kickReasons = await database.getKickReasons(guild);
 
     let kickMenu = kickReasonMenu;
-    kickMenu.setCustomId(`${Menus.KICK_MENU}_${verificationLogChannelId}_${verificationMessageId}`);
+    kickMenu
+        .setCustomId(`${Menus.KICK_MENU}_${verificationLogChannelId}_${verificationMessageId}`)
+        .setOptions([]);
 
     if (kickReasons) {
         for (const reason of kickReasons) {
+            if (reason === "Custom") {
+                continue;
+            }
+
             kickMenu.addOptions(({ label: reason, value: reason }));
         }
     }
