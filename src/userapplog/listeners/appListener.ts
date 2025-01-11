@@ -55,7 +55,7 @@ export class AppListener extends Listener {
         }
 
         if (message.attachments.size > 0) {
-            embed.addFields([{ name: "Attachments", value: `${message.attachments.map(attachment => attachment.url).join('\n')}` }]);
+            embed.addFields([{ name: "Attachments", value: `${trimString(message.attachments.map(attachment => attachment.url).join('\n').trim(), 1024)}` }]);
         }
 
         if (message.embeds.length > 0) {
