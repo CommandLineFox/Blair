@@ -11,5 +11,6 @@ export class BotClient extends SapphireClient {
 
         //Register verification as a shard
         this.stores.registerPath(join(this.rootData.root, 'verification'));
+        this.stores.registerPath(join(this.rootData.root, 'userapplog'));
     }
 }
