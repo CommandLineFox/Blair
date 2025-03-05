@@ -1,5 +1,5 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { Colors, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel } from 'discord.js';
 import { CustomResponse } from '../../types/customResponse';
 import Database from '../../database/database';
 import { logQuestioning } from '../../utils/utils';
@@ -37,7 +37,7 @@ export class ClearCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const userId = interaction.options.getString('user', true);
 

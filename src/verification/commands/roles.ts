@@ -1,7 +1,7 @@
 import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { Message, PermissionFlagsBits } from "discord.js";
+import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
 
 export class RoleCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -129,7 +129,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().setMemberRole(interaction.guildId!, role.id);
@@ -162,7 +162,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeMemberRole(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -186,7 +186,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().setUnverifiedRole(interaction.guildId!, role.id);
@@ -219,7 +219,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeUnverifiedRole(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -243,7 +243,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().addStaffRole(interaction.guildId!, role.id);
@@ -276,7 +276,7 @@ export class RoleCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const role = interaction.options.getRole("role", true);
         const response = await Database.getInstance().removeStaffRole(interaction.guildId!, role.id);

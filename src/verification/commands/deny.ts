@@ -1,6 +1,6 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { CommandInteraction, Message, PermissionFlagsBits, User } from 'discord.js';
+import { CommandInteraction, Message, MessageFlags, PermissionFlagsBits, User } from 'discord.js';
 import { getBanReasonComponent, getKickReasonComponent } from '../../types/component';
 import { CustomResponse } from '../../types/customResponse';
 import { isStaff } from '../../utils/utils';
@@ -37,7 +37,7 @@ export class DenyCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const action = interaction.options.getString('action');
         if (!['kick', 'ban'].includes(action!)) {

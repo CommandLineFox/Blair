@@ -1,6 +1,6 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, Guild, Message, PermissionFlagsBits, TextChannel, User } from 'discord.js';
+import { Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel, User } from 'discord.js';
 import { CustomResponse } from '../../types/customResponse';
 import { isStaff, logQuestioning } from '../../utils/utils';
 
@@ -30,7 +30,7 @@ export class ApproveCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const result = await this.approveUser(interaction.guild!, interaction.channel!.id, interaction.user);
         await interaction.editReply({ content: result.message });

@@ -1,6 +1,6 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { Guild, Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { Guild, Message, EmbedBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { trimString } from "../../utils/utils";
 
 export class ListCommand extends Command {
@@ -30,7 +30,7 @@ export class ListCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const embed = await this.fetchValues(interaction.guild!);
         await interaction.editReply({ embeds: [embed] });

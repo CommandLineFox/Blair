@@ -1,5 +1,5 @@
 import { ApplicationCommandRegistries, Command } from '@sapphire/framework';
-import { EmbedBuilder, Guild, Message, PermissionFlagsBits } from 'discord.js';
+import { EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits } from 'discord.js';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -27,7 +27,7 @@ export class PingCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const embed = await this.createHelpEmbed(interaction.guild!);
         await interaction.editReply({ embeds: [embed] });

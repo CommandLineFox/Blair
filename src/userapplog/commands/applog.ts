@@ -1,7 +1,7 @@
 import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message } from "discord.js";
+import { PermissionFlagsBits, ChannelType, Message, MessageFlags } from "discord.js";
 
 export class AppLogCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -84,7 +84,7 @@ export class AppLogCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -118,7 +118,7 @@ export class AppLogCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputChannelRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeUserAppLogChannel(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -138,7 +138,7 @@ export class AppLogCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleEnable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().enableUserAppLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -158,7 +158,7 @@ export class AppLogCommand extends Subcommand {
      * @param interaction Interaction of the command
      */
     public async chatInputToggleDisable(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().disableUserAppLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });
