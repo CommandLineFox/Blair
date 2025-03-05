@@ -44,13 +44,19 @@ const reasonSchema = new Schema({
     ban: { type: [String] },
 }, { _id: false });
 
+const userAppLogSchema = new Schema({
+    enabled: { type: [Boolean] },
+    channel: { type: [String] },
+}, { _id: false });
+
 const configSchema = new Schema({
     verification: { type: verificationSchema },
     questioning: { type: questioningSchema },
     guide: { type: guideSchema },
     welcome: { type: welcomeSchema },
     roles: { type: rolesSchema },
-    reason: { type: reasonSchema }
+    reason: { type: reasonSchema },
+    userAppLog: { type: userAppLogSchema }
 }, { _id: false });
 
 const guildSchema = new Schema<DatabaseGuild>({
@@ -361,6 +367,8 @@ export default class Database {
             return { success: false, message: errorMessage };
         }
     }
+
+    //Guild config table
 
     /**
      * Set the guide channel
@@ -830,6 +838,62 @@ export default class Database {
     }
 
     /**
+     * Enable logging user apps usage
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public enableUserAppLog(guildId: string) {
+        return this.setValue(guildId, "config.userAppLog.enabled", true,
+            "User application logging is already enabled.",
+            "Successfully enabled user application logging.",
+            "Failed to enable user application logging."
+        );
+    }
+
+    /**
+     * Disable logging user apps usage
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public disableUserAppLog(guildId: string) {
+        return this.setValue(guildId, "config.userAppLog.enabled", false,
+            "User application logging is already disabled.",
+            "Successfully disabled user application logging.",
+            "Failed to disable user application logging."
+        );
+    }
+
+    /**
+     * Set the channel to log user app usage in
+     * @param guildId ID of the guild
+     * @param channelId ID of the channel
+     * @returns Response indicating success or failure
+     */
+    public setUserAppLogChannel(guildId: string, channelId: string) {
+        return this.setValue(
+            guildId, "config.userAppLog.channel", channelId,
+            `User application logging channel is already set to <#${channelId}>.`,
+            `Successfully set the user application logging channel to <#${channelId}>.`,
+            "Failed to set the user application logging channel."
+        );
+    }
+
+    /**
+     * Remove the channel to log user app usage in
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public removeUserAppLogChannel(guildId: string) {
+        return this.unsetValue(
+            guildId,
+            "config.userAppLog.channel",
+            "User application logging channel is not set.",
+            "Successfully removed the user application logging channel.",
+            "Failed to remove the user application logging channel."
+        );
+    }
+
+    /**
      * Get the guide channel for a specified guild
      * @param guild The guild to search in
      * @returns The channel if found or nothing
@@ -1206,6 +1270,41 @@ export default class Database {
     }
 
     /**
+     * Get whether the logging user apps feature is enabled or disabled
+     * @param guild The guild to search in
+     * @returns True if enabled and false if disabled or not set
+     */
+    public async getUserAppLogToggle(guild: Guild): Promise<boolean> {
+        const dbGuild = await this.getGuild(guild.id);
+        return dbGuild?.config?.userAppLog?.enabled || false;
+    }
+
+    /**
+     * Get the channel for logging user app usage in
+     * @param guild The guild to search in
+     * @returns The channel if found or nothing
+     */
+    public async getUserAppLogChannel(guild: Guild): Promise<TextChannel | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const userAppLogChannel = dbGuild?.config?.userAppLog?.channel;
+
+        if (!userAppLogChannel) {
+            return null;
+        }
+
+        const channel = await guild.channels.fetch(userAppLogChannel);
+        if (!channel || channel.type !== ChannelType.GuildText) {
+            await this.removeUserAppLogChannel(guild.id);
+            return null;
+        }
+
+        return channel;
+    }
+
+
+    //Pending application table
+
+    /**
      * Add a pending application to the list
      * @param guildId ID of the guild
      * @param pendingApplication The pending application object
@@ -1459,6 +1558,8 @@ export default class Database {
 
         return pendingApplication;
     }
+
+    //Optout table
 
     /**
      * Add a user to the opt-out list

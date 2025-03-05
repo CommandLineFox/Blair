@@ -1,7 +1,7 @@
 import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message } from "discord.js";
+import { PermissionFlagsBits, ChannelType, Message, MessageFlags } from "discord.js";
 
 export class QuestioningCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -94,7 +94,7 @@ export class QuestioningCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const categoryId = interaction.options.getString("category", true);
         const category = await interaction.guild?.channels.fetch(categoryId);
@@ -133,7 +133,7 @@ export class QuestioningCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeQuestioningCategory(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -157,7 +157,7 @@ export class QuestioningCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -195,7 +195,7 @@ export class QuestioningCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeQuestioningLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });

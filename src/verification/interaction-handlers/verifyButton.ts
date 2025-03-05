@@ -1,7 +1,7 @@
 import { InteractionHandler, InteractionHandlerTypes } from "@sapphire/framework";
 import Database from "../../database/database";
 import { PendingApplication } from "../../database/models/pendingApllication";
-import { ButtonInteraction, Message, DMChannel } from "discord.js";
+import { ButtonInteraction, Message, DMChannel, MessageFlags } from "discord.js";
 import { Buttons, getDmVerificationComponent } from "../../types/component";
 import { blockFreshInteraction } from "../../utils/utils";
 
@@ -30,7 +30,7 @@ export class VerifyButtonHandler extends InteractionHandler {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         //Prevent this from running if the bot was started less than 5 minutes ago
         const blockInteraction = await blockFreshInteraction(interaction);

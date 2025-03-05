@@ -1,5 +1,5 @@
 import { Command } from '@sapphire/framework';
-import { Message } from 'discord.js';
+import { Message, MessageFlags } from 'discord.js';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -26,7 +26,7 @@ export class PingCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await interaction.editReply({ content: "Pong" });
     }
 

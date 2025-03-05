@@ -1,7 +1,7 @@
 import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import Database from '../../database/database';
-import { Message, PermissionFlagsBits } from 'discord.js';
+import { Message, MessageFlags, PermissionFlagsBits } from 'discord.js';
 
 export class ApproverCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -78,7 +78,7 @@ export class ApproverCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const user = interaction.options.getUser("user", true);
 
@@ -107,7 +107,7 @@ export class ApproverCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const user = interaction.options.getUser("user", true);
 
@@ -136,7 +136,7 @@ export class ApproverCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const approvers = await Database.getInstance().getVerificationApprovers(interaction.guild!);
         if (!approvers) {

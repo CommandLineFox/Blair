@@ -1,6 +1,6 @@
 import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import Database from '../../database/database';
-import { Guild, Message, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { Guild, Message, EmbedBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { trimString } from "../../utils/utils";
 
 export class ListCommand extends Command {
@@ -30,7 +30,7 @@ export class ListCommand extends Command {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const embed = await this.fetchValues(interaction.guild!);
         await interaction.editReply({ embeds: [embed] });
@@ -67,6 +67,9 @@ export class ListCommand extends Command {
         const kickReasons = await database.getKickReasons(guild);
         const banReasons = await database.getBanReasons(guild);
 
+        const userAppLogToggle = await database.getUserAppLogToggle(guild);
+        const userAppLogChannel = await database.getUserAppLogChannel(guild);
+
         const displayGuideChannel = guideChannel ? `<#${guideChannel.id}>` : 'Not set';
         const displayGuideMessage = guideMessage ? trimString(guideMessage, 1024) : 'Not set';
 
@@ -90,6 +93,9 @@ export class ListCommand extends Command {
         const displayKickReasons = kickReasons ? trimString(kickReasons.reduce((accumulator, currentReason, index) => accumulator + `${index + 1}. ${currentReason}\n`, '').trim(), 1024) : 'Not set';
         const displayBanReasons = banReasons ? trimString(banReasons.reduce((accumulator, currentReason, index) => accumulator + `${index + 1}. ${currentReason}\n`, '').trim(), 1024) : 'Not set';
 
+        const displayUserAppLogToggle = userAppLogToggle ? "Enabled" : "Disabled";
+        const displayUserAppLogChannel = userAppLogChannel ? `<#${userAppLogChannel.id}>` : "Not set";
+
         const displayNames = [
             'Guide channel (Where the message with the verify button will be posted)',
             'Guide message (the message with the verify button)',
@@ -107,7 +113,9 @@ export class ListCommand extends Command {
             'Unverified role',
             'Staff roles',
             'Kick reasons (list of reasons to choose from for kicking)',
-            'Ban reasons (list of reasons to choose from for banning)'
+            'Ban reasons (list of reasons to choose from for banning)',
+            'User app log toggle (toggle whether to log user app usage)',
+            'User app log channel (the channel to log user app usage in)'
         ];
         const displayValues = [
             displayGuideChannel,
@@ -126,7 +134,9 @@ export class ListCommand extends Command {
             displayUnverifiedRole,
             displayStaffRoles,
             displayKickReasons,
-            displayBanReasons
+            displayBanReasons,
+            displayUserAppLogToggle,
+            displayUserAppLogChannel
         ];
         const embedFields = displayValues.reduce((accumulator, currentValue, index) => accumulator.concat([{ name: displayNames[index]!, value: currentValue }]), [] as { name: string; value: string }[]);
 

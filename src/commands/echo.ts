@@ -1,5 +1,5 @@
 import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { ChannelType, Message, PermissionFlagsBits, TextBasedChannel } from 'discord.js';
+import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextBasedChannel } from 'discord.js';
 import { CustomResponse } from '../types/customResponse';
 
 export class PingCommand extends Command {
@@ -36,7 +36,7 @@ export class PingCommand extends Command {
         }
 
         const messageContent = interaction.options.getString('message', true);
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         if (!interaction.channel) {
             await interaction.editReply({ content: "Couldn't find the channel" });

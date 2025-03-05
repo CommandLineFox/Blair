@@ -50,6 +50,11 @@ interface Reason {
     ban?: string[];
 }
 
+interface UserAppLog {
+    enabled?: boolean;
+    channel?: string;
+}
+
 interface Config {
     verification?: Verification;
     questioning?: Questioning;
@@ -57,6 +62,7 @@ interface Config {
     welcome?: Welcome;
     roles?: Roles;
     reason?: Reason;
+    userAppLog?: UserAppLog;
 }
 
 export interface DatabaseGuild {

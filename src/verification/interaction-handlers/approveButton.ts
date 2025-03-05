@@ -1,6 +1,6 @@
 import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
+import { Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
 import { Buttons } from '../../types/component';
 import { blockFreshInteraction, isStaff } from '../../utils/utils';
 
@@ -29,7 +29,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         //Prevent this from running if the bot was started less than 5 minutes ago
         const blockInteraction = await blockFreshInteraction(interaction);

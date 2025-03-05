@@ -1,7 +1,7 @@
 import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message, TextChannel } from "discord.js";
+import { PermissionFlagsBits, ChannelType, Message, TextChannel, MessageFlags } from "discord.js";
 
 export class WelcomeCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -111,7 +111,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -149,7 +149,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeWelcomeChannel(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -173,7 +173,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await interaction.editReply("Please enter the message you would like to use as the welcome message below within the next 2 minutes. Use [member] for the user mention.");
 
         const channel = interaction.channel;
@@ -269,7 +269,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeWelcomeMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -293,7 +293,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().enableWelcomeToggle(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -317,7 +317,7 @@ export class WelcomeCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().disableWelcomeToggle(interaction.guildId!);
         await interaction.editReply({ content: response.message });

@@ -1,7 +1,7 @@
 import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { ChannelType, Message, PermissionFlagsBits, TextChannel } from "discord.js";
+import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel } from "discord.js";
 
 export class VerificationCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -194,7 +194,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await interaction.editReply("Please enter the message you would like to use as the starting verification message below within the next 2 minutes");
 
         const channel = interaction.channel;
@@ -290,7 +290,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeVerificationMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -314,7 +314,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await interaction.editReply("Please enter the message you would like to use as the verification ending message below within the next 2 minutes");
 
         const channel = interaction.channel;
@@ -410,7 +410,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeVerificationEndingMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -434,7 +434,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const question = interaction.options.getString("question", true);
         const response = await Database.getInstance().addVerificationQuestion(interaction.guildId!, question);
@@ -466,7 +466,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const index = interaction.options.getInteger("index", true);
         if (index < 0) {
@@ -503,7 +503,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const fromIndex = interaction.options.getInteger("from", true) - 1;
         const toIndex = interaction.options.getInteger("to", true) - 1;
@@ -542,7 +542,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -580,7 +580,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeVerificationLog(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -605,7 +605,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -643,7 +643,7 @@ export class VerificationCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeVerificationHistory(interaction.guildId!);
         await interaction.editReply({ content: response.message });

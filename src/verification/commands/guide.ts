@@ -1,7 +1,7 @@
 import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
 import { Subcommand } from '@sapphire/plugin-subcommands';
 import Database from '../../database/database';
-import { ChannelType, Message, PermissionFlagsBits, TextChannel } from 'discord.js';
+import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel } from 'discord.js';
 import { getGuideComponent } from '../../types/component';
 
 export class GuideCommand extends Subcommand {
@@ -95,7 +95,7 @@ export class GuideCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const channel = interaction.options.getChannel("channel", true);
         if (channel.type !== ChannelType.GuildText) {
@@ -132,7 +132,7 @@ export class GuideCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeGuideChannel(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -152,7 +152,7 @@ export class GuideCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         await interaction.editReply("Please enter the message you would like to use as the guide message below within the next 2 minutes");
 
         const channel = interaction.channel;
@@ -248,7 +248,7 @@ export class GuideCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const response = await Database.getInstance().removeGuideMessage(interaction.guildId!);
         await interaction.editReply({ content: response.message });
@@ -273,7 +273,7 @@ export class GuideCommand extends Subcommand {
             await interaction.deleteReply();
         }
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const database = Database.getInstance();
         const guideChannel = await database.getGuideChannel(interaction.guild!);
