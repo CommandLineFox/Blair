@@ -8,7 +8,7 @@ export class PingCommand extends Command {
             name: "ping",
             description: 'Check if the bot is responsive',
             detailedDescription: "Check if the bot is responsive",
-            preconditions: ['OwnerOnly', 'UptimeCheck']
+            preconditions: ['UptimeCheck']
         });
     }
 
