@@ -2,7 +2,7 @@ import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
 import {MessageFlags, PermissionFlagsBits, type ButtonInteraction} from 'discord.js';
 import {Buttons, getBanReasonComponent} from '../../types/component';
-import {blockFreshInteraction, isStaff} from '../../utils/utils';
+import {blockFreshInteraction, fetchChannelFromClient, fetchMember, isStaff} from '../../utils/utils';
 
 export class KickButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -47,7 +47,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const staffMember = await interaction.guild.members.fetch(interaction.member.user.id);
+        const staffMember = await fetchMember(interaction.guild, interaction.member.user.id);
         if (!staffMember) {
             await interaction.editReply({ content: "Couldn't find the member in the server" });
             return;
@@ -59,7 +59,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const channel = await interaction.client.channels.fetch(interaction.channelId);
+        const channel = await fetchChannelFromClient(interaction.client, interaction.channelId);
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the channel." });
             return;
@@ -79,7 +79,7 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        const member = await interaction.guild.members.fetch(pendingApplication.userId);
+        const member = await fetchMember(interaction.guild, pendingApplication.userId);
         if (!member) {
             await interaction.editReply({ content: "Couldn't find the member." });
             return;
@@ -108,8 +108,8 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
-        await database.setPendingApplicationCurrentlyActive(interaction.user.id, interaction.guild.id);
-        await database.setPendingApplicationCurrentStaffMember(interaction.user.id, interaction.guild.id, staffMember.id);
+        await database.setPendingApplicationCurrentlyActive(pendingApplication.userId, interaction.guild.id);
+        await database.setPendingApplicationCurrentStaffMember(pendingApplication.userId, interaction.guild.id, staffMember.id);
 
         const row = await getBanReasonComponent(interaction.guild, channel.id, messageId);
         await interaction.editReply({ content: "Please pick a reason or enter a custom one", components: [row] });

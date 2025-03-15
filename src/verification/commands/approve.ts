@@ -2,7 +2,7 @@ import {Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
 import Database from '../../database/database';
 import {Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel, User} from 'discord.js';
 import {CustomResponse} from '../../types/customResponse';
-import {isStaff, logQuestioning} from '../../utils/utils';
+import {fetchChannelFromGuild, fetchMember, isStaff, logQuestioning} from '../../utils/utils';
 
 export class ApproveCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -42,7 +42,11 @@ export class ApproveCommand extends Command {
     }
 
     private async approveUser(guild: Guild, channelId: string, staffMember: User): Promise<CustomResponse> {
-        const staffmemberMember = await guild.members.fetch(staffMember);
+        const staffmemberMember = await fetchMember(guild, staffMember.id);
+        if (!staffmemberMember) {
+            return { success: false, message: "Couldn't find the member" }
+        }
+
         const staffCheck = await isStaff(staffmemberMember);
         if (!staffCheck) {
             return { success: false, message: "Only staff members can interact with this." };
@@ -56,7 +60,7 @@ export class ApproveCommand extends Command {
             return { success: false, message: "Couldn't find the pending application." };
         }
 
-        const questioningChannel = await guild.channels.fetch(channelId);
+        const questioningChannel = await fetchChannelFromGuild(guild, channelId);
         if (!questioningChannel) {
             return { success: false, message: "Couldn't find the questioning channel." };
         }
@@ -139,7 +143,7 @@ export class ApproveCommand extends Command {
             return { success: false, message: "Couldn't find the member role." };
         }
 
-        const member = await guild.members.fetch(pendingApplication.userId);
+        const member = await fetchMember(guild, pendingApplication.userId);
         if (!member) {
             return { success: false, message: "Couldn't find the member." };
         }

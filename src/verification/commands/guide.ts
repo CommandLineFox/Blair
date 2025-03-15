@@ -3,6 +3,7 @@ import {Subcommand} from '@sapphire/plugin-subcommands';
 import Database from '../../database/database';
 import {ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel} from 'discord.js';
 import {getGuideComponent} from '../../types/component';
+import {fetchChannelFromGuild} from "../../utils/utils";
 
 export class GuideCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -289,7 +290,7 @@ export class GuideCommand extends Subcommand {
             return;
         }
 
-        const channel = await interaction.guild?.channels.fetch(guideChannel.id);
+        const channel = await fetchChannelFromGuild(interaction.guild!, guideChannel.id);
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the guide channel" });
             return;
@@ -337,7 +338,7 @@ export class GuideCommand extends Subcommand {
             return;
         }
 
-        const channel = await message.guild?.channels.fetch(guideChannel.id);
+        const channel = await fetchChannelFromGuild(message.guild!, guideChannel.id);
         if (!channel) {
             await message.reply({ content: "Couldn't find the guide channel" });
             return;

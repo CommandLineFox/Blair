@@ -3,7 +3,7 @@ import Database from '../../database/database';
 import {CommandInteraction, Message, MessageFlags, PermissionFlagsBits, User} from 'discord.js';
 import {getBanReasonComponent, getKickReasonComponent} from '../../types/component';
 import {CustomResponse} from '../../types/customResponse';
-import {isStaff} from '../../utils/utils';
+import {fetchChannelFromGuild, fetchMember, isStaff} from '../../utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -78,7 +78,11 @@ export class DenyCommand extends Command {
         const guild = interactionOrMessage.guild!;
         const channelId = interactionOrMessage.channelId;
 
-        const staffmemberMember = await guild.members.fetch(staffMember);
+        const staffmemberMember = await fetchMember(guild, staffMember.id);
+        if (!staffmemberMember) {
+            return { success: false, message: "Couldn't find the member" };
+        }
+
         const staffCheck = await isStaff(staffmemberMember);
         if (!staffCheck) {
             return { success: false, message: "Only staff members can interact with this" };
@@ -92,7 +96,7 @@ export class DenyCommand extends Command {
             return { success: false, message: "Couldn't find the pending application" };
         }
 
-        const questioningChannel = await guild.channels.fetch(channelId);
+        const questioningChannel = await fetchChannelFromGuild(guild, channelId);
         if (!questioningChannel) {
             return { success: false, message: "Couldn't find the questioning channel" };
         }
@@ -126,7 +130,7 @@ export class DenyCommand extends Command {
             return { success: false, message: "The bot doesn't have the permission to delete the questioning channel" };
         }
 
-        const member = await guild.members.fetch(pendingApplication.userId);
+        const member = await fetchMember(guild, pendingApplication.userId);
         if (!member) {
             return { success: false, message: "Couldn't find the member." };
         }

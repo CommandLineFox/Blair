@@ -2,7 +2,7 @@ import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
 import {MessageFlags, type ButtonInteraction, type DMChannel, type Message} from 'discord.js';
 import {Buttons, getDmVerificationComponent} from '../../types/component';
-import {blockFreshInteraction, postVerificationMessage} from '../../utils/utils';
+import {blockFreshInteraction, fetchChannelFromClient, postVerificationMessage} from '../../utils/utils';
 
 export class RetryButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -48,7 +48,7 @@ export class RetryButtonHandler extends InteractionHandler {
         }
         await interaction.editReply("Retrying application:");
 
-        const channel = await interaction.client.channels.fetch(interaction.channelId);
+        const channel = await fetchChannelFromClient(interaction.client, interaction.channelId);
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the channel." });
             return;

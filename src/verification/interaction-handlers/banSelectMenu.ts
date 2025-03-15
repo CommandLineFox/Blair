@@ -10,7 +10,7 @@ import {
     MessageFlags
 } from 'discord.js';
 import {Menus} from '../../types/component';
-import {blockFreshInteraction, getModerationReason, isStaff, logQuestioning} from '../../utils/utils';
+import {blockFreshInteraction, fetchChannelFromClient, fetchChannelFromGuild, fetchMember, getModerationReason, isStaff, logQuestioning} from '../../utils/utils';
 
 export class BanMenunHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -31,7 +31,7 @@ export class BanMenunHandler extends InteractionHandler {
             return this.none();
         }
 
-        const verificationLogChannel = await interaction.guild?.channels.fetch(channelId);
+        const verificationLogChannel = await fetchChannelFromGuild(interaction.guild!, channelId);
         if (!verificationLogChannel) {
             return this.none();
         }
@@ -76,7 +76,7 @@ export class BanMenunHandler extends InteractionHandler {
             return;
         }
 
-        const staffMember = await interaction.guild.members.fetch(interaction.member.user.id);
+        const staffMember = await fetchMember(interaction.guild, interaction.member.user.id);
         if (!staffMember) {
             await interaction.editReply({ content: "Couldn't find the member in the server" });
             return;
@@ -89,7 +89,7 @@ export class BanMenunHandler extends InteractionHandler {
         }
 
 
-        const channel = await interaction.client.channels.fetch(interaction.channelId) as TextChannel;
+        const channel = await fetchChannelFromClient(interaction.client, interaction.channelId) as TextChannel;
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the channel." });
             return;
@@ -109,7 +109,7 @@ export class BanMenunHandler extends InteractionHandler {
             return;
         }
 
-        const member = await interaction.guild.members.fetch(pendingApplication.userId);
+        const member = await fetchMember(interaction.guild, pendingApplication.userId);
         if (!member) {
             await interaction.editReply({ content: "Couldn't find the member." });
             return;
@@ -158,7 +158,7 @@ export class BanMenunHandler extends InteractionHandler {
         //If there's ongoing questioning delete the channel
         const questioningChannelId = pendingApplication.questioningChannelId;
         if (questioningChannelId) {
-            const questioningChannel = await interaction.guild.channels.fetch(questioningChannelId);
+            const questioningChannel = await fetchChannelFromGuild(interaction.guild, questioningChannelId);
             const questioningLogChannel = await database.getQuestioningLog(interaction.guild);
 
             if (questioningChannel && questioningLogChannel) {

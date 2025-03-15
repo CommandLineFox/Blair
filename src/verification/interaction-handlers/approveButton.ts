@@ -2,7 +2,7 @@ import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
 import {Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction} from 'discord.js';
 import {Buttons} from '../../types/component';
-import {blockFreshInteraction, isStaff} from '../../utils/utils';
+import {blockFreshInteraction, fetchChannelFromClient, fetchMember, isStaff} from '../../utils/utils';
 
 export class ApproveButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -47,7 +47,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        const staffMember = await interaction.guild.members.fetch(interaction.member.user.id);
+        const staffMember = await fetchMember(interaction.guild, interaction.member.user.id);
         if (!staffMember) {
             await interaction.editReply({ content: "Couldn't find the member in the server" });
             return;
@@ -66,7 +66,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        const channel = await interaction.client.channels.fetch(interaction.channelId);
+        const channel = await fetchChannelFromClient(interaction.client, interaction.channelId);
         if (!channel) {
             await interaction.editReply({ content: "Couldn't find the channel." });
             return;
@@ -132,7 +132,7 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        const member = await interaction.guild.members.fetch(pendingApplication.userId);
+        const member = await fetchMember(interaction.guild, pendingApplication.userId);
         if (!member) {
             await interaction.editReply({ content: "Couldn't find the member." });
             return;

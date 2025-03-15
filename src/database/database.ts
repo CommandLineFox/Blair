@@ -3,7 +3,7 @@ import {CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel} fro
 import mongoose, {Document, Model, Schema} from "mongoose";
 import {DatabaseConfig} from "../types/config";
 import {CustomResponse} from "../types/customResponse";
-import {trimString} from "../utils/utils";
+import {fetchChannelFromGuild, fetchMember, fetchRole, trimString} from "../utils/utils";
 import {DatabaseGuild} from "./models/guild";
 import {OptOut} from "./models/optOut";
 import {PendingApplication} from "./models/pendingApllication";
@@ -86,8 +86,8 @@ export default class Database {
 
     private config: DatabaseConfig;
     private GuildModel: Model<DatabaseGuild>;
-    private PendingApplicationModel: Model<PendingApplication>;
-    private OptOutModel: Model<OptOut>;
+    private readonly PendingApplicationModel: Model<PendingApplication>;
+    private readonly OptOutModel: Model<OptOut>;
 
     private constructor(config: DatabaseConfig) {
         this.config = config;
@@ -176,12 +176,11 @@ export default class Database {
     /**
      * Return data for a specific pending application by user ID
      * @param userId The user to search by
+     * @param guildId ID of the guild
      * @returns Pending application or null
      */
     private async getPendingApplicationFromDb(userId: string, guildId: string): Promise<PendingApplication | null> {
-        const pendingApplication = await this.PendingApplicationModel.findOne({ userId: userId, guildId: guildId });
-
-        return pendingApplication;
+        return this.PendingApplicationModel.findOne({ userId: userId, guildId: guildId });
     }
 
     /**
@@ -190,9 +189,7 @@ export default class Database {
      * @returns Pending application or null
      */
     private async getPendingApplicationByGuildId(guildId: string): Promise<PendingApplication[] | null> {
-        const pendingApplication = await this.PendingApplicationModel.find({ guildId: guildId });
-
-        return pendingApplication;
+        return this.PendingApplicationModel.find({ guildId: guildId });
     }
 
     /**
@@ -201,20 +198,16 @@ export default class Database {
      * @returns Pending application or null
      */
     private async getPendingApplicationByMessageId(messageId: string): Promise<PendingApplication | null> {
-        const pendingApllication = await this.PendingApplicationModel.findOne({ messageId: messageId });
-
-        return pendingApllication;
+        return this.PendingApplicationModel.findOne({ messageId: messageId });
     }
 
     /**
      * Return data for a specific pending application by message ID
-     * @param messageId The ID of the message
      * @returns Pending application or null
+     * @param questioningChannelId ID of the questioning channel
      */
     private async getPendingApplicationByQuestioningChannelId(questioningChannelId: string): Promise<PendingApplication | null> {
-        const pendingApllication = await this.PendingApplicationModel.findOne({ questioningChannelId: questioningChannelId });
-
-        return pendingApllication;
+        return this.PendingApplicationModel.findOne({ questioningChannelId: questioningChannelId });
     }
 
     /**
@@ -223,9 +216,7 @@ export default class Database {
      * @returns Whether the user is opted out or not
      */
     private async getOptOutByUser(userId: string): Promise<OptOut | null> {
-        const optOut = await this.OptOutModel.findOne({ userId: userId });
-
-        return optOut;
+        return this.OptOutModel.findOne({ userId: userId });
     }
 
     /**
@@ -262,7 +253,7 @@ export default class Database {
      * Unset a value in the database
      * @param guildId ID of the guild
      * @param databaseLocation Location of the object
-     * @param alreadySetMessage Error message for when a value is already set
+     * @param notSetMessage Error when message isn't set
      * @param successMessage Success message
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
@@ -600,7 +591,7 @@ export default class Database {
     /**
      * Add an approver to the list
      * @param guildId ID of the guild
-     * @param question Approver to be added
+     * @param approver ID of the approver
      * @returns Response indicating success or failure
      */
     public addVerificationApprover(guildId: string, approver: string) {
@@ -613,7 +604,7 @@ export default class Database {
     /**
      * Remove an approver from the list
      * @param guildId ID of the guild
-     * @param question Approver to be removed
+     * @param approver ID of the approver
      * @returns Response indicating success or failure
      */
     public removeVerificationApprover(guildId: string, approver: string) {
@@ -864,7 +855,7 @@ export default class Database {
     /**
      * Remove a kick reason from the list
      * @param guildId ID of the guild
-     * @param reason Kick reason to be removed
+     * @param questionIndex Index of the reason
      * @returns Response indicating success or failure
      */
     public removeKickReason(guildId: string, questionIndex: number) {
@@ -890,7 +881,7 @@ export default class Database {
     /**
      * Remove a ban reason from the list
      * @param guildId ID of the guild
-     * @param reason Ban reason to be removed
+     * @param questionIndex Index of the reason
      * @returns Response indicating success or failure
      */
     public removeBanReason(guildId: string, questionIndex: number) {
@@ -968,7 +959,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(guideChannel);
+        const channel = await fetchChannelFromGuild(guild, guideChannel);
         if (!channel) {
             await this.removeGuideChannel(guideChannel);
             return null;
@@ -1054,7 +1045,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(verificationLog);
+        const channel = await fetchChannelFromGuild(guild, verificationLog);
         if (!channel) {
             await this.removeVerificationLog(verificationLog);
             return null;
@@ -1082,7 +1073,7 @@ export default class Database {
 
         const approverList = [];
         for (const approverId of approvers) {
-            const member = await guild.members.fetch(approverId);
+            const member = await fetchMember(guild, approverId);
             if (!member) {
                 continue;
             }
@@ -1108,7 +1099,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(questioningCategory);
+        const channel = await fetchChannelFromGuild(guild, questioningCategory);
         if (!channel) {
             await this.removeQuestioningCategory(questioningCategory);
             return null;
@@ -1134,7 +1125,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(verificationHistory);
+        const channel = await fetchChannelFromGuild(guild, verificationHistory);
         if (!channel) {
             await this.removeVerificationHistory(verificationHistory);
             return null;
@@ -1160,7 +1151,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(questioningLog);
+        const channel = await fetchChannelFromGuild(guild, questioningLog);
         if (!channel) {
             await this.removeQuestioningLog(questioningLog);
             return null;
@@ -1186,7 +1177,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(welcomeChannel);
+        const channel = await fetchChannelFromGuild(guild, welcomeChannel);
         if (!channel) {
             await this.removeWelcomeChannel(welcomeChannel);
             return null;
@@ -1242,7 +1233,7 @@ export default class Database {
             return null;
         }
 
-        const role = await guild.roles.fetch(memberRole);
+        const role = await fetchRole(guild, memberRole);
         if (!role) {
             await this.removeMemberRole(memberRole);
             return null;
@@ -1263,7 +1254,7 @@ export default class Database {
             return null;
         }
 
-        const role = await guild.roles.fetch(unverifiedRole);
+        const role = await fetchRole(guild, unverifiedRole);
         if (!role) {
             await this.removeUnverifiedRole(unverifiedRole);
             return null;
@@ -1286,7 +1277,7 @@ export default class Database {
 
         const roleList = [];
         for (const staffRole of staffRoles) {
-            const role = await guild.roles.fetch(staffRole);
+            const role = await fetchRole(guild, staffRole);
             if (!role) {
                 await this.removeStaffRole(guild.id, staffRole);
                 continue;
@@ -1355,7 +1346,7 @@ export default class Database {
             return null;
         }
 
-        const channel = await guild.channels.fetch(userAppLogChannel);
+        const channel = await fetchChannelFromGuild(guild, userAppLogChannel);
         if (!channel || channel.type !== ChannelType.GuildText) {
             await this.removeUserAppLogChannel(guild.id);
             return null;
@@ -1369,7 +1360,6 @@ export default class Database {
 
     /**
      * Add a pending application to the list
-     * @param guildId ID of the guild
      * @param pendingApplication The pending application object
      * @returns Response indicating success or failure
      */
@@ -1521,6 +1511,7 @@ export default class Database {
             pendingApplication.set("currentlyActive", Date.now());
 
             await pendingApplication.save();
+            console.log("Successfully updated the currently active time for the pending application.");
             return { success: true, message: `Successfully updated currently active for <@${userId}> in the pending application.` };
         } catch (error) {
             return { success: false, message: "Failed to update the currently active field in the pending application." };
@@ -1544,6 +1535,7 @@ export default class Database {
             pendingApplication.set("currentStaffMember", staffMemberId);
 
             await pendingApplication.save();
+            console.log("Successfully updated the current staff member for the pending application.");
             return { success: true, message: `Successfully updated current staff member for <@${userId}> in the pending application.` };
         } catch (error) {
             return { success: false, message: "Failed to update the current staff member field in the pending application." };
@@ -1617,7 +1609,7 @@ export default class Database {
                 continue;
             }
 
-            const member = await guild.members.fetch(pendingApplication.userId);
+            const member = await fetchMember(guild, pendingApplication.userId);
             if (!member) {
                 await this.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                 continue;
@@ -1640,9 +1632,7 @@ export default class Database {
      * @returns Pending application if it exists
      */
     public async getPendingApplication(userId: string, guildId: string): Promise<PendingApplication | null> {
-        const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId);
-
-        return pendingApplication;
+        return await this.getPendingApplicationFromDb(userId, guildId);
     }
 
     /**
@@ -1651,20 +1641,16 @@ export default class Database {
      * @returns Pending application if it exists
      */
     public async getPendingApplicationFromMessage(messageId: string): Promise<PendingApplication | null> {
-        const pendingApplication = await this.getPendingApplicationByMessageId(messageId);
-
-        return pendingApplication;
+        return await this.getPendingApplicationByMessageId(messageId);
     }
 
     /**
      * Get a pending application by the questioning channel ID
-     * @param messageId The ID of the message
      * @returns Pending application if it exists
+     * @param questioningChannelId The ID of the pending application
      */
     public async getPendingApplicationFromQuestioningChannel(questioningChannelId: string): Promise<PendingApplication | null> {
-        const pendingApplication = await this.getPendingApplicationByQuestioningChannelId(questioningChannelId);
-
-        return pendingApplication;
+        return await this.getPendingApplicationByQuestioningChannelId(questioningChannelId);
     }
 
     //Optout table
@@ -1718,9 +1704,6 @@ export default class Database {
     public async getOptOut(userId: string): Promise<boolean> {
         const optOut = await this.getOptOutByUser(userId);
 
-        if (optOut) {
-            return true;
-        }
-        return false;
+        return !!optOut;
     }
 }

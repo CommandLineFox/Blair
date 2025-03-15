@@ -2,7 +2,7 @@ import {Args, Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
 import {Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel} from 'discord.js';
 import {CustomResponse} from '../../types/customResponse';
 import Database from '../../database/database';
-import {logQuestioning} from '../../utils/utils';
+import {fetchChannelFromGuild, fetchMember, logQuestioning} from '../../utils/utils';
 
 export class ClearCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -66,7 +66,7 @@ export class ClearCommand extends Command {
         }
 
         if (pendingApplication.questioningChannelId) {
-            const questioningChannel = await guild.channels.fetch(pendingApplication.questioningChannelId);
+            const questioningChannel = await fetchChannelFromGuild(guild, pendingApplication.questioningChannelId);
             if (!questioningChannel) {
                 return { success: false, message: "Couldn't find the questioning channel" };
             }
@@ -76,7 +76,7 @@ export class ClearCommand extends Command {
                 return { success: false, message: "Couldn't find the questioning log channel" };
             }
 
-            const member = await guild.members.fetch(userId);
+            const member = await fetchMember(guild, userId);
             if (!member) {
                 return { success: false, message: "Couldn't find the guild member" };
             }

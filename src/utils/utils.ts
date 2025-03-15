@@ -1,6 +1,6 @@
+import {AttachmentBuilder, ButtonInteraction, Channel, ChatInputCommandInteraction, Client, EmbedBuilder, Guild, GuildBasedChannel, GuildMember, PermissionFlagsBits, Role, StringSelectMenuInteraction, TextChannel, User} from "discord.js";
 import Database from "../database/database";
 import {PendingApplication} from "../database/models/pendingApllication";
-import {AttachmentBuilder, ButtonInteraction, ChatInputCommandInteraction, Client, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User} from "discord.js";
 import {getHandlingComponent} from "../types/component";
 
 /**
@@ -214,4 +214,56 @@ export async function blockFreshInteraction(interaction: ChatInputCommandInterac
     }
 
     return true;
+}
+
+/**
+ * Fetch a member from a guild
+ * @param guild The guild to fetch from
+ * @param memberId The ID of the member
+ */
+export async function fetchMember(guild: Guild, memberId: string): Promise<GuildMember | null> {
+    try {
+        return await guild.members.fetch(memberId);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Fetch a channel from a guild
+ * @param guild The guild to fetch from
+ * @param channelId The ID of the channel
+ */
+export async function fetchChannelFromGuild(guild: Guild, channelId: string): Promise<GuildBasedChannel | null> {
+    try {
+        return await guild.channels.fetch(channelId);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Fetch a channel from the client
+ * @param client The client to fetch from
+ * @param channelId The ID of the channel
+ */
+export async function fetchChannelFromClient(client: Client, channelId: string): Promise<Channel | null> {
+    try {
+        return await client.channels.fetch(channelId);
+    } catch (e) {
+        return null;
+    }
+}
+
+/**
+ * Fetch a role from a guild
+ * @param guild The guild to fetch from
+ * @param roleId The ID of the role
+ */
+export async function fetchRole(guild: Guild, roleId: string): Promise<Role | null> {
+    try {
+        return await guild.roles.fetch(roleId);
+    } catch (e) {
+        return null;
+    }
 }

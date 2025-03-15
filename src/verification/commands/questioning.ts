@@ -2,6 +2,7 @@ import {CommandOptionsRunTypeEnum, Args} from "@sapphire/framework";
 import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
 import {PermissionFlagsBits, ChannelType, Message, MessageFlags} from "discord.js";
+import {fetchChannelFromGuild} from "../../utils/utils";
 
 export class QuestioningCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -97,7 +98,7 @@ export class QuestioningCommand extends Subcommand {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const categoryId = interaction.options.getString("category", true);
-        const category = await interaction.guild?.channels.fetch(categoryId);
+        const category = await fetchChannelFromGuild(interaction.guild!, categoryId);
         if (!category || category.type !== ChannelType.GuildCategory) {
             await interaction.editReply({ content: "You need to provide a valid category channel." });
             return;

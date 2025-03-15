@@ -3,7 +3,7 @@ import Database from "../../database/database";
 import {PendingApplication} from "../../database/models/pendingApllication";
 import {ButtonInteraction, Message, DMChannel, MessageFlags} from "discord.js";
 import {Buttons, getDmVerificationComponent} from "../../types/component";
-import {blockFreshInteraction} from "../../utils/utils";
+import {blockFreshInteraction, fetchChannelFromClient} from "../../utils/utils";
 
 export class VerifyButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -107,7 +107,7 @@ export class VerifyButtonHandler extends InteractionHandler {
         }
 
         const verificationAnswers: string[] = [];
-        const dmChannel = await interaction.client.channels.fetch(verificationMessage.channel.id) as DMChannel;
+        const dmChannel = await fetchChannelFromClient(interaction.client, verificationMessage.channel.id) as DMChannel;
 
         //Post questions and gather answers
         for (const verificationQuestion of verificationQuestions) {
