@@ -1,12 +1,12 @@
 import {container} from "@sapphire/framework";
-import {DatabaseConfig} from "../types/config";
-import {DatabaseGuild} from "./models/guild";
-import mongoose, {Schema, Model, Document} from "mongoose";
 import {CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel} from "discord.js";
-import {trimString} from "../utils/utils";
-import {PendingApplication} from "./models/pendingApllication";
-import {OptOut} from "./models/optOut";
+import mongoose, {Document, Model, Schema} from "mongoose";
+import {DatabaseConfig} from "../types/config";
 import {CustomResponse} from "../types/customResponse";
+import {trimString} from "../utils/utils";
+import {DatabaseGuild} from "./models/guild";
+import {OptOut} from "./models/optOut";
+import {PendingApplication} from "./models/pendingApllication";
 
 const verificationSchema = new Schema({
     message: { type: String },
@@ -161,10 +161,17 @@ export default class Database {
      * @returns New or existing guild object
      */
     private async getGuild(id: string): Promise<DatabaseGuild | null> {
-        const guild = await this.GuildModel.findOneAndUpdate({ id }, { $setOnInsert: { id } }, { new: true, upsert: true });
-
-        return guild;
+        return this.GuildModel.findOneAndUpdate({ id }, { $setOnInsert: { id } }, { new: true, upsert: true });
     }
+
+    /**
+     * Delete a guild
+     * @param id ID of the guild
+     */
+    public async deleteGuild(id: string): Promise<void> {
+        await this.GuildModel.findOneAndDelete({ id });
+    }
+
 
     /**
      * Return data for a specific pending application by user ID
