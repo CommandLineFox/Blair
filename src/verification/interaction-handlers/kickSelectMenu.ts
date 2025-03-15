@@ -1,8 +1,8 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
-import { Menus } from '../../types/component';
-import { blockFreshInteraction, getModerationReason, isStaff, logQuestioning } from '../../utils/utils';
+import {Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction, MessageFlags} from 'discord.js';
+import {Menus} from '../../types/component';
+import {blockFreshInteraction, getModerationReason, isStaff, logQuestioning} from '../../utils/utils';
 
 export class KickMenuHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -43,6 +43,7 @@ export class KickMenuHandler extends InteractionHandler {
     /**
      * Handle what happens when the kick button is pressed in the verification log channel
      * @param interaction The menu interaction
+     * @param verificationMessage The message in the verification log channel
      */
     public async run(interaction: StringSelectMenuInteraction, verificationMessage: Message): Promise<void> {
         if (interaction.replied || interaction.deferred) {
@@ -145,7 +146,7 @@ export class KickMenuHandler extends InteractionHandler {
             if (questioningChannel && questioningLogChannel) {
                 //Putting the contents of the questioning channel into a file and logging it
                 await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
-                questioningChannel.delete("Questioning completed");
+                await questioningChannel.delete("Questioning completed");
             }
         }
 

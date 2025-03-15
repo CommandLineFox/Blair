@@ -1,8 +1,8 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
-import { Buttons } from '../../types/component';
-import { blockFreshInteraction, isStaff } from '../../utils/utils';
+import {Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction} from 'discord.js';
+import {Buttons} from '../../types/component';
+import {blockFreshInteraction, isStaff} from '../../utils/utils';
 
 export class ApproveButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -53,7 +53,8 @@ export class ApproveButtonHandler extends InteractionHandler {
             return;
         }
 
-        const botPermissions = interaction.guild.members.me?.permissions;;
+        const botPermissions = interaction.guild.members.me?.permissions;
+        ;
         if (!botPermissions?.has(PermissionFlagsBits.ManageRoles)) {
             await interaction.editReply({ content: "The bot doesn't have the manage roles permission" });
             return;

@@ -1,6 +1,6 @@
-import { Precondition, Result, UserError } from '@sapphire/framework';
-import type { Client, CommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
-import { getRemainingUptime } from '../utils/utils';
+import {Precondition, Result, UserError} from '@sapphire/framework';
+import type {Client, CommandInteraction, ContextMenuCommandInteraction, Message} from 'discord.js';
+import {getRemainingUptime} from '../utils/utils';
 
 export class UptimeCheckPrecondition extends Precondition {
     public override async messageRun(message: Message): Promise<Result<unknown, UserError>> {

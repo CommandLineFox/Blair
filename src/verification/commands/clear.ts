@@ -1,8 +1,8 @@
-import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel } from 'discord.js';
-import { CustomResponse } from '../../types/customResponse';
+import {Args, Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
+import {Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel} from 'discord.js';
+import {CustomResponse} from '../../types/customResponse';
 import Database from '../../database/database';
-import { logQuestioning } from '../../utils/utils';
+import {logQuestioning} from '../../utils/utils';
 
 export class ClearCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -19,15 +19,15 @@ export class ClearCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addStringOption((option) =>
-                    option
-                        .setName("user")
-                        .setDescription("ID of user to remove the pending application of")
-                        .setRequired(true)
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addStringOption((option) =>
+                        option
+                            .setName("user")
+                            .setDescription("ID of user to remove the pending application of")
+                            .setRequired(true)
+                    ),
             { idHints: ["1310732494290555033"] }
         );
     }

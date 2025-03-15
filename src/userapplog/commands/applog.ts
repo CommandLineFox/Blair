@@ -1,7 +1,7 @@
-import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
-import { Subcommand } from "@sapphire/plugin-subcommands";
+import {CommandOptionsRunTypeEnum, Args} from "@sapphire/framework";
+import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message, MessageFlags } from "discord.js";
+import {PermissionFlagsBits, ChannelType, Message, MessageFlags} from "discord.js";
 
 export class AppLogCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -36,45 +36,45 @@ export class AppLogCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("channel")
-                        .setDescription("Manage the application logging channel")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel for application logs")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel for application logs")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the application logging channel")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("toggle")
-                        .setDescription("Toggle the application logging feature")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("enable")
-                                .setDescription("Enable the application logging feature")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("disable")
-                                .setDescription("Disable the application logging feature")
-                        )
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("channel")
+                            .setDescription("Manage the application logging channel")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel for application logs")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel for application logs")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the application logging channel")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("toggle")
+                            .setDescription("Toggle the application logging feature")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("enable")
+                                    .setDescription("Enable the application logging feature")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("disable")
+                                    .setDescription("Disable the application logging feature")
+                            )
+                    ),
             { idHints: ["1327395197608263781"] }
         );
     }

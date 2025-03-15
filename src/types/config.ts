@@ -1,5 +1,5 @@
-import { GatewayIntentBits, Partials } from "discord.js";
-import { existsSync, readFileSync } from "fs";
+import {GatewayIntentBits, Partials} from "discord.js";
+import {existsSync, readFileSync} from "fs";
 import * as dotenv from "dotenv";
 
 export type ClientConfig = {

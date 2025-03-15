@@ -1,7 +1,7 @@
-import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import {Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Guild, Message, EmbedBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
-import { trimString } from "../../utils/utils";
+import {Guild, Message, EmbedBuilder, PermissionFlagsBits, MessageFlags} from 'discord.js';
+import {trimString} from "../../utils/utils";
 
 export class ListCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -18,9 +18,9 @@ export class ListCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description),
             { idHints: ["1310732575932944468"] }
         );
     }

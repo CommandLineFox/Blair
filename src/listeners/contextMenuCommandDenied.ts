@@ -1,5 +1,5 @@
-import { Events, Listener, type ContextMenuCommandDeniedPayload, type UserError } from '@sapphire/framework';
-import { InteractionResponse, Message, MessageFlags } from 'discord.js';
+import {Events, Listener, type ContextMenuCommandDeniedPayload, type UserError} from '@sapphire/framework';
+import {InteractionResponse, Message, MessageFlags} from 'discord.js';
 
 export class ContextMenuCommandDenied extends Listener<typeof Events.ContextMenuCommandDenied> {
     public run(error: UserError, { interaction }: ContextMenuCommandDeniedPayload): Promise<Message<boolean>> | Promise<InteractionResponse<boolean>> {

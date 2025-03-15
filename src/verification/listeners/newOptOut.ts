@@ -1,7 +1,7 @@
-import { Listener } from '@sapphire/framework';
+import {Listener} from '@sapphire/framework';
 import Database from '../../database/database';
-import { PermissionFlagsBits, type Message } from 'discord.js';
-import { Config } from '../../types/config';
+import {PermissionFlagsBits, type Message} from 'discord.js';
+import {Config} from '../../types/config';
 
 export class newOptOut extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {
@@ -18,7 +18,6 @@ export class newOptOut extends Listener {
         if (!searchChannel) {
             return;
         }
-
 
         if (message.channel !== searchChannel) {
             return;

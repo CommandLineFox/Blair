@@ -1,9 +1,9 @@
-import { InteractionHandler, InteractionHandlerTypes } from "@sapphire/framework";
+import {InteractionHandler, InteractionHandlerTypes} from "@sapphire/framework";
 import Database from "../../database/database";
-import { PendingApplication } from "../../database/models/pendingApllication";
-import { ButtonInteraction, Message, DMChannel, MessageFlags } from "discord.js";
-import { Buttons, getDmVerificationComponent } from "../../types/component";
-import { blockFreshInteraction } from "../../utils/utils";
+import {PendingApplication} from "../../database/models/pendingApllication";
+import {ButtonInteraction, Message, DMChannel, MessageFlags} from "discord.js";
+import {Buttons, getDmVerificationComponent} from "../../types/component";
+import {blockFreshInteraction} from "../../utils/utils";
 
 export class VerifyButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {

@@ -1,6 +1,6 @@
-import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextBasedChannel } from 'discord.js';
-import { CustomResponse } from '../types/customResponse';
+import {Args, Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
+import {ChannelType, Message, MessageFlags, PermissionFlagsBits, TextBasedChannel} from 'discord.js';
+import {CustomResponse} from '../types/customResponse';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -17,15 +17,15 @@ export class PingCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addStringOption((option) =>
-                    option
-                        .setName("message")
-                        .setDescription("The message to echo")
-                        .setRequired(true)
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addStringOption((option) =>
+                        option
+                            .setName("message")
+                            .setDescription("The message to echo")
+                            .setRequired(true)
+                    ),
             { idHints: ["1310732664600268922"] }
         );
     }

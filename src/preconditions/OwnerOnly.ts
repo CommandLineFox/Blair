@@ -1,6 +1,6 @@
-import { Precondition, Result, UserError } from '@sapphire/framework';
-import type { CommandInteraction, ContextMenuCommandInteraction, Message } from 'discord.js';
-import { Config } from "../types/config";
+import {Precondition, Result, UserError} from '@sapphire/framework';
+import type {CommandInteraction, ContextMenuCommandInteraction, Message} from 'discord.js';
+import {Config} from "../types/config";
 
 export class OwnerOnlyPrecondition extends Precondition {
     public override async messageRun(message: Message): Promise<Result<unknown, UserError>> {

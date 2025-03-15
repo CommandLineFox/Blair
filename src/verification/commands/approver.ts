@@ -1,7 +1,7 @@
-import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { Subcommand } from '@sapphire/plugin-subcommands';
+import {Args, CommandOptionsRunTypeEnum} from '@sapphire/framework';
+import {Subcommand} from '@sapphire/plugin-subcommands';
 import Database from '../../database/database';
-import { Message, MessageFlags, PermissionFlagsBits } from 'discord.js';
+import {Message, MessageFlags, PermissionFlagsBits} from 'discord.js';
 
 export class ApproverCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -35,36 +35,36 @@ export class ApproverCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommand((command) =>
-                    command
-                        .setName("add")
-                        .setDescription("Add a user to the list of verification approvers")
-                        .addUserOption((option) =>
-                            option
-                                .setName("user")
-                                .setDescription("The user to add as a verification approver")
-                                .setRequired(true)
-                        )
-                )
-                .addSubcommand((command) =>
-                    command
-                        .setName("remove")
-                        .setDescription("Remove a user from the list of verification approvers")
-                        .addUserOption((option) =>
-                            option
-                                .setName("user")
-                                .setDescription("The user to remove from the verification approvers list")
-                                .setRequired(true)
-                        )
-                )
-                .addSubcommand((command) =>
-                    command
-                        .setName("list")
-                        .setDescription("List all verification approvers")
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommand((command) =>
+                        command
+                            .setName("add")
+                            .setDescription("Add a user to the list of verification approvers")
+                            .addUserOption((option) =>
+                                option
+                                    .setName("user")
+                                    .setDescription("The user to add as a verification approver")
+                                    .setRequired(true)
+                            )
+                    )
+                    .addSubcommand((command) =>
+                        command
+                            .setName("remove")
+                            .setDescription("Remove a user from the list of verification approvers")
+                            .addUserOption((option) =>
+                                option
+                                    .setName("user")
+                                    .setDescription("The user to remove from the verification approvers list")
+                                    .setRequired(true)
+                            )
+                    )
+                    .addSubcommand((command) =>
+                        command
+                            .setName("list")
+                            .setDescription("List all verification approvers")
+                    ),
             { idHints: ["1310732493108019331"] }
         );
     }

@@ -1,8 +1,16 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, Message, PermissionFlagsBits, TextChannel, StringSelectMenuInteraction, MessageFlags } from 'discord.js';
-import { Menus } from '../../types/component';
-import { blockFreshInteraction, getModerationReason, isStaff, logQuestioning } from '../../utils/utils';
+import {
+    Colors,
+    EmbedBuilder,
+    Message,
+    PermissionFlagsBits,
+    TextChannel,
+    StringSelectMenuInteraction,
+    MessageFlags
+} from 'discord.js';
+import {Menus} from '../../types/component';
+import {blockFreshInteraction, getModerationReason, isStaff, logQuestioning} from '../../utils/utils';
 
 export class BanMenunHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -43,6 +51,7 @@ export class BanMenunHandler extends InteractionHandler {
     /**
      * Handle what happens when the kick button is pressed in the verification log channel
      * @param interaction The menu interaction
+     * @param verificationMessage The message in the verification log
      */
     public async run(interaction: StringSelectMenuInteraction, verificationMessage: Message): Promise<void> {
         if (interaction.replied || interaction.deferred) {
@@ -134,7 +143,10 @@ export class BanMenunHandler extends InteractionHandler {
         const newEmbed = new EmbedBuilder(oldEmbed.data)
             .setTitle(`${oldEmbed.title} | Banned`)
             .setColor(Colors.Red)
-            .addFields([{ name: "Handled by", value: `${staffMember.user.username} (${staffMember.id})` }, { name: "Reason", value: reason }]);
+            .addFields([{
+                name: "Handled by",
+                value: `${staffMember.user.username} (${staffMember.id})`
+            }, { name: "Reason", value: reason }]);
 
         await interaction.editReply({ content: "Banned" });
 

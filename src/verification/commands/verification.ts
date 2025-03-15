@@ -1,7 +1,7 @@
-import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { Subcommand } from "@sapphire/plugin-subcommands";
+import {Args, CommandOptionsRunTypeEnum} from "@sapphire/framework";
+import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel } from "discord.js";
+import {ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel} from "discord.js";
 
 export class VerificationCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -61,126 +61,126 @@ export class VerificationCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("message")
-                        .setDescription("Manage the verification message before questions are sent")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the verification message")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the verification message")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("ending")
-                        .setDescription("Manage the verification ending message after questions are answered")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the verification message")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the verification message")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("question")
-                        .setDescription("Manage verification questions")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("add")
-                                .setDescription("Add a verification question")
-                                .addStringOption((option) =>
-                                    option
-                                        .setName("question")
-                                        .setDescription("The verification question to add")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove a verification question")
-                                .addIntegerOption((option) =>
-                                    option
-                                        .setName("index")
-                                        .setDescription("The index of the question to remove")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("move")
-                                .setDescription("Move a verification question")
-                                .addIntegerOption((option) =>
-                                    option
-                                        .setName("from")
-                                        .setDescription("Index of the question to move")
-                                        .setRequired(true)
-                                )
-                                .addIntegerOption((option) =>
-                                    option
-                                        .setName("to")
-                                        .setDescription("New index of the question")
-                                        .setRequired(true)
-                                )
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("log")
-                        .setDescription("Manage the verification log channel")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel where verification logs will be sent")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel for verification logs")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the verification log channel")
-                        )
-                )
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("message")
+                            .setDescription("Manage the verification message before questions are sent")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the verification message")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the verification message")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("ending")
+                            .setDescription("Manage the verification ending message after questions are answered")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the verification message")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the verification message")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("question")
+                            .setDescription("Manage verification questions")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("add")
+                                    .setDescription("Add a verification question")
+                                    .addStringOption((option) =>
+                                        option
+                                            .setName("question")
+                                            .setDescription("The verification question to add")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove a verification question")
+                                    .addIntegerOption((option) =>
+                                        option
+                                            .setName("index")
+                                            .setDescription("The index of the question to remove")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("move")
+                                    .setDescription("Move a verification question")
+                                    .addIntegerOption((option) =>
+                                        option
+                                            .setName("from")
+                                            .setDescription("Index of the question to move")
+                                            .setRequired(true)
+                                    )
+                                    .addIntegerOption((option) =>
+                                        option
+                                            .setName("to")
+                                            .setDescription("New index of the question")
+                                            .setRequired(true)
+                                    )
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("log")
+                            .setDescription("Manage the verification log channel")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel where verification logs will be sent")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel for verification logs")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the verification log channel")
+                            )
+                    )
 
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("history")
-                        .setDescription("Manage the verification history channel")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel where server protector messages are fetched")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel for verification history")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the verification history channel")
-                        )
-                ),
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("history")
+                            .setDescription("Manage the verification history channel")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel where server protector messages are fetched")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel for verification history")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the verification history channel")
+                            )
+                    ),
             { idHints: ["1310732583482556446"] }
         );
     }
@@ -281,7 +281,7 @@ export class VerificationCommand extends Subcommand {
             });
     }
 
-    /** 
+    /**
      * Verification message remove slash command logic
      * @param interaction Interaction of the command
      */
@@ -401,7 +401,7 @@ export class VerificationCommand extends Subcommand {
             });
     }
 
-    /** 
+    /**
      * Verification ending remove slash command logic
      * @param interaction Interaction of the command
      */

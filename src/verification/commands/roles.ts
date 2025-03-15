@@ -1,7 +1,7 @@
-import { Args, CommandOptionsRunTypeEnum } from "@sapphire/framework";
-import { Subcommand } from "@sapphire/plugin-subcommands";
+import {Args, CommandOptionsRunTypeEnum} from "@sapphire/framework";
+import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { Message, MessageFlags, PermissionFlagsBits } from "discord.js";
+import {Message, MessageFlags, PermissionFlagsBits} from "discord.js";
 
 export class RoleCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -44,78 +44,78 @@ export class RoleCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("member")
-                        .setDescription("Manage the member role")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the member role")
-                                .addRoleOption((option) =>
-                                    option
-                                        .setName("role")
-                                        .setDescription("The member role to set")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the member role")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("unverified")
-                        .setDescription("Manage the unverified role")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the unverified role")
-                                .addRoleOption((option) =>
-                                    option
-                                        .setName("role")
-                                        .setDescription("The unverified role to set")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the unverified role")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("staff")
-                        .setDescription("Manage the staff roles")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("add")
-                                .setDescription("Add a staff role")
-                                .addRoleOption((option) =>
-                                    option
-                                        .setName("role")
-                                        .setDescription("The staff role to add")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove a staff role")
-                                .addRoleOption((option) =>
-                                    option
-                                        .setName("role")
-                                        .setDescription("The staff role to remove")
-                                        .setRequired(true)
-                                )
-                        )
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("member")
+                            .setDescription("Manage the member role")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the member role")
+                                    .addRoleOption((option) =>
+                                        option
+                                            .setName("role")
+                                            .setDescription("The member role to set")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the member role")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("unverified")
+                            .setDescription("Manage the unverified role")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the unverified role")
+                                    .addRoleOption((option) =>
+                                        option
+                                            .setName("role")
+                                            .setDescription("The unverified role to set")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the unverified role")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("staff")
+                            .setDescription("Manage the staff roles")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("add")
+                                    .setDescription("Add a staff role")
+                                    .addRoleOption((option) =>
+                                        option
+                                            .setName("role")
+                                            .setDescription("The staff role to add")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove a staff role")
+                                    .addRoleOption((option) =>
+                                        option
+                                            .setName("role")
+                                            .setDescription("The staff role to remove")
+                                            .setRequired(true)
+                                    )
+                            )
+                    ),
             { idHints: ["1310732581364437135"] }
         );
     }

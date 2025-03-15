@@ -1,8 +1,8 @@
-import { Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import {Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel, User } from 'discord.js';
-import { CustomResponse } from '../../types/customResponse';
-import { isStaff, logQuestioning } from '../../utils/utils';
+import {Colors, EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits, TextChannel, User} from 'discord.js';
+import {CustomResponse} from '../../types/customResponse';
+import {isStaff, logQuestioning} from '../../utils/utils';
 
 export class ApproveCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -18,9 +18,9 @@ export class ApproveCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description),
             { idHints: ["1310732490390114324"] }
         )
     }

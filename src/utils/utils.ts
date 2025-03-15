@@ -1,7 +1,7 @@
 import Database from "../database/database";
-import { PendingApplication } from "../database/models/pendingApllication";
-import { AttachmentBuilder, ButtonInteraction, ChatInputCommandInteraction, Client, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User } from "discord.js";
-import { getHandlingComponent } from "../types/component";
+import {PendingApplication} from "../database/models/pendingApllication";
+import {AttachmentBuilder, ButtonInteraction, ChatInputCommandInteraction, Client, EmbedBuilder, Guild, GuildMember, PermissionFlagsBits, StringSelectMenuInteraction, TextChannel, User} from "discord.js";
+import {getHandlingComponent} from "../types/component";
 
 /**
  * Trim a string to a desired length so it fits within a limit

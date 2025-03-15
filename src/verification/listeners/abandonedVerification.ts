@@ -1,6 +1,6 @@
-import { Listener } from '@sapphire/framework';
+import {Listener} from '@sapphire/framework';
 import Database from '../../database/database';
-import { Colors, EmbedBuilder, type GuildMember } from 'discord.js';
+import {Colors, EmbedBuilder, type GuildMember} from 'discord.js';
 
 export class newOptOut extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {

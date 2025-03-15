@@ -1,5 +1,5 @@
 import Database from "../database/database";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Guild, StringSelectMenuBuilder } from "discord.js";
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, Guild, StringSelectMenuBuilder} from "discord.js";
 
 export enum Buttons {
     VERIFY_BUTTON = "verify",

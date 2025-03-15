@@ -1,6 +1,6 @@
-import { Config } from "./types/config";
+import {Config} from "./types/config";
 import Database from "./database/database";
-import { BotClient } from "./types/client";
+import {BotClient} from "./types/client";
 
 async function main(): Promise<void> {
     const config = Config.getInstance();

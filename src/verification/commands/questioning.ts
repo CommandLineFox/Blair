@@ -1,7 +1,7 @@
-import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
-import { Subcommand } from "@sapphire/plugin-subcommands";
+import {CommandOptionsRunTypeEnum, Args} from "@sapphire/framework";
+import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message, MessageFlags } from "discord.js";
+import {PermissionFlagsBits, ChannelType, Message, MessageFlags} from "discord.js";
 
 export class QuestioningCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -36,51 +36,51 @@ export class QuestioningCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("category")
-                        .setDescription("Manage the questioning category")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the questioning category")
-                                .addStringOption((option) =>
-                                    option
-                                        .setName("category")
-                                        .setDescription("The category for questioning")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the questioning category")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("log")
-                        .setDescription("Manage the questioning log channel")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel where questioning logs will be sent")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel for questioning logs")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the questioning log channel")
-                        )
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("category")
+                            .setDescription("Manage the questioning category")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the questioning category")
+                                    .addStringOption((option) =>
+                                        option
+                                            .setName("category")
+                                            .setDescription("The category for questioning")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the questioning category")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("log")
+                            .setDescription("Manage the questioning log channel")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel where questioning logs will be sent")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel for questioning logs")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the questioning log channel")
+                            )
+                    ),
             { idHints: ["1310732577987891282"] }
         );
     }
@@ -109,7 +109,7 @@ export class QuestioningCommand extends Subcommand {
 
     /**
      * Questioning category set message command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      * @param args Text channel name or ID
      */
     public async messageCategorySet(message: Message, args: Args): Promise<void> {
@@ -171,7 +171,7 @@ export class QuestioningCommand extends Subcommand {
 
     /**
      * Questioning log set message command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      * @param args Text channel name, ID or mention
      */
     public async messageLogSet(message: Message, args: Args): Promise<void> {
@@ -203,7 +203,7 @@ export class QuestioningCommand extends Subcommand {
 
     /**
      * Questioning log remove message command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      */
     public async messageLogRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeQuestioningLog(message.guildId!);

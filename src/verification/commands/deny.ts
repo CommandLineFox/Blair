@@ -1,9 +1,9 @@
-import { Args, Command, CommandOptionsRunTypeEnum } from '@sapphire/framework';
+import {Args, Command, CommandOptionsRunTypeEnum} from '@sapphire/framework';
 import Database from '../../database/database';
-import { CommandInteraction, Message, MessageFlags, PermissionFlagsBits, User } from 'discord.js';
-import { getBanReasonComponent, getKickReasonComponent } from '../../types/component';
-import { CustomResponse } from '../../types/customResponse';
-import { isStaff } from '../../utils/utils';
+import {CommandInteraction, Message, MessageFlags, PermissionFlagsBits, User} from 'discord.js';
+import {getBanReasonComponent, getKickReasonComponent} from '../../types/component';
+import {CustomResponse} from '../../types/customResponse';
+import {isStaff} from '../../utils/utils';
 
 export class DenyCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -19,19 +19,20 @@ export class DenyCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry) {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addStringOption((option) =>
-                    option
-                        .setName("action")
-                        .setDescription("Choose to kick or ban the user")
-                        .addChoices([{ name: "Kick", value: "kick" }, { name: "Ban", value: "ban" }])
-                        .setRequired(true)
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addStringOption((option) =>
+                        option
+                            .setName("action")
+                            .setDescription("Choose to kick or ban the user")
+                            .addChoices([{ name: "Kick", value: "kick" }, { name: "Ban", value: "ban" }])
+                            .setRequired(true)
+                    ),
             { idHints: ["1310732496198963241"] }
         );
     }
+
     public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
         if (interaction.replied || interaction.deferred) {
             await interaction.deleteReply();
@@ -68,7 +69,7 @@ export class DenyCommand extends Command {
 
     /**
      * Deny a user from the server
-     * @param interactionOrMessage Interaction or message depending on if it was a slash command or message command 
+     * @param interactionOrMessage Interaction or message depending on if it was a slash command or message command
      * @param staffMember The staff member handling the application
      * @param action Kick or ban
      * @returns Whether it was successful or not and a message

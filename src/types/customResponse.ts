@@ -1,4 +1,4 @@
-import { ActionRowBuilder, MessageActionRowComponentBuilder } from "discord.js";
+import {ActionRowBuilder, MessageActionRowComponentBuilder} from "discord.js";
 
 export type CustomResponse = {
     success: boolean;

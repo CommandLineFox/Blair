@@ -1,5 +1,5 @@
-import { Events, Listener, type ChatInputCommandDeniedPayload, type UserError } from '@sapphire/framework';
-import { InteractionResponse, Message, MessageFlags } from 'discord.js';
+import {Events, Listener, type ChatInputCommandDeniedPayload, type UserError} from '@sapphire/framework';
+import {InteractionResponse, Message, MessageFlags} from 'discord.js';
 
 export class ChatInputCommandDenied extends Listener<typeof Events.ChatInputCommandDenied> {
     public run(error: UserError, { interaction }: ChatInputCommandDeniedPayload): Promise<Message<boolean>> | Promise<InteractionResponse<boolean>> {

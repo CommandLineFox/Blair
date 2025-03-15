@@ -1,8 +1,8 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
-import { ChannelType, Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction } from 'discord.js';
-import { Buttons } from '../../types/component';
-import { blockFreshInteraction, isStaff } from '../../utils/utils';
+import {ChannelType, Colors, EmbedBuilder, MessageFlags, PermissionFlagsBits, type ButtonInteraction} from 'discord.js';
+import {Buttons} from '../../types/component';
+import {blockFreshInteraction, isStaff} from '../../utils/utils';
 
 export class KickButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -21,7 +21,7 @@ export class KickButtonHandler extends InteractionHandler {
     }
 
     /**
-     * Handle what happens when the approve button gets pressed in the verification log channel
+     * Handle what happens when the approval button gets pressed in the verification log channel
      * @param interaction The button interaction
      */
     public async run(interaction: ButtonInteraction): Promise<void> {

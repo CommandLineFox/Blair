@@ -1,7 +1,7 @@
-import { Listener } from '@sapphire/framework';
+import {Listener} from '@sapphire/framework';
 import Database from '../../database/database';
-import { PermissionFlagsBits, type Client, type Message, type TextChannel } from 'discord.js';
-import { Config } from '../../types/config';
+import {PermissionFlagsBits, type Client, type Message, type TextChannel} from 'discord.js';
+import {Config} from '../../types/config';
 
 export class LoadOptOutListener extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {

@@ -1,7 +1,7 @@
-import { CommandOptionsRunTypeEnum, Args } from "@sapphire/framework";
-import { Subcommand } from "@sapphire/plugin-subcommands";
+import {CommandOptionsRunTypeEnum, Args} from "@sapphire/framework";
+import {Subcommand} from "@sapphire/plugin-subcommands";
 import Database from "../../database/database";
-import { PermissionFlagsBits, ChannelType, Message, TextChannel, MessageFlags } from "discord.js";
+import {PermissionFlagsBits, ChannelType, Message, TextChannel, MessageFlags} from "discord.js";
 
 export class WelcomeCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -44,60 +44,60 @@ export class WelcomeCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("channel")
-                        .setDescription("Manage the welcome channel")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel where welcome messages will be sent")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel for welcome messages")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the welcome channel")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("message")
-                        .setDescription("Manage the welcome message")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the welcome message")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the welcome message")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("toggle")
-                        .setDescription("Toggle the welcome message feature")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("enable")
-                                .setDescription("Enable the welcome message feature")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("disable")
-                                .setDescription("Disable the welcome message feature")
-                        )
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("channel")
+                            .setDescription("Manage the welcome channel")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel where welcome messages will be sent")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel for welcome messages")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the welcome channel")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("message")
+                            .setDescription("Manage the welcome message")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the welcome message")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the welcome message")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("toggle")
+                            .setDescription("Toggle the welcome message feature")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("enable")
+                                    .setDescription("Enable the welcome message feature")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("disable")
+                                    .setDescription("Disable the welcome message feature")
+                            )
+                    ),
             { idHints: ["1310732662385803315"] }
         );
     }

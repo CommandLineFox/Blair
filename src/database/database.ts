@@ -1,12 +1,12 @@
-import { container } from "@sapphire/framework";
-import { DatabaseConfig } from "../types/config";
-import { DatabaseGuild } from "./models/guild";
-import mongoose, { Schema, Model, Document } from "mongoose";
-import { CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel } from "discord.js";
-import { trimString } from "../utils/utils";
-import { PendingApplication } from "./models/pendingApllication";
-import { OptOut } from "./models/optOut";
-import { CustomResponse } from "../types/customResponse";
+import {container} from "@sapphire/framework";
+import {DatabaseConfig} from "../types/config";
+import {DatabaseGuild} from "./models/guild";
+import mongoose, {Schema, Model, Document} from "mongoose";
+import {CategoryChannel, ChannelType, Guild, GuildMember, Role, TextChannel} from "discord.js";
+import {trimString} from "../utils/utils";
+import {PendingApplication} from "./models/pendingApllication";
+import {OptOut} from "./models/optOut";
+import {CustomResponse} from "../types/customResponse";
 
 const verificationSchema = new Schema({
     message: { type: String },
@@ -145,10 +145,10 @@ export default class Database {
     }
 
     /**
-    * Return data for a specific pending application by user ID
-    * @param userId The user to search by
-    * @returns Pending application or null
-    */
+     * Return data for a specific pending application by user ID
+     * @param userId The user to search by
+     * @returns Pending application or null
+     */
     private async getPendingApplicationFromDb(userId: string, guildId: string): Promise<PendingApplication | null> {
         const pendingApplication = await this.PendingApplicationModel.findOne({ userId: userId, guildId: guildId });
 

@@ -1,8 +1,8 @@
-import { Args, CommandOptionsRunTypeEnum } from '@sapphire/framework';
-import { Subcommand } from '@sapphire/plugin-subcommands';
+import {Args, CommandOptionsRunTypeEnum} from '@sapphire/framework';
+import {Subcommand} from '@sapphire/plugin-subcommands';
 import Database from '../../database/database';
-import { ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel } from 'discord.js';
-import { getGuideComponent } from '../../types/component';
+import {ChannelType, Message, MessageFlags, PermissionFlagsBits, TextChannel} from 'discord.js';
+import {getGuideComponent} from '../../types/component';
 
 export class GuideCommand extends Subcommand {
     public constructor(context: Subcommand.LoaderContext, options: Subcommand.Options) {
@@ -38,50 +38,50 @@ export class GuideCommand extends Subcommand {
 
     public override registerApplicationCommands(registry: Subcommand.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description)
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("channel")
-                        .setDescription("channel group")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the channel that the message with the Verify button will be sent in")
-                                .addChannelOption((option) =>
-                                    option
-                                        .setName("channel")
-                                        .setDescription("The text channel that guide messages will be sent in")
-                                        .setRequired(true)
-                                )
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the channel that the message with the Verify button will be sent in")
-                        )
-                )
-                .addSubcommandGroup((group) =>
-                    group
-                        .setName("message")
-                        .setDescription("message group")
-                        .addSubcommand((command) =>
-                            command
-                                .setName("set")
-                                .setDescription("Set the message that will be sent with the verify button")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("remove")
-                                .setDescription("Remove the message that will be sent with the verify button")
-                        )
-                        .addSubcommand((command) =>
-                            command
-                                .setName("post")
-                                .setDescription("Post or edit the guide message in the guide channel")
-                        )
-                ),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description)
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("channel")
+                            .setDescription("channel group")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the channel that the message with the Verify button will be sent in")
+                                    .addChannelOption((option) =>
+                                        option
+                                            .setName("channel")
+                                            .setDescription("The text channel that guide messages will be sent in")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the channel that the message with the Verify button will be sent in")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("message")
+                            .setDescription("message group")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the message that will be sent with the verify button")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the message that will be sent with the verify button")
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("post")
+                                    .setDescription("Post or edit the guide message in the guide channel")
+                            )
+                    ),
             { idHints: ["1310732497809707100"] }
         );
     }
@@ -109,7 +109,7 @@ export class GuideCommand extends Subcommand {
 
     /**
      * Guide channel set message command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      * @param args Text channel name, ID or mention
      */
     public async messageGuideChannelSet(message: Message, args: Args): Promise<void> {
@@ -140,7 +140,7 @@ export class GuideCommand extends Subcommand {
 
     /**
      * Gulde message set slash command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      */
     public async messageGuideChannelRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeGuideChannel(message.guildId!);
@@ -195,7 +195,7 @@ export class GuideCommand extends Subcommand {
 
     /**
      * Gulde message set message command logic
-     * @param message Message containing the command 
+     * @param message Message containing the command
      * @param args Text containing desired message
      */
     public async messageGuideMessageSet(message: Message): Promise<void> {

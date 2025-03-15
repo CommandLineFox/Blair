@@ -1,7 +1,7 @@
-import { Listener } from '@sapphire/framework';
-import { EmbedBuilder, Message, PermissionFlagsBits } from 'discord.js';
+import {Listener} from '@sapphire/framework';
+import {EmbedBuilder, Message, PermissionFlagsBits} from 'discord.js';
 import Database from '../../database/database';
-import { trimString } from '../../utils/utils';
+import {trimString} from '../../utils/utils';
 
 export class AppListener extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {

@@ -1,5 +1,5 @@
-import { Command } from '@sapphire/framework';
-import { Message, MessageFlags } from 'discord.js';
+import {Command} from '@sapphire/framework';
+import {Message, MessageFlags} from 'discord.js';
 
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
@@ -14,9 +14,9 @@ export class PingCommand extends Command {
 
     public override registerApplicationCommands(registry: Command.Registry): void {
         registry.registerChatInputCommand((builder) =>
-            builder
-                .setName(this.name)
-                .setDescription(this.description),
+                builder
+                    .setName(this.name)
+                    .setDescription(this.description),
             { idHints: ["1310732668266217472"] }
         );
     }

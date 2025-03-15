@@ -1,8 +1,8 @@
-import { InteractionHandler, InteractionHandlerTypes } from '@sapphire/framework';
+import {InteractionHandler, InteractionHandlerTypes} from '@sapphire/framework';
 import Database from '../../database/database';
-import { MessageFlags, type ButtonInteraction, type DMChannel } from 'discord.js';
-import { Buttons } from '../../types/component';
-import { blockFreshInteraction, postVerificationMessage } from '../../utils/utils';
+import {MessageFlags, type ButtonInteraction, type DMChannel} from 'discord.js';
+import {Buttons} from '../../types/component';
+import {blockFreshInteraction, postVerificationMessage} from '../../utils/utils';
 
 export class ConfirmButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
@@ -32,6 +32,7 @@ export class ConfirmButtonHandler extends InteractionHandler {
     /**
      * Handle what happens when the confirm button gets pressed in a DM channel
      * @param interaction The button interaction
+     * @param guildId The ID of the guild
      */
     public async run(interaction: ButtonInteraction, guildId: string): Promise<void> {
         if (interaction.replied || interaction.deferred) {
