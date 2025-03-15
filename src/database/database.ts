@@ -285,7 +285,7 @@ export default class Database {
      * @param guildId ID of the guild
      * @param databaseLocation Location of the object
      * @param value Value to be assigned
-     * @param alreadySetMessage Error message for when a value is already set
+     * @param existsMessage Whether the message already exists
      * @param successMessage Success message
      * @param errorMessage Eror message for if the value fails to be set
      * @returns Response indicating success or failure
@@ -358,6 +358,30 @@ export default class Database {
     }
 
     /**
+     * Remove all values from an array in the database
+     * @param guildId ID of the guild
+     * @param databaseLocation Location of the object
+     * @param successMessage Success message
+     * @param errorMessage Error message if the operation fails
+     * @returns Response indicating success or failure
+     */
+    private async removeAllFromArray(guildId: string, databaseLocation: string, successMessage: string, errorMessage: string): Promise<CustomResponse> {
+        const guild = await this.getGuild(guildId) as Document | null;
+        if (!guild) {
+            return { success: false, message: "There was an error fetching the guild." };
+        }
+
+        guild.set(databaseLocation, []);
+
+        try {
+            await guild.save();
+            return { success: true, message: successMessage };
+        } catch (error) {
+            return { success: false, message: errorMessage };
+        }
+    }
+
+    /**
      * Reposition a value in the database
      * @param guildId ID of the guild
      * @param databaseLocation Location of the object
@@ -420,7 +444,7 @@ export default class Database {
     /**
      * Set the guide message
      * @param guildId ID of the guild
-     * @param messageId ID of the guide message
+     * @param message The guide message
      * @returns Response indicating success or failure
      */
     public setGuideMessage(guildId: string, message: string) {
@@ -445,7 +469,7 @@ export default class Database {
     /**
      * Set the verification message
      * @param guildId ID of the guild
-     * @param messageId ID of the guide message
+     * @param message The verification message
      * @returns Response indicating success or failure
      */
     public setVerificationMessage(guildId: string, message: string) {
@@ -470,7 +494,7 @@ export default class Database {
     /**
      * Set the verification ending message
      * @param guildId ID of the guild
-     * @param messageId ID of the guide message
+     * @param endingMessage The ending message
      * @returns Response indicating success or failure
      */
     public setVerificationEndingMessage(guildId: string, endingMessage: string) {
@@ -508,7 +532,7 @@ export default class Database {
     /**
      * Remove a verification question from the list
      * @param guildId ID of the guild
-     * @param question Verification question to be removed
+     * @param questionIndex The index of the question
      * @returns Response indicating success or failure
      */
     public removeVerificationQuestion(guildId: string, questionIndex: number) {
@@ -516,6 +540,16 @@ export default class Database {
             "That verification question does not exist.",
             "Successfully removed the question from the verification questions list.",
             "Failed to remove the verification question.");
+    }
+
+    /**
+     * Remove all verification questions from a guild
+     * @param guildId The ID of the guild
+     */
+    public removeAllVerificationQuestions(guildId: string) {
+        return this.removeAllFromArray(guildId, "config.verification.questions",
+            "Successfully removed all verification questions.",
+            "Failed to remove all verification questions.");
     }
 
     /**

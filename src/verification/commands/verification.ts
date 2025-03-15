@@ -33,7 +33,8 @@ export class VerificationCommand extends Subcommand {
                     entries: [
                         { name: "add", chatInputRun: "chatInputQuestionsAdd", messageRun: "messageQuestionsAdd" },
                         { name: "remove", chatInputRun: "chatInputQuestionsRemove", messageRun: "messageQuestionsRemove" },
-                        { name: "move", chatInputRun: "chatInputQuestionsMove", messageRun: "messageQuestionsMove" }
+                        { name: "move", chatInputRun: "chatInputQuestionsMove", messageRun: "messageQuestionsMove" },
+                        { name: "reset", chatInputRun: "chatInputQuestionsReset", messageRun: "messageQuestionsReset" }
                     ]
                 },
                 {
@@ -137,6 +138,10 @@ export class VerificationCommand extends Subcommand {
                                             .setRequired(true)
                                     )
                             )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("reset")
+                                    .setDescription("Reset the verification questions"))
                     )
                     .addSubcommandGroup((group) =>
                         group
@@ -534,6 +539,30 @@ export class VerificationCommand extends Subcommand {
     }
 
     /**
+     * Verification questions remove slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputQuestionsReset(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        const response = await Database.getInstance().removeAllVerificationQuestions(interaction.guildId!);
+        await interaction.editReply({ content: response.message })
+    }
+
+    /**
+     * Verification questions remove message command logic
+     * @param message Message containing the command
+     */
+    public async messageQuestionsReset(message: Message): Promise<void> {
+        const response = await Database.getInstance().removeAllVerificationQuestions(message.guildId!);
+        await message.reply({ content: response.message });
+    }
+
+    /**
      * Verification log set slash command logic
      * @param interaction Interaction of the command
      */
@@ -594,7 +623,6 @@ export class VerificationCommand extends Subcommand {
         const response = await Database.getInstance().removeVerificationLog(message.guildId!);
         await message.reply({ content: response.message });
     }
-
 
     /**
      * Verification history set slash command logic
