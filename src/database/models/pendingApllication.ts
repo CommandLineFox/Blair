@@ -7,4 +7,6 @@ export interface PendingApplication {
     attempts: number;
     messageId?: string;
     questioningChannelId?: string;
+    currentlyActive?: number;
+    currentStaffMember?: string;
 }

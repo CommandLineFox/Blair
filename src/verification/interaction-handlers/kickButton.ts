@@ -74,6 +74,11 @@ export class KickButtonHandler extends InteractionHandler {
             return;
         }
 
+        if (pendingApplication.currentlyActive) {
+            await interaction.editReply({ content: "Someone's already taking action." });
+            return;
+        }
+
         const member = await interaction.guild.members.fetch(pendingApplication.userId);
         if (!member) {
             await interaction.editReply({ content: "Couldn't find the member." });
@@ -102,6 +107,9 @@ export class KickButtonHandler extends InteractionHandler {
             await interaction.editReply({ content: "The bot cannot moderate this user as they have the same or higher role than the bot" });
             return;
         }
+
+        await database.setPendingApplicationCurrentlyActive(interaction.user.id, interaction.guild.id);
+        await database.setPendingApplicationCurrentStaffMember(interaction.user.id, interaction.guild.id, staffMember.id);
 
         const row = await getKickReasonComponent(interaction.guild, channel.id, messageId);
         await interaction.editReply({ content: "Please pick a reason or enter a custom one", components: [row] });

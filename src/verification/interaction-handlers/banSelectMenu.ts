@@ -104,6 +104,11 @@ export class BanMenunHandler extends InteractionHandler {
             return;
         }
 
+        if (pendingApplication.currentStaffMember !== staffMember.id) {
+            await interaction.editReply({ content: "Someone's already handling the application." });
+            return;
+        }
+
         const member = await interaction.guild.members.fetch(pendingApplication.userId);
         if (!member) {
             await interaction.editReply({ content: "Couldn't find the member." });

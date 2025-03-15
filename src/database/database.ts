@@ -72,7 +72,9 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     questioningChannelId: { type: String, unique: true, required: false },
     questions: { type: [String], required: true },
     answers: { type: [String], required: true },
-    attempts: { type: Number, required: true }
+    attempts: { type: Number, required: true },
+    currentlyActive: { type: Number, required: false },
+    currentStaffMember: { type: String, required: false },
 });
 
 const optOutSchema = new Schema<OptOut>({
@@ -94,6 +96,8 @@ export default class Database {
         this.OptOutModel = mongoose.model("OptOut", optOutSchema);
 
         mongoose.set("strictQuery", false);
+
+        this.startCleanupTask();
     }
 
     /**
@@ -131,6 +135,24 @@ export default class Database {
     public async disconnect(): Promise<void> {
         await mongoose.disconnect();
         container.logger.info("Disconnected from database");
+    }
+
+    /**
+     * Clean currently active values from pending applications
+     */
+    private startCleanupTask(): void {
+        setInterval(async () => {
+            const threshold = Date.now() - 3 * 60 * 1000;
+
+            try {
+                await this.PendingApplicationModel.updateMany(
+                    { currentlyActive: { $lte: threshold } },
+                    { $unset: { currentlyActive: "", currentStaffMember: "" } },
+                );
+            } catch (error) {
+                console.error("Failed to clean up expired currentlyActive fields:", error);
+            }
+        }, 30 * 1000);
     }
 
     /**
@@ -1439,6 +1461,51 @@ export default class Database {
             return { success: true, message: `Successfully updated questioning channel ID for <@${userId}> in the pending application.` };
         } catch (error) {
             return { success: false, message: "Failed to update the questioning channel ID in the pending application." };
+        }
+    }
+
+    /**
+     * Set the currently active time when someone started a kick or ban process
+     * @param userId The ID of the pending application user
+     * @param guildId The ID of the guild
+     */
+    public async setPendingApplicationCurrentlyActive(userId: string, guildId: string): Promise<CustomResponse> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            pendingApplication.set("currentlyActive", Date.now());
+
+            await pendingApplication.save();
+            return { success: true, message: `Successfully updated currently active for <@${userId}> in the pending application.` };
+        } catch (error) {
+            return { success: false, message: "Failed to update the currently active field in the pending application." };
+        }
+    }
+
+    /**
+     * Set the staff member that's currently handling a kick or a ban
+     * @param userId The ID of the user of the pending application
+     * @param guildId The ID of the guild
+     * @param staffMemberId The ID of the staff member
+     */
+    public async setPendingApplicationCurrentStaffMember(userId: string, guildId: string, staffMemberId: string): Promise<CustomResponse> {
+        try {
+            const pendingApplication = await this.getPendingApplicationFromDb(userId, guildId) as Document | null;
+
+            if (!pendingApplication) {
+                return { success: false, message: "Pending application does not exist." };
+            }
+
+            pendingApplication.set("currentStaffMember", staffMemberId);
+
+            await pendingApplication.save();
+            return { success: true, message: `Successfully updated current staff member for <@${userId}> in the pending application.` };
+        } catch (error) {
+            return { success: false, message: "Failed to update the current staff member field in the pending application." };
         }
     }
 
