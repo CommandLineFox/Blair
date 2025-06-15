@@ -8,7 +8,7 @@ export class AppLogCommand extends Subcommand {
         super(context, {
             ...options,
             name: "applog",
-            description: "Manage the application logging channel and toggle",
+            description: "Manage the user app logging channel and toggle",
             detailedDescription: "Manage the channel where application logs are sent and toggle the feature on or off",
             subcommands: [
                 {

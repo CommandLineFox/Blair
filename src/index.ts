@@ -12,7 +12,7 @@ async function main(): Promise<void> {
     const client = new BotClient(config.getClientOptions());
 
     try {
-        client.login(config.getClientConfig().token);
+        await client.login(config.getClientConfig().token);
     } catch (error) {
         console.error('Error logging in:', error);
     }
