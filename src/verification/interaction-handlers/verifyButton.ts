@@ -128,7 +128,7 @@ export class VerifyButtonHandler extends InteractionHandler {
 
             let answerMessage: Message | undefined;
             let success = true;
-            await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === user, max: 1, time: 120000 })
+            await dmChannel?.awaitMessages({ errors: ["time"], filter: (message) => message.author === user, max: 1, time: 300000 })
                 .then(async (messages) => {
                     if (!messages.first()) {
                         await questionMessage.edit({ content: "There was an error when fetching the answer you sent. Please verify again." });
@@ -148,7 +148,7 @@ export class VerifyButtonHandler extends InteractionHandler {
                     verificationAnswers.push(answerMessage.cleanContent);
                 })
                 .catch(async () => {
-                    await questionMessage.edit({ content: "No message was provided after 2 minutes. Please verify again." });
+                    await questionMessage.edit({ content: "No message was provided after 5 minutes. Please verify again." });
                     await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
                     success = false;
                     return;
