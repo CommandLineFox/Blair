@@ -49,7 +49,7 @@ export class BanMenunHandler extends InteractionHandler {
     }
 
     /**
-     * Handle what happens when the kick button is pressed in the verification log channel
+     * Handle what happens when the ban button is pressed in the verification log channel
      * @param interaction The menu interaction
      * @param verificationMessage The message in the verification log
      */
@@ -164,7 +164,7 @@ export class BanMenunHandler extends InteractionHandler {
             if (questioningChannel && questioningLogChannel) {
                 //Putting the contents of the questioning channel into a file and logging it
                 await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
-                questioningChannel.delete("Questioning completed");
+                await questioningChannel.delete("Questioning completed");
             }
         }
 

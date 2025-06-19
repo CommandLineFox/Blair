@@ -4,7 +4,7 @@ import {MessageFlags, PermissionFlagsBits, type ButtonInteraction} from 'discord
 import {Buttons, getBanReasonComponent} from '../../types/component';
 import {blockFreshInteraction, fetchChannelFromClient, fetchMember, isStaff} from '../../utils/utils';
 
-export class KickButtonHandler extends InteractionHandler {
+export class BanButtonHandler extends InteractionHandler {
     public constructor(ctx: InteractionHandler.LoaderContext, options: InteractionHandler.Options) {
         super(ctx, {
             ...options,

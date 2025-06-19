@@ -1,6 +1,7 @@
 import {ApplicationCommandRegistries, Command} from '@sapphire/framework';
-import {EmbedBuilder, Guild, Message, MessageFlags, PermissionFlagsBits} from 'discord.js';
-
+import {EmbedBuilder, Guild, Message, MessageFlags} from 'discord.js';
+import {fetchMember, isStaff} from "../utils/utils";
+git
 export class PingCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
         super(context, {
@@ -8,7 +9,6 @@ export class PingCommand extends Command {
             name: "help",
             description: 'List all available commands',
             detailedDescription: "List all available commands",
-            requiredUserPermissions: [PermissionFlagsBits.Administrator],
             preconditions: ['UptimeCheck']
         });
     }
@@ -29,16 +29,36 @@ export class PingCommand extends Command {
 
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-        const embed = await this.createHelpEmbed(interaction.guild!);
+        const embed = await this.createHelpEmbed(interaction.guild!, interaction.user.id);
+        if (!embed) {
+            await interaction.editReply("Only staff members can interact with this");
+            return;
+        }
+
         await interaction.editReply({ embeds: [embed] });
     }
 
     public override async messageRun(message: Message): Promise<void> {
-        const embed = await this.createHelpEmbed(message.guild!);
+        const embed = await this.createHelpEmbed(message.guild!, message.author.id);
+        if (!embed) {
+            await message.reply("Only staff members can interact with this");
+            return;
+        }
+
         await message.reply({ embeds: [embed] });
     }
 
-    private async createHelpEmbed(guild: Guild): Promise<EmbedBuilder> {
+    private async createHelpEmbed(guild: Guild, staffMemberId: string): Promise<EmbedBuilder | null> {
+        const staffmemberMember = await fetchMember(guild, staffMemberId);
+        if (!staffmemberMember) {
+            return null;
+        }
+
+        const staffCheck = await isStaff(staffmemberMember);
+        if (!staffCheck) {
+            return null;
+        }
+
         const helpEmbed = new EmbedBuilder()
             .setTitle(`List of commands for ${guild.name}`)
             .setColor("Yellow")
