@@ -1,8 +1,8 @@
 import {ApplicationCommandRegistries, Command} from '@sapphire/framework';
 import {EmbedBuilder, Guild, Message, MessageFlags} from 'discord.js';
 import {fetchMember, isStaff} from "../utils/utils";
-git
-export class PingCommand extends Command {
+
+export class HelpCommand extends Command {
     public constructor(context: Command.LoaderContext, options: Command.Options) {
         super(context, {
             ...options,
