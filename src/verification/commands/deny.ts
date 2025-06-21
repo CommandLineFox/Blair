@@ -47,7 +47,7 @@ export class DenyCommand extends Command {
         }
 
         const result = await this.denyUser(interaction, interaction.user, action!);
-        await interaction.editReply({ content: result.message });
+        await interaction.editReply({ content: result.message, components: result.components });
     }
 
     public override async messageRun(message: Message, args: Args) {
@@ -64,7 +64,7 @@ export class DenyCommand extends Command {
         }
 
         const result = await this.denyUser(message, message.author, action);
-        await message.reply({ content: result.message });
+        await message.reply({ content: result.message, components: result.components });
     }
 
     /**
