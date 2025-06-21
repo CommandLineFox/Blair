@@ -151,6 +151,7 @@ export class DenyCommand extends Command {
                 return { success: false, message: "The bot cannot moderate this user as they have the same or higher role than the bot" };
             }
 
+            await database.setPendingApplicationCurrentStaffMember(pendingApplication.userId, guild.id, staffMember.id);
             const row = await getKickReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
             return { success: true, message: "Please choose a reason to deny the user with", components: [row] };
         } else {
@@ -163,6 +164,7 @@ export class DenyCommand extends Command {
                 return { success: false, message: "The bot cannot moderate this user as they have the same or higher role than the bot" };
             }
 
+            await database.setPendingApplicationCurrentStaffMember(pendingApplication.userId, guild.id, staffMember.id);
             const row = await getBanReasonComponent(guild, verificationLogChannel.id, pendingApplication.messageId);
             return { success: true, message: "Please choose a reason to deny the user with", components: [row] };
         }
