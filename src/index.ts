@@ -7,7 +7,6 @@ async function main(): Promise<void> {
     const database = Database.getInstance(config.getDatabaseConfig());
 
     await database.connect();
-    await database.removePendingApplication("399624330268508162", "671258196811448320")
 
     const client = new BotClient(config.getClientOptions());
 
