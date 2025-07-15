@@ -1,6 +1,7 @@
 import {Listener} from '@sapphire/framework';
 import Database from '../../database/database';
-import {Colors, EmbedBuilder, type GuildMember} from 'discord.js';
+import {Colors, EmbedBuilder, type GuildMember, PermissionFlagsBits, TextChannel} from 'discord.js';
+import {logQuestioning} from "../../utils/utils";
 
 export class newOptOut extends Listener {
     public constructor(context: Listener.LoaderContext, options: Listener.Options) {
@@ -19,6 +20,26 @@ export class newOptOut extends Listener {
         const pendingApplication = await database.getPendingApplication(member.id, guild.id);
         if (!pendingApplication) {
             return;
+        }
+
+        if (pendingApplication.questioningChannelId) {
+            const questioningLogChannel = await database.getQuestioningLog(guild);
+            if (!questioningLogChannel) {
+                return;
+            }
+
+            const questioningChannel = await guild.channels.fetch(pendingApplication.questioningChannelId);
+            if (!questioningChannel) {
+                return;
+            }
+
+            const botPermissions = guild.members.me?.permissions;
+            if (!botPermissions?.has(PermissionFlagsBits.ManageChannels)) {
+                return;
+            }
+
+            await logQuestioning(questioningChannel as TextChannel, questioningLogChannel, member);
+            await questioningChannel.delete("Questioning abandoned");
         }
 
         const messageId = pendingApplication.messageId;
