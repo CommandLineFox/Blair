@@ -132,7 +132,6 @@ export class KickMenuHandler extends InteractionHandler {
         }
 
         await member.send(`You've been kicked from ${interaction.guild.name} during verification for the following reason: ${reason}`);
-        await member.kick(reason);
 
         //Update the embed to indicate banning the user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
@@ -156,6 +155,7 @@ export class KickMenuHandler extends InteractionHandler {
         }
 
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
+        await member.kick(reason);
         await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }

@@ -142,7 +142,6 @@ export class BanMenunHandler extends InteractionHandler {
         }
 
         await member.send(`You've been banned from ${interaction.guild.name} during verification for the following reason: ${reason}`);
-        await member.ban({ reason: reason });
 
         //Update the embed to indicate banning the user
         const newEmbed = new EmbedBuilder(oldEmbed.data)
@@ -169,6 +168,7 @@ export class BanMenunHandler extends InteractionHandler {
         }
 
         await verificationMessage.edit({ embeds: [newEmbed], components: [] });
+        await member.ban({ reason: reason });
         await database.removePendingApplication(member.id, interaction.guild.id);
     }
 }
