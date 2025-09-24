@@ -90,11 +90,13 @@ export class VerifyButtonHandler extends InteractionHandler {
             verificationMessage = await user.send(verificationMessageText);
         } catch (error) {
             await interaction.editReply({ content: "Couldn't message you, please make sure your DMs are open." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
             return;
         }
 
         if (!verificationMessage) {
             await interaction.editReply({ content: "Couldn't find the message after sending it." });
+            await database.removePendingApplication(pendingApplication.userId, pendingApplication.guildId);
             return;
         }
 
