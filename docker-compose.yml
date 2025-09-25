@@ -1,22 +1,24 @@
 services:
   mongo:
     image: 'mongo:latest'
-    ports:
-      - '27017:27017'
-    env_file:
-      - .env.production
     volumes:
-      - 'mongo:/data/db'
+      - mongo:/data/db
+    networks:
+      - shared-mongo-net
 
   blair:
     build:
       context: .
-    ports:
-      - '443:443'
-    env_file: 
+    env_file:
       - .env.production
     volumes:
       - ./config.json:/usr/src/app/config.json
+    networks:
+      - shared-mongo-net
 
 volumes:
   mongo:
+
+networks:
+  shared-mongo-net:
+    external: true
