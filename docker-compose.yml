@@ -5,6 +5,7 @@ services:
       - mongo:/data/db
     networks:
       - shared-mongo-net
+    restart: unless-stopped
 
   blair:
     build:
@@ -15,6 +16,7 @@ services:
       - ./config.json:/usr/src/app/config.json
     networks:
       - shared-mongo-net
+    restart: unless-stopped
 
 volumes:
   mongo:
