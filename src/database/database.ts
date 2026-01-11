@@ -37,6 +37,7 @@ const rolesSchema = new Schema({
     memberRole: { type: String },
     unverifiedRole: { type: String },
     staffRoles: { type: [String] },
+    verificationMentionRole: { type: String },
 }, { _id: false });
 
 const reasonSchema = new Schema({
@@ -68,8 +69,8 @@ const pendingApplicationSchema = new Schema<PendingApplication>({
     userId: { type: String, unique: true, required: true },
     requiredApprovers: { type: [String], required: true },
     guildId: { type: String, required: true },
-    messageId: { type: String, unique: true,  sparse: true, required: false },
-    questioningChannelId: { type: String, unique: true,  sparse: true, required: false },
+    messageId: { type: String, unique: true, sparse: true, required: false },
+    questioningChannelId: { type: String, unique: true, sparse: true, required: false },
     questions: { type: [String], required: true },
     answers: { type: [String], required: true },
     attempts: { type: Number, required: true },
@@ -840,6 +841,29 @@ export default class Database {
     }
 
     /**
+     * Set the verification mention role
+     * @param guildId ID of the guild
+     * @param roleId Id of the role
+     */
+    public setVerificationMentionRole(guildId: string, roleId: string) {
+        return this.setValue(guildId, "config.roles.verificationMentionRole", roleId,
+            `The verification mention role is already set to <@&${roleId}>.`,
+            `Successfully set the verification mention role to <@&${roleId}>.`,
+            "Failed to set the verification mention role.");
+    }
+
+    /**
+     * Remove the verification mention role
+     * @param guildId ID of the guild
+     */
+    public removeVerificationMentionRole(guildId: string) {
+        return this.unsetValue(guildId, "config.roles.verificationMentionRole",
+            "The verification mention role is not set.",
+            "Successfully removed the verification mention role.",
+            "Failed to remove the verification mention role.");
+    }
+
+    /**
      * Add a kick reason to the list
      * @param guildId ID of the guild
      * @param reason Kick reason to be added
@@ -1257,6 +1281,27 @@ export default class Database {
         const role = await fetchRole(guild, unverifiedRole);
         if (!role) {
             await this.removeUnverifiedRole(unverifiedRole);
+            return null;
+        }
+
+        return role;
+    }
+
+    /**
+     * Get the verification mention role for a specified guild
+     * @param guild The guild to search in
+     * @returns The role if found or nothing
+     */
+    public async getVerificationMentionRole(guild: Guild): Promise<Role | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        const verificationMentionRole = dbGuild?.config?.roles?.verificationMentionRole;
+        if (!verificationMentionRole) {
+            return null;
+        }
+
+        const role = await fetchRole(guild, verificationMentionRole);
+        if (!role) {
+            await this.removeVerificationMentionRole(verificationMentionRole);
             return null;
         }
 

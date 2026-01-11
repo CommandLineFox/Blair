@@ -82,9 +82,15 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
         verificationEmbed.addFields({ name: "You tried so hard and got so far", value: "But in the end it doesn't even matter" });
     }
 
+    let verificationMessage = "";
+    const verificationMentionRole = await database.getVerificationMentionRole(guild);
+    if (verificationMentionRole) {
+        verificationMessage = `<@&${verificationMentionRole.id}>`;
+    }
+
     //Post the message with the accept, question, kick and ban buttons
     const row = getHandlingComponent(user.id);
-    const verificationLogMessage = await verificationLogChannel.send({ embeds: [verificationEmbed], components: [row] });
+    const verificationLogMessage = await verificationLogChannel.send({ content: verificationMessage, embeds: [verificationEmbed], components: [row] });
 
     //Add the message ID to the pending application to access it
     await database.setPendingApplicationMessageId(user.id, guild.id, verificationLogMessage.id);

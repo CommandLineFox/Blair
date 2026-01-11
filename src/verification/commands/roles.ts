@@ -28,6 +28,14 @@ export class RoleCommand extends Subcommand {
                     ]
                 },
                 {
+                    name: "mention",
+                    type: "group",
+                    entries: [
+                        { name: "set", chatInputRun: "chatInputVerificationMentionRoleSet", messageRun: "messageVerificationMentionRoleSet" },
+                        { name: "remove", chatInputRun: "chatInputVerificationMentionRoleRemove", messageRun: "messageVerificationMentionRoleRemove" }
+                    ]
+                },
+                {
                     name: "staff",
                     type: "group",
                     entries: [
@@ -87,6 +95,27 @@ export class RoleCommand extends Subcommand {
                                 command
                                     .setName("remove")
                                     .setDescription("Remove the unverified role")
+                            )
+                    )
+                    .addSubcommandGroup((group) =>
+                        group
+                            .setName("mention")
+                            .setDescription("Manage the verification mention role")
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("set")
+                                    .setDescription("Set the verification mention role")
+                                    .addRoleOption((option) =>
+                                        option
+                                            .setName("role")
+                                            .setDescription("The verification mention role to set")
+                                            .setRequired(true)
+                                    )
+                            )
+                            .addSubcommand((command) =>
+                                command
+                                    .setName("remove")
+                                    .setDescription("Remove the verification mention role")
                             )
                     )
                     .addSubcommandGroup((group) =>
@@ -231,6 +260,63 @@ export class RoleCommand extends Subcommand {
      */
     public async messageUnverifiedRoleRemove(message: Message): Promise<void> {
         const response = await Database.getInstance().removeUnverifiedRole(message.guildId!);
+        await message.reply({ content: response.message });
+    }
+
+    /**
+     * Verification mention role set slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputVerificationMentionRoleSet(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        const role = interaction.options.getRole("role", true);
+        const response = await Database.getInstance().setVerificationMentionRole(interaction.guildId!, role.id);
+        await interaction.editReply({ content: response.message });
+    }
+
+    /**
+     * Verification mention role set message command logic
+     * @param message Message containing the command
+     * @param args Text argument containing the role ID
+     */
+    public async messageVerificationMentionRoleSet(message: Message, args: Args): Promise<void> {
+        const roleId = await args.pick("string");
+        const role = message.guild?.roles.cache.get(roleId);
+        if (!role) {
+            await message.reply({ content: "You need to provide a valid role." });
+            return;
+        }
+
+        const response = await Database.getInstance().setVerificationMentionRole(message.guildId!, role.id);
+        await message.reply({ content: response.message });
+    }
+
+    /**
+     * Verification mention role remove slash command logic
+     * @param interaction Interaction of the command
+     */
+    public async chatInputVerificationMentionRoleRemove(interaction: Subcommand.ChatInputCommandInteraction): Promise<void> {
+        if (interaction.replied || interaction.deferred) {
+            await interaction.deleteReply();
+        }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+        const response = await Database.getInstance().removeVerificationMentionRole(interaction.guildId!);
+        await interaction.editReply({ content: response.message });
+    }
+
+    /**
+     * Verification mention role remove message command logic
+     * @param message Message containing the command
+     */
+    public async messageVerificationMentionRoleRemove(message: Message): Promise<void> {
+        const response = await Database.getInstance().removeVerificationMentionRole(message.guildId!);
         await message.reply({ content: response.message });
     }
 

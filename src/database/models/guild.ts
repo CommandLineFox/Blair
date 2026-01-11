@@ -42,7 +42,9 @@ interface Roles {
     //Unverified role in the server
     unverifiedRole?: string;
     //Staff roles in the server
-    staffRoles?: string[]
+    staffRoles?: string[];
+    //Verification mention role
+    verificationMentionRole?: string;
 }
 
 interface Reason {
