@@ -108,6 +108,7 @@ export class KickButtonHandler extends InteractionHandler {
         try {
             questioningChannel = await questioningCategory.children.create({ name: `${member.user.username}-questioning`, type: ChannelType.GuildText });
             await questioningChannel.permissionOverwrites.create(member.user, { ViewChannel: true, SendMessages: true, ReadMessageHistory: true, });
+            await questioningChannel.send(`<@${member.id}>`);
         } catch (error) {
             await interaction.editReply({ content: "Something went wrong when creating the channel and setting up permissions for them" });
             return;
