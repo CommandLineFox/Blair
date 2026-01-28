@@ -43,7 +43,7 @@ export async function postVerificationMessage(guild: Guild, interaction: ButtonI
         .setTimestamp()
         .addFields([
             { name: "Username", value: user.username },
-            { name: "User ID", value: user.id }
+            { name: "User ID", value: `\`${user.id}\`` }
         ]);
 
     const questionAmount = pendingApplication.questions.length;
