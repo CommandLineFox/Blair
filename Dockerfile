@@ -1,18 +1,24 @@
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS build
+
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+COPY package*.json tsconfig.json ./
 
-COPY . .
+RUN npm ci
+
+COPY src ./src
+
 RUN npm run build
 
 FROM node:20-alpine AS production
+
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/package*.json ./
-COPY --from=builder /usr/src/app/dist ./dist
+RUN npm install --production --save-dev cross-env
 
-RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
 
-CMD ["node", "dist/index.js"]
+WORKDIR /usr/src/app/dist
+
+CMD ["npx", "cross-env", "NODE_ENV=production", "node", "index.js"]
