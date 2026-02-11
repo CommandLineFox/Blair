@@ -1,28 +1,18 @@
-# Build stage
-FROM node:20-alpine AS build
-
+FROM node:20-alpine AS builder
 WORKDIR /usr/src/app
 
-COPY package*.json tsconfig.json ./
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm npm ci
 
-RUN npm ci
-
-COPY src ./src
-
+COPY . .
 RUN npm run build
 
-# Production stage
 FROM node:20-alpine AS production
-
 WORKDIR /usr/src/app
 
-# Install cross-env in the production environment
-RUN npm install --production --save-dev cross-env
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/dist ./dist
 
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
 
-WORKDIR /usr/src/app/dist
-
-# Run the app with cross-env to set environment variables
-CMD ["npx", "cross-env", "NODE_ENV=production", "node", "index.js"]
+CMD ["node", "dist/index.js"]

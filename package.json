@@ -22,12 +22,15 @@
     "@sapphire/framework": "^5.3.6",
     "@sapphire/plugin-subcommands": "^7.0.1",
     "@sapphire/utilities": "^3.18.2",
-    "@types/jest": "^29.5.14",
     "cross-env": "^7.0.3",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
-    "mongoose": "^8.15.1",
+    "mongoose": "^8.15.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
     "shx": "^0.4.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
