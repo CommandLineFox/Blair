@@ -57,7 +57,8 @@ const configSchema = new Schema({
     welcome: { type: welcomeSchema },
     roles: { type: rolesSchema },
     reason: { type: reasonSchema },
-    userAppLog: { type: userAppLogSchema }
+    userAppLog: { type: userAppLogSchema },
+    banAppealLink: { type: String },
 }, { _id: false });
 
 const guildSchema = new Schema<DatabaseGuild>({
@@ -941,6 +942,34 @@ export default class Database {
         );
     }
 
+
+    /**
+     * Set the ban appeal link
+     * @param guildId ID of the guild
+     * @param banAppealLink The link to the appeal form
+     * @returns Response indicating success or failure
+     */
+    public setBanAppealLink(guildId: string, banAppealLink: string) {
+        return this.setValue(guildId, "config.banAppealLink", banAppealLink,
+            "The ban appeal link is already set to that.",
+            "Successfully set the ban appeal link.",
+            "Failed to set the ban appeal link."
+        );
+    }
+
+    /**
+     * Remove the ban appeal link
+     * @param guildId ID of the guild
+     * @returns Response indicating success or failure
+     */
+    public removeBanAppealLink(guildId: string) {
+        return this.unsetValue(guildId, "config.banAppealLink",
+            "The ban appeal link is not set.",
+            "Successfully removed the ban appeal link.",
+            "Failed to remove the ban appeal link."
+        );
+    }
+
     /**
      * Set the channel to log user app usage in
      * @param guildId ID of the guild
@@ -1398,6 +1427,16 @@ export default class Database {
         }
 
         return channel;
+    }
+
+    /**
+     * Get the ban appeal link
+     * @param guild The guild to search in
+     * @returns The ban appeal link or nothing
+     */
+    public async getBanAppealLink(guild: Guild): Promise<string | null> {
+        const dbGuild = await this.getGuild(guild.id);
+        return dbGuild?.config?.banAppealLink ?? null;
     }
 
 

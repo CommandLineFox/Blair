@@ -70,6 +70,8 @@ export class ListCommand extends Command {
         const userAppLogToggle = await database.getUserAppLogToggle(guild);
         const userAppLogChannel = await database.getUserAppLogChannel(guild);
 
+        const banAppealLink = await database.getBanAppealLink(guild);
+
         const displayGuideChannel = guideChannel ? `<#${guideChannel.id}>` : 'Not set';
         const displayGuideMessage = guideMessage ? trimString(guideMessage, 1024) : 'Not set';
 
@@ -96,6 +98,8 @@ export class ListCommand extends Command {
         const displayUserAppLogToggle = userAppLogToggle ? "Enabled" : "Disabled";
         const displayUserAppLogChannel = userAppLogChannel ? `<#${userAppLogChannel.id}>` : "Not set";
 
+        const displayBanAppealLink = banAppealLink ? banAppealLink : "Not set";
+
         const displayNames = [
             'Guide channel (Where the message with the verify button will be posted)',
             'Guide message (the message with the verify button)',
@@ -115,7 +119,8 @@ export class ListCommand extends Command {
             'Kick reasons (list of reasons to choose from for kicking)',
             'Ban reasons (list of reasons to choose from for banning)',
             'User app log toggle (toggle whether to log user app usage)',
-            'User app log channel (the channel to log user app usage in)'
+            'User app log channel (the channel to log user app usage in)',
+            'Ban appeal link'
         ];
         const displayValues = [
             displayGuideChannel,
@@ -136,7 +141,8 @@ export class ListCommand extends Command {
             displayKickReasons,
             displayBanReasons,
             displayUserAppLogToggle,
-            displayUserAppLogChannel
+            displayUserAppLogChannel,
+            displayBanAppealLink
         ];
         const embedFields = displayValues.reduce((accumulator, currentValue, index) => accumulator.concat([{ name: displayNames[index]!, value: currentValue }]), [] as { name: string; value: string }[]);
 

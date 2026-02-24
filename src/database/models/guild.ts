@@ -65,6 +65,7 @@ interface Config {
     roles?: Roles;
     reason?: Reason;
     userAppLog?: UserAppLog;
+    banAppealLink?: string;
 }
 
 export interface DatabaseGuild {

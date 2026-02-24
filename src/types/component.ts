@@ -106,7 +106,9 @@ export async function getBanReasonComponent(guild: Guild, verificationLogChannel
                 continue;
             }
 
-            banMenu.addOptions({ label: reason, value: reason });
+            let reasonLabel = reason.length > 100 ? `${reason.substring(0, 97).trim()}...` : reason;
+
+            banMenu.addOptions({ label: reasonLabel, value: reason });
         }
     }
 
@@ -137,7 +139,9 @@ export async function getKickReasonComponent(guild: Guild, verificationLogChanne
                 continue;
             }
 
-            kickMenu.addOptions(({ label: reason, value: reason }));
+            let reasonLabel = reason.length > 100 ? `${reason.substring(0, 97).trim()}...` : reason;
+
+            kickMenu.addOptions(({ label: reasonLabel, value: reason }));
         }
     }
 
