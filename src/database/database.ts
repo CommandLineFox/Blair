@@ -871,6 +871,10 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public addKickReason(guildId: string, reason: string) {
+        if (reason.length > 100) {
+            return { success: false, message: "Kick reason must be less than 100 characters." };
+        }
+
         return this.addToArray(guildId, "config.reason.kick", reason,
             "That kick reason already exists.",
             `Successfully added "${reason}" to the kick reasons list.`,
@@ -897,6 +901,10 @@ export default class Database {
      * @returns Response indicating success or failure
      */
     public addBanReason(guildId: string, reason: string) {
+        if (reason.length > 100) {
+            return { success: false, message: "Ban reason must be less than 100 characters." };
+        }
+
         return this.addToArray(guildId, "config.reason.ban", reason,
             "That ban reason already exists.",
             `Successfully added "${reason}" to the ban reasons list.`,
