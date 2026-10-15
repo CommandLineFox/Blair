@@ -1,12 +1,4 @@
 services:
-  mongo:
-    image: 'mongo:latest'
-    volumes:
-      - mongo:/data/db
-    networks:
-      - shared-mongo-net
-    restart: unless-stopped
-
   blair:
     build:
       context: .
@@ -17,9 +9,6 @@ services:
     networks:
       - shared-mongo-net
     restart: unless-stopped
-
-volumes:
-  mongo:
 
 networks:
   shared-mongo-net:
